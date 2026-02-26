@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum AnimeSource {
+  ANILIST
+  MANUAL
+}
+
+enum AiringStatus {
+  FINISHED
+  RELEASING
+  HIATUS
+  CANCELLED
+  NOT_YET_RELEASED
+}
+
+enum DisplayFormat {
+  SERIES
+  MOVIE
+}
+
+enum SourceMaterial {
+  ORIGINAL
+  MANGA
+  LIGHT_NOVEL
+  NOVEL
+  VISUAL_NOVEL
+  VIDEO_GAME
+  OTHER
+}
+
+enum Season {
+  WINTER
+  SPRING
+  SUMMER
+  FALL
+}
+
+enum FranchiseEntryType {
+  MAIN
+  SIDE_STORY
+  MOVIE
+  OVA
+}
+
+enum WatchStatus {
+  WATCHING
+  COMPLETED
+  ON_HOLD
+  DROPPED
+  PLAN_TO_WATCH
+  RECOMMENDED
+}
+
+enum WatchContext {
+  SOLO
+  WATCH_PARTY
+}
+
+model Person {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  entries   UserEntry[]
+  createdAt DateTime    @default(now())
+}
+
+model Franchise {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  description String?
+  entries     FranchiseEntry[]
+  createdAt   DateTime         @default(now())
+}
+
+model FranchiseEntry {
+  id          Int                @id @default(autoincrement())
+  franchise   Franchise          @relation(fields: [franchiseId], references: [id], onDelete: Cascade)
+  franchiseId Int
+  anime       Anime              @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId     Int
+  order       Int
+  entryType   FranchiseEntryType @default(MAIN)
+
+  @@unique([franchiseId, animeId])
+  @@unique([franchiseId, order])
+}
+
+model Studio {
+  id              Int           @id @default(autoincrement())
+  name            String        @unique
+  anilistStudioId Int?          @unique
+  animeStudios    AnimeStudio[]
+}
+
+model AnimeStudio {
+  anime        Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId      Int
+  studio       Studio  @relation(fields: [studioId], references: [id])
+  studioId     Int
+  isMainStudio Boolean @default(false)
+
+  @@id([animeId, studioId])
+}
+
+model Anime {
+  id             Int            @id @default(autoincrement())
+  anilistId      Int?           @unique
+  source         AnimeSource    @default(ANILIST)
+  titleEnglish   String?
+  titleRomaji    String
+  titleNative    String?
+  coverImageUrl  String?
+  synopsis       String?
+  genres         String         @default("[]") // stored as JSON array string
+  totalEpisodes  Int?
+  durationMins   Int?
+  airingStatus   AiringStatus   @default(FINISHED)
+  displayFormat  DisplayFormat  @default(SERIES)
+  sourceMaterial SourceMaterial?
+  season         Season?
+  seasonYear     Int?
+  meanScore      Int?           // AniList community score 0-100
+  nextAiringEp   Int?           // next episode number (RELEASING shows)
+  nextAiringAt   DateTime?      // timestamp of next episode
+  lastSyncedAt   DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  franchiseEntries FranchiseEntry[]
+  animeStudios     AnimeStudio[]
+  userEntry        UserEntry?
+}
+
+model UserEntry {
+  id             Int          @id @default(autoincrement())
+  anime          Anime        @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId        Int          @unique
+  watchStatus    WatchStatus  @default(PLAN_TO_WATCH)
+  currentEpisode Int          @default(0)
+  score          Float?       // 1-10, user's personal rating
+  notes          String?
+  watchContext   WatchContext?
+  watchPartyWith String?
+  recommender    Person?      @relation(fields: [recommenderId], references: [id])
+  recommenderId  Int?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  rewatchCount   Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}

@@ -1,0 +1,145 @@
+"use client";
+
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
+import { STATUS_CONFIG } from "./StatusBadge";
+import type { WatchStatus } from "@/app/generated/prisma";
+
+const SORT_OPTIONS = [
+  { value: "updatedAt", label: "Recent Activity" },
+  { value: "startedAt", label: "Date Started" },
+  { value: "completedAt", label: "Date Completed" },
+  { value: "score", label: "My Score" },
+  { value: "meanScore", label: "Community Score" },
+  { value: "title", label: "Title A–Z" },
+];
+
+const STATUS_TABS: { value: WatchStatus | "ALL"; label: string }[] = [
+  { value: "ALL", label: "All" },
+  { value: "WATCHING", label: "Watching" },
+  { value: "COMPLETED", label: "Completed" },
+  { value: "ON_HOLD", label: "On Hold" },
+  { value: "DROPPED", label: "Dropped" },
+  { value: "PLAN_TO_WATCH", label: "Plan to Watch" },
+  { value: "RECOMMENDED", label: "Recommended" },
+];
+
+export default function LibraryFilters({
+  franchises,
+  counts,
+}: {
+  franchises: { id: number; name: string }[];
+  counts: Partial<Record<WatchStatus | "ALL", number>>;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const set = useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+      // Reset to page 1 on filter change
+      params.delete("page");
+      router.push(`${pathname}?${params.toString()}`);
+    },
+    [router, pathname, searchParams]
+  );
+
+  const activeStatus = searchParams.get("status") || "ALL";
+  const activeSort = searchParams.get("sort") || "updatedAt";
+  const activeSearch = searchParams.get("search") || "";
+  const activeFranchise = searchParams.get("franchise") || "";
+  const activeFormat = searchParams.get("format") || "";
+  const activeContext = searchParams.get("context") || "";
+
+  return (
+    <div className="space-y-4">
+      {/* Status tabs */}
+      <div className="flex gap-1 flex-wrap">
+        {STATUS_TABS.map(({ value, label }) => {
+          const count = counts[value] ?? 0;
+          const active = activeStatus === value;
+          return (
+            <button
+              key={value}
+              onClick={() => set("status", value === "ALL" ? "" : value)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                active
+                  ? "bg-indigo-600 text-white"
+                  : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
+              }`}
+            >
+              {label}
+              {count > 0 && (
+                <span className={`ml-1.5 text-xs ${active ? "text-indigo-200" : "text-slate-500"}`}>
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Search + filters row */}
+      <div className="flex gap-3 flex-wrap">
+        <input
+          type="search"
+          placeholder="Search titles..."
+          defaultValue={activeSearch}
+          onChange={(e) => set("search", e.target.value)}
+          className="flex-1 min-w-48 bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+        />
+
+        <select
+          value={activeFranchise}
+          onChange={(e) => set("franchise", e.target.value)}
+          className="bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+        >
+          <option value="">All Franchises</option>
+          {franchises.map((f) => (
+            <option key={f.id} value={String(f.id)}>
+              {f.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={activeFormat}
+          onChange={(e) => set("format", e.target.value)}
+          className="bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+        >
+          <option value="">All Formats</option>
+          <option value="SERIES">Series</option>
+          <option value="MOVIE">Movie</option>
+        </select>
+
+        <select
+          value={activeContext}
+          onChange={(e) => set("context", e.target.value)}
+          className="bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+        >
+          <option value="">All Watch Contexts</option>
+          <option value="SOLO">Solo</option>
+          <option value="WATCH_PARTY">Watch Party</option>
+        </select>
+
+        <select
+          value={activeSort}
+          onChange={(e) => set("sort", e.target.value)}
+          className="bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+        >
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              Sort: {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
