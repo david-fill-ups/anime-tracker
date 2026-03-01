@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireUserId } from "@/lib/auth-helpers";
 
 export async function GET() {
+  const userId = await requireUserId();
   const people = await db.person.findMany({
+    where: { userId },
     include: {
       entries: {
         include: { anime: true },
-        where: { watchStatus: "COMPLETED" },
+        where: { watchStatus: "COMPLETED", userId },
       },
     },
     orderBy: { name: "asc" },
@@ -31,8 +34,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const userId = await requireUserId();
   const { name } = await req.json();
   if (!name) return NextResponse.json({ error: "name required" }, { status: 400 });
-  const person = await db.person.create({ data: { name } });
+  const person = await db.person.create({ data: { name, userId } });
   return NextResponse.json(person, { status: 201 });
 }

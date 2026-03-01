@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 enum AnimeSource {
@@ -56,26 +56,92 @@ enum WatchStatus {
   DROPPED
   PLAN_TO_WATCH
   RECOMMENDED
+  NOT_INTERESTED
 }
 
-enum WatchContext {
-  SOLO
-  WATCH_PARTY
+enum StreamingService {
+  NETFLIX
+  HULU
+  DISNEY_PLUS
+  HBO
+  CRUNCHYROLL
+  AMAZON_PRIME
+  HIDIVE
 }
+
+// ── Auth.js required models ──────────────────────────────────────────────────
+
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String      @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  userEntries   UserEntry[]
+  franchises    Franchise[]
+  people        Person[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ── App models ───────────────────────────────────────────────────────────────
 
 model Person {
-  id        Int         @id @default(autoincrement())
-  name      String      @unique
-  entries   UserEntry[]
-  createdAt DateTime    @default(now())
+  id                  Int         @id @default(autoincrement())
+  name                String
+  userId              String
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries             UserEntry[] @relation("Recommender")
+  watchContextEntries UserEntry[] @relation("WatchContextPerson")
+  createdAt           DateTime    @default(now())
+
+  @@unique([name, userId])
 }
 
 model Franchise {
   id          Int              @id @default(autoincrement())
-  name        String           @unique
+  name        String
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   description String?
   entries     FranchiseEntry[]
   createdAt   DateTime         @default(now())
+
+  @@unique([name, userId])
 }
 
 model FranchiseEntry {
@@ -118,7 +184,9 @@ model Anime {
   coverImageUrl  String?
   synopsis       String?
   genres         String         @default("[]") // stored as JSON array string
-  totalEpisodes  Int?
+  totalEpisodes     Int?
+  totalSeasons      Int?
+  episodesPerSeason String? // JSON array e.g. [13,10,13,14,12]
   durationMins   Int?
   airingStatus   AiringStatus   @default(FINISHED)
   displayFormat  DisplayFormat  @default(SERIES)
@@ -128,30 +196,53 @@ model Anime {
   meanScore      Int?           // AniList community score 0-100
   nextAiringEp   Int?           // next episode number (RELEASING shows)
   nextAiringAt   DateTime?      // timestamp of next episode
-  lastSyncedAt   DateTime?
-  createdAt      DateTime       @default(now())
+  lastSyncedAt       DateTime?
+  tmdbId             Int?
+  tmdbMediaType      String?     // "tv" or "movie"
+  externalUrl        String?     // custom link for manually-added anime (e.g. TMDB)
+  streamingCheckedAt DateTime?
+  createdAt          DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+
+  mergedIntoId     Int?
+  mergedInto       Anime?           @relation("AnimeMerge", fields: [mergedIntoId], references: [id])
+  mergedAnimes     Anime[]          @relation("AnimeMerge")
 
   franchiseEntries FranchiseEntry[]
   animeStudios     AnimeStudio[]
-  userEntry        UserEntry?
+  userEntries      UserEntry[]
+  streamingLinks   StreamingLink[]
+}
+
+model StreamingLink {
+  id      Int              @id @default(autoincrement())
+  anime   Anime            @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId Int
+  service StreamingService
+  url     String
+
+  @@unique([animeId, service])
 }
 
 model UserEntry {
   id             Int          @id @default(autoincrement())
   anime          Anime        @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  animeId        Int          @unique
+  animeId        Int
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
   watchStatus    WatchStatus  @default(PLAN_TO_WATCH)
   currentEpisode Int          @default(0)
   score          Float?       // 1-10, user's personal rating
   notes          String?
-  watchContext   WatchContext?
-  watchPartyWith String?
-  recommender    Person?      @relation(fields: [recommenderId], references: [id])
-  recommenderId  Int?
+  watchContextPerson   Person?      @relation("WatchContextPerson", fields: [watchContextPersonId], references: [id])
+  watchContextPersonId Int?
+  recommender          Person?      @relation("Recommender", fields: [recommenderId], references: [id])
+  recommenderId        Int?
   startedAt      DateTime?
   completedAt    DateTime?
-  rewatchCount   Int          @default(0)
+  verified       Boolean      @default(false) // TODO[TEMP]: remove after data review
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+
+  @@unique([animeId, userId])
 }

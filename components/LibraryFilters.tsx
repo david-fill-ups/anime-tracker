@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 import { STATUS_CONFIG } from "./StatusBadge";
 import type { WatchStatus } from "@/app/generated/prisma";
 
@@ -20,20 +20,37 @@ const STATUS_TABS: { value: WatchStatus | "ALL"; label: string }[] = [
   { value: "COMPLETED", label: "Completed" },
   { value: "ON_HOLD", label: "On Hold" },
   { value: "DROPPED", label: "Dropped" },
-  { value: "PLAN_TO_WATCH", label: "Plan to Watch" },
-  { value: "RECOMMENDED", label: "Recommended" },
 ];
 
 export default function LibraryFilters({
   franchises,
+  people,
   counts,
 }: {
   franchises: { id: number; name: string }[];
+  people: { id: number; name: string }[];
   counts: Partial<Record<WatchStatus | "ALL", number>>;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ synced: number; total: number } | null>(null);
+
+  const handleRefreshAll = useCallback(async () => {
+    setRefreshing(true);
+    setSyncResult(null);
+    try {
+      const res = await fetch("/api/sync-all", { method: "POST" });
+      const data = await res.json();
+      setSyncResult({ synced: data.synced, total: data.total });
+      router.refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [router]);
 
   const set = useCallback(
     (key: string, value: string) => {
@@ -50,12 +67,23 @@ export default function LibraryFilters({
     [router, pathname, searchParams]
   );
 
+  const setSearch = useCallback(
+    (value: string) => {
+      if (searchDebounce.current) clearTimeout(searchDebounce.current);
+      searchDebounce.current = setTimeout(() => set("search", value), 300);
+    },
+    [set]
+  );
+
   const activeStatus = searchParams.get("status") || "ALL";
   const activeSort = searchParams.get("sort") || "updatedAt";
   const activeSearch = searchParams.get("search") || "";
   const activeFranchise = searchParams.get("franchise") || "";
   const activeFormat = searchParams.get("format") || "";
   const activeContext = searchParams.get("context") || "";
+  const activeGenre = searchParams.get("genre") || "";
+  const activeStudio = searchParams.get("studio") || "";
+  const activeVerified = searchParams.get("verified") || ""; // TODO[TEMP]: remove after data review
 
   return (
     <div className="space-y-4">
@@ -85,13 +113,37 @@ export default function LibraryFilters({
         })}
       </div>
 
+      {/* Active genre / studio chips */}
+      {(activeGenre || activeStudio) && (
+        <div className="flex gap-2 flex-wrap">
+          {activeGenre && (
+            <button
+              onClick={() => set("genre", "")}
+              className="flex items-center gap-1.5 bg-indigo-900/50 border border-indigo-700 text-indigo-300 text-sm px-3 py-1 rounded-full hover:bg-indigo-900 transition-colors"
+            >
+              Genre: {activeGenre}
+              <span className="text-indigo-400">×</span>
+            </button>
+          )}
+          {activeStudio && (
+            <button
+              onClick={() => set("studio", "")}
+              className="flex items-center gap-1.5 bg-indigo-900/50 border border-indigo-700 text-indigo-300 text-sm px-3 py-1 rounded-full hover:bg-indigo-900 transition-colors"
+            >
+              Studio: {activeStudio}
+              <span className="text-indigo-400">×</span>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Search + filters row */}
       <div className="flex gap-3 flex-wrap">
         <input
           type="search"
           placeholder="Search titles..."
           defaultValue={activeSearch}
-          onChange={(e) => set("search", e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           className="flex-1 min-w-48 bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
         />
 
@@ -124,8 +176,9 @@ export default function LibraryFilters({
           className="bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
         >
           <option value="">All Watch Contexts</option>
-          <option value="SOLO">Solo</option>
-          <option value="WATCH_PARTY">Watch Party</option>
+          {people.map((p) => (
+            <option key={p.id} value={String(p.id)}>{p.name}</option>
+          ))}
         </select>
 
         <select
@@ -138,6 +191,29 @@ export default function LibraryFilters({
               Sort: {o.label}
             </option>
           ))}
+        </select>
+
+        <button
+          onClick={handleRefreshAll}
+          disabled={refreshing}
+          className="bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 px-3 py-2 rounded-md text-sm transition-colors disabled:opacity-50 whitespace-nowrap"
+        >
+          {refreshing
+            ? "Refreshing..."
+            : syncResult
+            ? `Synced ${syncResult.synced} / ${syncResult.total}`
+            : "Refresh All"}
+        </button>
+
+        {/* TODO[TEMP]: Verified filter — remove after data review */}
+        <select
+          value={activeVerified}
+          onChange={(e) => set("verified", e.target.value)}
+          className="bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+        >
+          <option value="">All (verified + unverified)</option>
+          <option value="false">Unverified only</option>
+          <option value="true">Verified only</option>
         </select>
       </div>
     </div>

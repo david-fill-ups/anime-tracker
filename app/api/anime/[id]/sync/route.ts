@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireUserId } from "@/lib/auth-helpers";
 import { fetchAniListById, mapDisplayFormat, mapSourceMaterial } from "@/lib/anilist";
+import { autoPopulateFranchise } from "@/lib/franchise-auto";
+import { refreshSeasonData } from "@/lib/tmdb";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(_req: NextRequest, { params }: Params) {
+  const userId = await requireUserId();
   const { id } = await params;
   const anime = await db.anime.findUnique({ where: { id: Number(id) } });
 
@@ -41,6 +45,9 @@ export async function POST(_req: NextRequest, { params }: Params) {
       lastSyncedAt: new Date(),
     },
   });
+
+  await autoPopulateFranchise(Number(id), data, userId);
+  await refreshSeasonData(Number(id));
 
   return NextResponse.json(updated);
 }

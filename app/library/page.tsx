@@ -1,38 +1,56 @@
 export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import LibraryFilters from "@/components/LibraryFilters";
 import AnimeGrid from "@/components/AnimeGrid";
-import type { WatchStatus, DisplayFormat, WatchContext } from "@/app/generated/prisma";
+import type { WatchStatus, DisplayFormat, AiringStatus } from "@/app/generated/prisma";
+import { effectiveTotalEpisodes, effectiveAiringStatus, MERGED_ANIME_SELECT } from "@/lib/anime-utils";
 
-const include = {
-  userEntry: { include: { recommender: true } },
-  franchiseEntries: { include: { franchise: true } },
-  animeStudios: { include: { studio: true } },
-};
+// Statuses that belong to the Library (watched / watching)
+const LIBRARY_STATUSES: WatchStatus[] = ["WATCHING", "COMPLETED", "ON_HOLD", "DROPPED"];
 
 export default async function LibraryPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string>>;
 }) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id;
+
   const params = await searchParams;
-  const { status, search, franchise, format, context, sort = "updatedAt" } = params;
+  const { status, search, franchise, format, context, sort = "updatedAt", genre, studio, verified } = params; // TODO[TEMP]: verified
 
-  // Build filters
-  const where: Record<string, unknown> = {};
+  // Build the userEntry filter (always scoped to this user)
+  const userEntryFilter: Record<string, unknown> = { userId };
 
-  if (status) {
-    where.userEntry = { watchStatus: status as WatchStatus };
+  if (status && LIBRARY_STATUSES.includes(status as WatchStatus)) {
+    userEntryFilter.watchStatus = status as WatchStatus;
   } else {
-    // Exclude anime with no user entry from the default view
-    where.userEntry = { isNot: null };
+    userEntryFilter.watchStatus = { in: LIBRARY_STATUSES };
   }
+
+  if (context) {
+    userEntryFilter.watchContextPersonId = Number(context);
+  }
+
+  // TODO[TEMP]: verified filter — remove after data review
+  if (verified === "true" || verified === "false") {
+    userEntryFilter.verified = verified === "true";
+  }
+
+  // Build anime filters
+  const where: Record<string, unknown> = {
+    userEntries: { some: userEntryFilter },
+    mergedIntoId: null,
+  };
 
   if (search) {
     where.OR = [
-      { titleEnglish: { contains: search, mode: "insensitive" } },
-      { titleRomaji: { contains: search, mode: "insensitive" } },
+      { titleEnglish: { contains: search } },
+      { titleRomaji: { contains: search } },
     ];
   }
 
@@ -44,27 +62,65 @@ export default async function LibraryPage({
     where.displayFormat = format as DisplayFormat;
   }
 
-  if (context) {
-    const contextFilter = { watchContext: context as WatchContext };
-    where.userEntry =
-      typeof where.userEntry === "object" && where.userEntry !== null
-        ? { ...where.userEntry, ...contextFilter }
-        : contextFilter;
+  if (genre) {
+    where.genres = { contains: genre };
   }
 
-  // Build sort
+  if (studio) {
+    where.animeStudios = { some: { isMainStudio: true, studio: { name: studio } } };
+  }
+
+  // Build sort — use aggregation ordering for userEntry fields
   const orderBy = buildOrderBy(sort);
 
-  const [animes, franchises, rawCounts] = await Promise.all([
+  const include = {
+    userEntries: {
+      where: { userId },
+      include: { recommender: true, watchContextPerson: true },
+      take: 1,
+    },
+    franchiseEntries: { include: { franchise: true } },
+    animeStudios: { include: { studio: true } },
+    mergedAnimes: { select: MERGED_ANIME_SELECT },
+  };
+
+  const [rawAnimes, franchises, people, rawCounts] = await Promise.all([
     db.anime.findMany({ where, include, orderBy }),
-    db.franchise.findMany({ orderBy: { name: "asc" } }),
+    db.franchise.findMany({ where: { userId }, orderBy: { name: "asc" } }),
+    db.person.findMany({ where: { userId }, orderBy: { name: "asc" } }),
     db.userEntry.groupBy({
       by: ["watchStatus"],
       _count: { watchStatus: true },
+      where: { watchStatus: { in: LIBRARY_STATUSES }, userId },
     }),
   ]);
 
-  // Build status counts
+  // Transform userEntries[] -> userEntry, compute effective totals for merged seasons,
+  // then sort client-side for user-entry fields
+  // (Prisma 7.4 doesn't support _max aggregate ordering on one-to-many relations)
+  const animes = rawAnimes
+    .map((a) => ({
+      ...a,
+      userEntry: a.userEntries[0] ?? null,
+      totalEpisodes: effectiveTotalEpisodes(a),
+      airingStatus: effectiveAiringStatus(a) as AiringStatus,
+    }))
+    .sort((a, b) => {
+      const ae = a.userEntry;
+      const be = b.userEntry;
+      if (sort === "startedAt")
+        return (be?.startedAt?.getTime() ?? 0) - (ae?.startedAt?.getTime() ?? 0);
+      if (sort === "completedAt")
+        return (be?.completedAt?.getTime() ?? 0) - (ae?.completedAt?.getTime() ?? 0);
+      if (sort === "score")
+        return (be?.score ?? -1) - (ae?.score ?? -1);
+      if (sort === "meanScore" || sort === "title")
+        return 0; // already ordered by Prisma
+      // default: updatedAt
+      return (be?.updatedAt?.getTime() ?? 0) - (ae?.updatedAt?.getTime() ?? 0);
+    });
+
+  // Build status counts (library statuses only)
   const counts: Partial<Record<WatchStatus | "ALL", number>> = {};
   let total = 0;
   for (const row of rawCounts) {
@@ -86,7 +142,7 @@ export default async function LibraryPage({
       </div>
 
       <Suspense>
-        <LibraryFilters franchises={franchises} counts={counts} />
+        <LibraryFilters franchises={franchises} people={people} counts={counts} />
       </Suspense>
 
       <AnimeGrid animes={animes} />
@@ -95,18 +151,8 @@ export default async function LibraryPage({
 }
 
 function buildOrderBy(sort: string): Record<string, unknown> {
-  switch (sort) {
-    case "startedAt":
-      return { userEntry: { startedAt: "desc" } };
-    case "completedAt":
-      return { userEntry: { completedAt: "desc" } };
-    case "score":
-      return { userEntry: { score: "desc" } };
-    case "meanScore":
-      return { meanScore: "desc" };
-    case "title":
-      return { titleEnglish: "asc" };
-    default:
-      return { userEntry: { updatedAt: "desc" } };
-  }
+  // Only DB-level sorts (not user-entry fields — those are sorted client-side)
+  if (sort === "meanScore") return { meanScore: "desc" };
+  if (sort === "title") return { titleEnglish: "asc" };
+  return { updatedAt: "desc" }; // fallback; actual updatedAt sort applied client-side
 }

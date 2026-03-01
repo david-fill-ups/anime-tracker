@@ -1,26 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import type { WatchStatus, DisplayFormat, WatchContext } from "@/app/generated/prisma";
+import { requireUserId } from "@/lib/auth-helpers";
+import type { WatchStatus, DisplayFormat } from "@/app/generated/prisma";
 
 export async function GET(req: NextRequest) {
+  const userId = await requireUserId();
   const params = req.nextUrl.searchParams;
   const status = params.get("status");
   const franchise = params.get("franchise");
   const format = params.get("format");
-  const context = params.get("context");
   const search = params.get("search");
 
-  const where: Record<string, unknown> = { userEntry: { isNot: null } };
-  if (status) where.userEntry = { watchStatus: status as WatchStatus };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const where: Record<string, any> = {
+    userEntries: { some: { userId } },
+    mergedIntoId: null,
+  };
+  if (status) where.userEntries = { some: { userId, watchStatus: status as WatchStatus } };
   if (franchise) where.franchiseEntries = { some: { franchiseId: Number(franchise) } };
   if (format) where.displayFormat = format as DisplayFormat;
-  if (context) {
-    const contextFilter = { watchContext: context as WatchContext };
-    where.userEntry =
-      typeof where.userEntry === "object" && where.userEntry !== null
-        ? { ...where.userEntry, ...contextFilter }
-        : contextFilter;
-  }
   if (search) {
     where.OR = [
       { titleEnglish: { contains: search } },
@@ -31,15 +29,16 @@ export async function GET(req: NextRequest) {
   const animes = await db.anime.findMany({
     where,
     include: {
-      userEntry: { include: { recommender: true } },
+      userEntries: { where: { userId }, include: { recommender: true }, take: 1 },
       franchiseEntries: { include: { franchise: true }, orderBy: { order: "asc" } },
       animeStudios: { include: { studio: true }, where: { isMainStudio: true } },
     },
-    orderBy: { userEntry: { updatedAt: "desc" } },
+    orderBy: { updatedAt: "desc" },
   });
 
   const rows = [
     [
+      "AniList ID",
       "Title",
       "Status",
       "Current Episode",
@@ -52,18 +51,16 @@ export async function GET(req: NextRequest) {
       "Genres",
       "Airing Status",
       "Season",
-      "Watch Context",
-      "Watch Party With",
       "Recommended By",
       "Started",
       "Completed",
-      "Rewatch Count",
       "Notes",
     ],
     ...animes.map((a) => {
-      const e = a.userEntry!;
+      const e = a.userEntries[0]!;
       const genres: string[] = JSON.parse(a.genres || "[]");
       return [
+        a.anilistId != null ? String(a.anilistId) : "",
         a.titleEnglish || a.titleRomaji,
         e.watchStatus,
         String(e.currentEpisode),
@@ -76,12 +73,9 @@ export async function GET(req: NextRequest) {
         genres.join("; "),
         a.airingStatus,
         a.season && a.seasonYear ? `${a.season} ${a.seasonYear}` : "",
-        e.watchContext ?? "",
-        e.watchPartyWith ?? "",
         e.recommender?.name ?? "",
         e.startedAt ? e.startedAt.toISOString().split("T")[0] : "",
         e.completedAt ? e.completedAt.toISOString().split("T")[0] : "",
-        String(e.rewatchCount),
         (e.notes ?? "").replace(/[\n\r]/g, " "),
       ];
     }),

@@ -7,7 +7,7 @@ import StatusBadge from "./StatusBadge";
 import type { Anime, UserEntry, WatchStatus } from "@/app/generated/prisma";
 
 type AnimeWithEntry = Anime & {
-  userEntry: UserEntry & { recommender: { name: string } | null } | null;
+  userEntry: UserEntry & { recommender: { name: string } | null; watchContextPerson: { name: string } | null } | null;
   franchiseEntries: { franchise: { name: string }; order: number }[];
   animeStudios: { studio: { name: string }; isMainStudio: boolean }[];
 };
@@ -52,7 +52,7 @@ export default function AnimeCard({ anime, onUpdate }: {
   return (
     <div className={`group relative bg-slate-900 rounded-xl overflow-hidden border border-slate-800 hover:border-slate-600 transition-all ${loading ? "opacity-60" : ""}`}>
       {/* Cover image */}
-      <div className="relative aspect-[2/3] bg-slate-800">
+      <Link href={`/anime/${anime.id}`} className="block relative aspect-[2/3] bg-slate-800">
         {anime.coverImageUrl ? (
           <Image
             src={anime.coverImageUrl}
@@ -79,7 +79,7 @@ export default function AnimeCard({ anime, onUpdate }: {
             ★ {entry.score}
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Content */}
       <div className="p-3 space-y-2">
@@ -126,8 +126,8 @@ export default function AnimeCard({ anime, onUpdate }: {
         )}
 
         {/* Watch context */}
-        {entry?.watchContext === "WATCH_PARTY" && entry.watchPartyWith && (
-          <p className="text-xs text-slate-500">w/ {entry.watchPartyWith}</p>
+        {entry?.watchContextPerson && (
+          <p className="text-xs text-slate-500">w/ {entry.watchContextPerson.name}</p>
         )}
 
         {/* Quick status change */}

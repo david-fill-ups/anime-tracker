@@ -43,6 +43,16 @@ export interface AniListAnime {
       };
     }[];
   };
+  relations: {
+    edges: {
+      relationType: string;
+      node: {
+        id: number;
+        type: string;
+        title: { romaji: string; english: string | null };
+      };
+    }[];
+  };
 }
 
 const ANIME_FIELDS = gql`
@@ -76,6 +86,19 @@ const ANIME_FIELDS = gql`
         node {
           id
           name
+        }
+      }
+    }
+    relations {
+      edges {
+        relationType(version: 2)
+        node {
+          id
+          type
+          title {
+            romaji
+            english
+          }
         }
       }
     }

@@ -1,22 +1,37 @@
 export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
-import Link from "next/link";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import FranchiseManager from "@/components/FranchiseManager";
 
 export default async function FranchisesPage() {
-  const franchises = await db.franchise.findMany({
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id;
+
+  const rawFranchises = await db.franchise.findMany({
+    where: { userId },
     include: {
       entries: {
         orderBy: { order: "asc" },
         include: {
           anime: {
-            include: { userEntry: true },
+            include: { userEntries: { where: { userId }, take: 1 } },
           },
         },
       },
     },
     orderBy: { name: "asc" },
   });
+
+  // Transform nested userEntries[] -> userEntry for component compatibility
+  const franchises = rawFranchises.map((f) => ({
+    ...f,
+    entries: f.entries.map((e) => ({
+      ...e,
+      anime: { ...e.anime, userEntry: e.anime.userEntries[0] ?? null },
+    })),
+  }));
 
   return (
     <div className="space-y-6">

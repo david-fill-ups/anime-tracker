@@ -1,9 +1,16 @@
 export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import PeopleManager from "@/components/PeopleManager";
 
 export default async function PeoplePage() {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id;
+
   const people = await db.person.findMany({
+    where: { userId },
     include: {
       entries: {
         include: { anime: true },

@@ -1,16 +1,24 @@
 export const dynamic = "force-dynamic";
+import Link from "next/link";
 import { db } from "@/lib/db";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function StatsPage() {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id;
+
   const [entries, animes] = await Promise.all([
     db.userEntry.findMany({
+      where: { userId },
       include: {
         anime: {
           include: { animeStudios: { include: { studio: true }, where: { isMainStudio: true } } },
         },
       },
     }),
-    db.anime.findMany({ where: { userEntry: { isNot: null } } }),
+    db.anime.findMany({ where: { userEntries: { some: { userId } }, mergedIntoId: null } }),
   ]);
 
   // Status breakdown
@@ -99,10 +107,10 @@ export default async function StatsPage() {
 
       {/* Top-line numbers */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total Tracked" value={String(entries.length)} />
-        <StatCard label="Completed" value={String(statusCounts["COMPLETED"] ?? 0)} />
-        <StatCard label="Hours Watched" value={String(totalHours)} />
-        <StatCard label="Avg Score" value={avgScore != null ? `${avgScore}/10` : "—"} />
+        <StatCard label="Total Tracked" value={String(entries.length)} href="/library" />
+        <StatCard label="Completed" value={String(statusCounts["COMPLETED"] ?? 0)} href="/library?status=COMPLETED" />
+        <StatCard label="Hours Watched" value={String(totalHours)} href="/library?status=COMPLETED" />
+        <StatCard label="Avg Score" value={avgScore != null ? `${avgScore}/10` : "—"} href="/library?sort=score" />
       </div>
 
       {/* Status breakdown */}
@@ -112,7 +120,11 @@ export default async function StatsPage() {
           {Object.entries(statusCounts).map(([status, count]) => {
             const pct = Math.round((count / entries.length) * 100);
             return (
-              <div key={status} className="flex items-center gap-3">
+              <Link
+                key={status}
+                href={`/library?status=${status}`}
+                className="flex items-center gap-3 rounded-lg px-2 py-1 -mx-2 hover:bg-slate-800/60 transition-colors"
+              >
                 <span className="text-sm text-slate-400 w-32">{STATUS_LABELS[status] ?? status}</span>
                 <div className="flex-1 bg-slate-800 rounded-full h-2">
                   <div
@@ -121,7 +133,7 @@ export default async function StatsPage() {
                   />
                 </div>
                 <span className="text-sm text-slate-400 w-12 text-right">{count}</span>
-              </div>
+              </Link>
             );
           })}
         </div>
@@ -135,10 +147,14 @@ export default async function StatsPage() {
         ) : (
           <div className="grid grid-cols-2 gap-2">
             {topGenres.map(([genre, count]) => (
-              <div key={genre} className="flex items-center justify-between bg-slate-800 rounded-lg px-3 py-2">
+              <Link
+                key={genre}
+                href={`/library?genre=${encodeURIComponent(genre)}`}
+                className="flex items-center justify-between bg-slate-800 rounded-lg px-3 py-2 hover:bg-slate-700 transition-colors"
+              >
                 <span className="text-sm text-slate-300">{genre}</span>
                 <span className="text-sm font-medium text-white">{count}</span>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -153,11 +169,15 @@ export default async function StatsPage() {
         ) : (
           <div className="space-y-2">
             {topStudios.map((s) => (
-              <div key={s.name} className="flex items-center gap-3">
+              <Link
+                key={s.name}
+                href={`/library?studio=${encodeURIComponent(s.name)}`}
+                className="flex items-center gap-3 rounded-lg px-2 py-1 -mx-2 hover:bg-slate-800/60 transition-colors"
+              >
                 <span className="text-sm text-slate-300 flex-1">{s.name}</span>
                 <span className="text-xs text-slate-500">{s.count} anime</span>
                 <span className="text-sm font-medium text-yellow-400">★ {s.avg}</span>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -168,10 +188,14 @@ export default async function StatsPage() {
         <h3 className="text-sm font-semibold text-slate-300 mb-4">Format</h3>
         <div className="flex gap-4">
           {Object.entries(formatCounts).map(([format, count]) => (
-            <div key={format} className="text-center">
+            <Link
+              key={format}
+              href={`/library?format=${format}`}
+              className="text-center hover:opacity-75 transition-opacity"
+            >
               <p className="text-2xl font-bold text-white">{count}</p>
               <p className="text-xs text-slate-400 capitalize">{format.toLowerCase()}</p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -179,11 +203,14 @@ export default async function StatsPage() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCard({ label, value, href }: { label: string; value: string; href: string }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 text-center">
+    <Link
+      href={href}
+      className="bg-slate-900 border border-slate-800 rounded-xl p-5 text-center hover:border-slate-600 hover:bg-slate-800/50 transition-colors block"
+    >
       <p className="text-2xl font-bold text-white">{value}</p>
       <p className="text-xs text-slate-400 mt-1">{label}</p>
-    </div>
+    </Link>
   );
 }

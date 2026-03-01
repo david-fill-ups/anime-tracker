@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireUserId } from "@/lib/auth-helpers";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function PATCH(_req: NextRequest, { params }: Params) {
+  const userId = await requireUserId();
   const { id } = await params;
   const animeId = Number(id);
 
-  const entry = await db.userEntry.findUnique({ where: { animeId } });
+  const entry = await db.userEntry.findFirst({ where: { animeId, userId } });
   if (!entry) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const anime = await db.anime.findUnique({ where: { id: animeId } });
@@ -27,6 +29,9 @@ export async function PATCH(_req: NextRequest, { params }: Params) {
     data.watchStatus = "WATCHING";
   }
 
-  const updated = await db.userEntry.update({ where: { animeId }, data });
+  const updated = await db.userEntry.update({
+    where: { animeId_userId: { animeId, userId } },
+    data,
+  });
   return NextResponse.json(updated);
 }
