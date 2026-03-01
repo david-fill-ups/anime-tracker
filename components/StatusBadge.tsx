@@ -6,7 +6,8 @@ const config: Record<WatchStatus, { label: string; className: string }> = {
   ON_HOLD:       { label: "On Hold",        className: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" },
   DROPPED:       { label: "Dropped",        className: "bg-red-500/20 text-red-300 border-red-500/30" },
   PLAN_TO_WATCH: { label: "Plan to Watch",  className: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
-  RECOMMENDED:   { label: "Recommended",    className: "bg-orange-500/20 text-orange-300 border-orange-500/30" },
+  RECOMMENDED:     { label: "Recommended",    className: "bg-orange-500/20 text-orange-300 border-orange-500/30" },
+  NOT_INTERESTED:  { label: "Not Interested", className: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
 };
 
 export default function StatusBadge({ status }: { status: WatchStatus }) {
