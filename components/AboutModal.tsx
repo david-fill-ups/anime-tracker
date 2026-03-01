@@ -20,7 +20,7 @@ export default function AboutModal() {
             className="absolute inset-0 bg-black/60"
             onClick={() => setOpen(false)}
           />
-          <div className="relative bg-slate-900 border border-slate-700 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl space-y-4">
+          <div className="relative bg-slate-900 border border-slate-700 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between gap-4">
               <h2 className="text-base font-semibold text-white">About this project</h2>
               <button
@@ -39,13 +39,24 @@ export default function AboutModal() {
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <h3 className="text-xs font-medium text-slate-300 uppercase tracking-wide">Tech stack &amp; hosting</h3>
-              <ul className="text-sm text-slate-400 space-y-1">
-                <li>Next.js App Router · TypeScript · Tailwind CSS</li>
-                <li>Prisma ORM · PostgreSQL · NextAuth v5</li>
-                <li>AniList GraphQL API for metadata</li>
-                <li>Hosted on Vercel</li>
+              <ul className="space-y-2.5">
+                {[
+                  { name: "Next.js", desc: "The React framework powering the app — handles routing, server-side rendering, and API endpoints." },
+                  { name: "TypeScript", desc: "Typed JavaScript. Catches bugs at compile time rather than at runtime." },
+                  { name: "Tailwind CSS", desc: "Utility-first CSS framework used for all styling — no separate stylesheet files." },
+                  { name: "Prisma ORM", desc: "Handles all database reads and writes. Lets you work with the database using TypeScript instead of raw SQL." },
+                  { name: "PostgreSQL", desc: "The relational database storing all user data — anime entries, ratings, franchises, etc." },
+                  { name: "NextAuth v5", desc: "Authentication library managing the Google sign-in flow and user sessions." },
+                  { name: "AniList API", desc: "Third-party GraphQL API used to pull anime metadata (titles, covers, descriptions, episode counts)." },
+                  { name: "Vercel", desc: "Hosting platform where the app is deployed. Handles CI/CD — every push to main goes live automatically." },
+                ].map(({ name, desc }) => (
+                  <li key={name} className="space-y-0.5">
+                    <span className="text-xs font-medium text-slate-200">{name}</span>
+                    <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
+                  </li>
+                ))}
               </ul>
             </div>
 
