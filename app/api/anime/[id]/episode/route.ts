@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
+import { effectiveTotalEpisodes } from "@/lib/anime-utils";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -12,13 +13,17 @@ export async function PATCH(_req: NextRequest, { params }: Params) {
   const entry = await db.userEntry.findFirst({ where: { animeId, userId } });
   if (!entry) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const anime = await db.anime.findUnique({ where: { id: animeId } });
+  const anime = await db.anime.findUnique({
+    where: { id: animeId },
+    include: { mergedAnimes: { select: { totalEpisodes: true } } },
+  });
   const newEpisode = entry.currentEpisode + 1;
 
   const data: Record<string, unknown> = { currentEpisode: newEpisode };
 
-  // Auto-complete when last episode reached
-  if (anime?.totalEpisodes && newEpisode >= anime.totalEpisodes) {
+  // Auto-complete when last episode reached (uses effective total across all merged seasons)
+  const totalEps = anime ? effectiveTotalEpisodes(anime) : null;
+  if (totalEps && newEpisode >= totalEps) {
     data.watchStatus = "COMPLETED";
     data.completedAt = new Date();
   }

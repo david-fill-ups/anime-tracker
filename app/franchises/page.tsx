@@ -24,13 +24,15 @@ export default async function FranchisesPage() {
     orderBy: { name: "asc" },
   });
 
-  // Transform nested userEntries[] -> userEntry for component compatibility
+  // Transform nested userEntries[] -> userEntry; exclude merged secondaries from display
   const franchises = rawFranchises.map((f) => ({
     ...f,
-    entries: f.entries.map((e) => ({
-      ...e,
-      anime: { ...e.anime, userEntry: e.anime.userEntries[0] ?? null },
-    })),
+    entries: f.entries
+      .filter((e) => e.anime.mergedIntoId === null)
+      .map((e) => ({
+        ...e,
+        anime: { ...e.anime, userEntry: e.anime.userEntries[0] ?? null },
+      })),
   }));
 
   return (

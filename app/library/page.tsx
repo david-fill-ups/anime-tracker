@@ -133,12 +133,6 @@ export default async function LibraryPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Library</h2>
-        <a
-          href="/api/export"
-          className="text-sm text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 px-3 py-1.5 rounded-md transition-colors"
-        >
-          Export CSV
-        </a>
       </div>
 
       <Suspense>

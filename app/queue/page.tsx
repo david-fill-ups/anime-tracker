@@ -25,7 +25,7 @@ export default async function QueuePage() {
   const rawPlanToWatch = await db.anime.findMany({
     where: { userEntries: { some: { userId, watchStatus: { in: QUEUE_STATUSES } } }, mergedIntoId: null },
     include: {
-      userEntries: { where: { userId }, include: { recommender: true }, take: 1 },
+      userEntries: { where: { userId }, include: { recommender: true, watchContextPerson: true }, take: 1 },
       franchiseEntries: { include: { franchise: true } },
       animeStudios: { include: { studio: true } },
       mergedAnimes: { select: MERGED_ANIME_SELECT },
@@ -58,7 +58,6 @@ export default async function QueuePage() {
         orderBy: { order: "asc" },
         include: {
           anime: {
-            where: { mergedIntoId: null },
             include: {
               userEntries: { where: { userId }, take: 1 },
               franchiseEntries: { include: { franchise: true } },
@@ -79,6 +78,8 @@ export default async function QueuePage() {
   for (const franchise of watchedFranchises) {
     for (const entry of franchise.entries) {
       const rawAnime = entry.anime;
+      // Skip merged secondaries — they're represented by their primary
+      if (rawAnime.mergedIntoId !== null) { seenIds.add(rawAnime.id); continue; }
       if (seenIds.has(rawAnime.id)) continue;
 
       const anime = {

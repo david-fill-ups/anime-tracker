@@ -27,20 +27,22 @@ export default async function FranchiseDetailPage({
       },
     }),
     db.anime.findMany({
-      where: { userEntries: { some: { userId } } },
+      where: { userEntries: { some: { userId } }, mergedIntoId: null },
       orderBy: { titleRomaji: "asc" },
     }),
   ]);
 
   if (!rawFranchise) notFound();
 
-  // Transform nested userEntries[] -> userEntry for component compatibility
+  // Transform nested userEntries[] -> userEntry; exclude merged secondaries from display
   const franchise = {
     ...rawFranchise,
-    entries: rawFranchise.entries.map((e) => ({
-      ...e,
-      anime: { ...e.anime, userEntry: e.anime.userEntries[0] ?? null },
-    })),
+    entries: rawFranchise.entries
+      .filter((e) => e.anime.mergedIntoId === null)
+      .map((e) => ({
+        ...e,
+        anime: { ...e.anime, userEntry: e.anime.userEntries[0] ?? null },
+      })),
   };
 
   return (

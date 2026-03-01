@@ -50,9 +50,14 @@ export default async function AnimeDetailPage({
 
   if (!rawAnime) notFound();
 
-  // Transform for component compatibility: userEntries[] -> userEntry
+  // Transform for component compatibility: userEntries[] -> userEntry, effective aggregated fields
   const { userEntries, ...animeRest } = rawAnime;
-  const anime = { ...animeRest, userEntry: userEntries[0] ?? null };
+  const anime = {
+    ...animeRest,
+    userEntry: userEntries[0] ?? null,
+    totalEpisodes: effectiveTotalEpisodes(animeRest),
+    airingStatus: effectiveAiringStatus(animeRest) as AiringStatus,
+  };
 
   const entry = anime.userEntry;
   const genres: string[] = JSON.parse(anime.genres || "[]");
@@ -168,6 +173,8 @@ export default async function AnimeDetailPage({
           )}
         </div>
       )}
+
+      <SeasonsMerge animeId={anime.id} mergedAnimes={anime.mergedAnimes} />
 
       <StreamingAutoRefresh animeId={anime.id} source={anime.source} />
       <WhereToWatch animeId={anime.id} initialLinks={anime.streamingLinks} />

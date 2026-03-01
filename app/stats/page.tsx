@@ -97,12 +97,6 @@ export default async function StatsPage() {
     <div className="space-y-8 max-w-4xl">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Stats</h2>
-        <a
-          href="/api/export"
-          className="text-sm text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 px-3 py-1.5 rounded-md transition-colors"
-        >
-          Export CSV
-        </a>
       </div>
 
       {/* Top-line numbers */}

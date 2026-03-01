@@ -1,4 +1,5 @@
 import { signIn } from "@/auth";
+import AboutModal from "@/components/AboutModal";
 
 export default function LoginPage() {
   return (
@@ -39,6 +40,9 @@ export default function LoginPage() {
             Sign in with Google
           </button>
         </form>
+        <div>
+          <AboutModal />
+        </div>
       </div>
     </div>
   );
