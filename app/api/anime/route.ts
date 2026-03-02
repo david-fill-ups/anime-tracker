@@ -4,13 +4,16 @@ import { requireUserId } from "@/lib/auth-helpers";
 import { fetchAniListById, mapDisplayFormat, mapSourceMaterial } from "@/lib/anilist";
 import { refreshStreamingForAnime } from "@/lib/tmdb";
 import { autoPopulateFranchise } from "@/lib/franchise-auto";
-import type { WatchStatus, AnimeSource, DisplayFormat, SourceMaterial, Season } from "@/app/generated/prisma";
+import { CreateAnimeSchema, parseBody, wrapHandler } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
-  const userId = await requireUserId();
-  const body = await req.json();
+  return wrapHandler(async () => {
+    const userId = await requireUserId();
+    const parsed = parseBody(CreateAnimeSchema, await req.json());
+    if (!parsed.success) return parsed.response;
+    const body = parsed.data;
 
-  if (body.source === "ANILIST" && body.anilistId) {
+  if (body.source === "ANILIST") {
     const data = await fetchAniListById(body.anilistId);
     if (!data) {
       return NextResponse.json({ error: "AniList entry not found" }, { status: 404 });
@@ -60,7 +63,7 @@ export async function POST(req: NextRequest) {
       data: {
         animeId: anime.id,
         userId,
-        watchStatus: (body.watchStatus as WatchStatus) ?? "PLAN_TO_WATCH",
+        watchStatus: body.watchStatus ?? "PLAN_TO_WATCH",
         watchContextPersonId: body.watchContextPersonId ?? null,
         recommenderId: body.recommenderId ?? null,
       },
@@ -75,7 +78,7 @@ export async function POST(req: NextRequest) {
   // Manual entry
   const anime = await db.anime.create({
     data: {
-      source: "MANUAL" as AnimeSource,
+      source: "MANUAL",
       titleRomaji: body.titleRomaji,
       titleEnglish: body.titleEnglish ?? null,
       titleNative: body.titleNative ?? null,
@@ -84,10 +87,10 @@ export async function POST(req: NextRequest) {
       genres: JSON.stringify(body.genres ?? []),
       totalEpisodes: body.totalEpisodes ?? null,
       durationMins: body.durationMins ?? null,
-      airingStatus: (body.airingStatus as AiringStatus) ?? "FINISHED",
-      displayFormat: (body.displayFormat as DisplayFormat) ?? "SERIES",
-      sourceMaterial: (body.sourceMaterial as SourceMaterial) ?? null,
-      season: (body.season as Season) ?? null,
+      airingStatus: body.airingStatus ?? "FINISHED",
+      displayFormat: body.displayFormat ?? "SERIES",
+      sourceMaterial: body.sourceMaterial ?? null,
+      season: body.season ?? null,
       seasonYear: body.seasonYear ?? null,
     },
   });
@@ -96,7 +99,7 @@ export async function POST(req: NextRequest) {
     data: {
       animeId: anime.id,
       userId,
-      watchStatus: (body.watchStatus as WatchStatus) ?? "PLAN_TO_WATCH",
+      watchStatus: body.watchStatus ?? "PLAN_TO_WATCH",
       watchContextPersonId: body.watchContextPersonId ?? null,
       recommenderId: body.recommenderId ?? null,
     },
@@ -105,6 +108,7 @@ export async function POST(req: NextRequest) {
   await refreshStreamingForAnime(anime.id);
 
   return NextResponse.json(anime, { status: 201 });
+  });
 }
 
 async function upsertStudios(
@@ -121,6 +125,3 @@ async function upsertStudios(
   }
   return creates;
 }
-
-// Fix missing import
-type AiringStatus = "FINISHED" | "RELEASING" | "HIATUS" | "CANCELLED" | "NOT_YET_RELEASED";

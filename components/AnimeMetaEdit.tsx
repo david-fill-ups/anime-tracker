@@ -170,19 +170,69 @@ export default function AnimeMetaEdit({ anime }: Props) {
   const selectCls = "w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500";
   const disabledSelectCls = "w-full bg-slate-800/40 text-slate-500 border border-slate-700/50 rounded-md px-3 py-2 text-sm cursor-not-allowed";
 
+  // Always-visible TMDB status row
+  const tmdbRow = (
+    <div className="flex items-center gap-2 flex-wrap text-xs mt-1">
+      <span className="text-slate-500">TMDB:</span>
+      {anime.tmdbId ? (
+        <>
+          <a
+            href={`https://www.themoviedb.org/${anime.tmdbMediaType ?? "tv"}/${anime.tmdbId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-400 hover:text-indigo-300 transition-colors"
+          >
+            #{anime.tmdbId} ({anime.tmdbMediaType ?? "tv"}) ↗
+          </a>
+          <button
+            onClick={clearTmdb}
+            disabled={tmdbSaving}
+            className="text-slate-600 hover:text-red-400 transition-colors disabled:opacity-50"
+          >
+            {tmdbSaving ? "clearing…" : "clear"}
+          </button>
+        </>
+      ) : (
+        <>
+          <span className="text-slate-600">not linked</span>
+          <input
+            value={tmdbInput}
+            onChange={(e) => { setTmdbInput(e.target.value); setTmdbMsg(""); }}
+            onKeyDown={(e) => e.key === "Enter" && saveTmdb()}
+            placeholder="URL or ID"
+            className="w-28 bg-slate-800 text-slate-100 border border-slate-700 rounded px-2 py-0.5 text-xs focus:outline-none focus:border-indigo-500"
+          />
+          <button
+            onClick={saveTmdb}
+            disabled={tmdbSaving || !tmdbInput.trim()}
+            className="px-2 py-0.5 text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 rounded transition-colors disabled:opacity-50"
+          >
+            {tmdbSaving ? "…" : "Set"}
+          </button>
+          {tmdbMsg && <span className="text-red-400">{tmdbMsg}</span>}
+        </>
+      )}
+    </div>
+  );
+
   if (!open) {
     return (
-      <button
-        onClick={() => setOpen(true)}
-        className="text-xs text-slate-600 hover:text-slate-400 transition-colors mt-1"
-      >
-        Edit details
-      </button>
+      <div className="mt-1 space-y-1">
+        {tmdbRow}
+        <button
+          onClick={() => setOpen(true)}
+          className="text-xs text-slate-600 hover:text-slate-400 transition-colors"
+        >
+          Edit details
+        </button>
+      </div>
     );
   }
 
   return (
-    <div className="border border-slate-700 rounded-md p-4 space-y-4 mt-2">
+    <div className="space-y-2 mt-2">
+      {tmdbRow}
+      <div className="border border-slate-700 rounded-md p-4 space-y-4">
       {/* Metadata fields */}
       <div className="space-y-3">
         {isAniList && (
@@ -330,48 +380,6 @@ export default function AnimeMetaEdit({ anime }: Props) {
         </div>
       </div>
 
-      {/* TMDB link */}
-      <div className="border-t border-slate-700/50 pt-4 space-y-2">
-        <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">TMDB Link</p>
-        {anime.tmdbId ? (
-          <div className="flex items-center gap-3">
-            <a
-              href={`https://www.themoviedb.org/${anime.tmdbMediaType ?? "tv"}/${anime.tmdbId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
-              #{anime.tmdbId} ({anime.tmdbMediaType ?? "tv"}) ↗
-            </a>
-            <button
-              onClick={clearTmdb}
-              disabled={tmdbSaving}
-              className="text-xs text-slate-600 hover:text-red-400 transition-colors disabled:opacity-50"
-            >
-              Clear
-            </button>
-          </div>
-        ) : (
-          <p className="text-xs text-slate-600">Not linked</p>
-        )}
-        <div className="flex gap-2">
-          <input
-            value={tmdbInput}
-            onChange={(e) => { setTmdbInput(e.target.value); setTmdbMsg(""); }}
-            placeholder="TMDB URL or numeric ID"
-            className="flex-1 bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-indigo-500"
-          />
-          <button
-            onClick={saveTmdb}
-            disabled={tmdbSaving || !tmdbInput.trim()}
-            className="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md transition-colors disabled:opacity-50"
-          >
-            {tmdbSaving ? "Saving..." : "Set"}
-          </button>
-        </div>
-        {tmdbMsg && <p className="text-xs text-red-400">{tmdbMsg}</p>}
-      </div>
-
       {/* AniList link */}
       <div className="border-t border-slate-700/50 pt-4 space-y-2">
         <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">AniList Link</p>
@@ -467,6 +475,7 @@ export default function AnimeMetaEdit({ anime }: Props) {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

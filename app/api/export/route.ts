@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
 import type { WatchStatus, DisplayFormat } from "@/app/generated/prisma";
+import { wrapHandler } from "@/lib/validation";
 
 export async function GET(req: NextRequest) {
+  return wrapHandler(async () => {
   const userId = await requireUserId();
   const params = req.nextUrl.searchParams;
   const status = params.get("status");
@@ -32,6 +34,7 @@ export async function GET(req: NextRequest) {
       userEntries: { where: { userId }, include: { recommender: true }, take: 1 },
       franchiseEntries: { include: { franchise: true }, orderBy: { order: "asc" } },
       animeStudios: { include: { studio: true }, where: { isMainStudio: true } },
+      mergedAnimes: { select: { anilistId: true } },
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -55,6 +58,8 @@ export async function GET(req: NextRequest) {
       "Started",
       "Completed",
       "Notes",
+      "TMDB ID",
+      "Linked AniList IDs",
     ],
     ...animes.map((a) => {
       const e = a.userEntries[0]!;
@@ -77,6 +82,8 @@ export async function GET(req: NextRequest) {
         e.startedAt ? e.startedAt.toISOString().split("T")[0] : "",
         e.completedAt ? e.completedAt.toISOString().split("T")[0] : "",
         (e.notes ?? "").replace(/[\n\r]/g, " "),
+        a.tmdbId != null ? String(a.tmdbId) : "",
+        a.mergedAnimes.map((m) => m.anilistId).filter(Boolean).join("; "),
       ];
     }),
   ];
@@ -90,5 +97,6 @@ export async function GET(req: NextRequest) {
       "Content-Type": "text/csv",
       "Content-Disposition": `attachment; filename="anime-tracker-${new Date().toISOString().split("T")[0]}.csv"`,
     },
+  });
   });
 }

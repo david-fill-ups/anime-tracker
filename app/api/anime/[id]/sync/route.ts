@@ -4,50 +4,57 @@ import { requireUserId } from "@/lib/auth-helpers";
 import { fetchAniListById, mapDisplayFormat, mapSourceMaterial } from "@/lib/anilist";
 import { autoPopulateFranchise } from "@/lib/franchise-auto";
 import { refreshSeasonData } from "@/lib/tmdb";
+import { URLIdSchema, wrapHandler } from "@/lib/validation";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(_req: NextRequest, { params }: Params) {
-  const userId = await requireUserId();
-  const { id } = await params;
-  const anime = await db.anime.findUnique({ where: { id: Number(id) } });
+  return wrapHandler(async () => {
+    const userId = await requireUserId();
+    const { id } = await params;
+    const idParsed = URLIdSchema.safeParse(id);
+    if (!idParsed.success) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+    const animeId = idParsed.data;
 
-  if (!anime || !anime.anilistId) {
-    return NextResponse.json({ error: "Not an AniList entry" }, { status: 400 });
-  }
+    const anime = await db.anime.findUnique({ where: { id: animeId } });
 
-  const data = await fetchAniListById(anime.anilistId);
-  if (!data) {
-    return NextResponse.json({ error: "AniList fetch failed" }, { status: 502 });
-  }
+    if (!anime || !anime.anilistId) {
+      return NextResponse.json({ error: "Not an AniList entry" }, { status: 400 });
+    }
 
-  const updated = await db.anime.update({
-    where: { id: Number(id) },
-    data: {
-      titleRomaji: data.title.romaji,
-      titleEnglish: data.title.english ?? null,
-      titleNative: data.title.native ?? null,
-      coverImageUrl: data.coverImage.large,
-      synopsis: data.description ?? null,
-      genres: JSON.stringify(data.genres),
-      totalEpisodes: data.episodes ?? null,
-      durationMins: data.duration ?? null,
-      airingStatus: data.status,
-      displayFormat: mapDisplayFormat(data.format),
-      sourceMaterial: mapSourceMaterial(data.source),
-      season: data.season ?? null,
-      seasonYear: data.seasonYear ?? null,
-      meanScore: data.meanScore ?? null,
-      nextAiringEp: data.nextAiringEpisode?.episode ?? null,
-      nextAiringAt: data.nextAiringEpisode
-        ? new Date(data.nextAiringEpisode.airingAt * 1000)
-        : null,
-      lastSyncedAt: new Date(),
-    },
+    const data = await fetchAniListById(anime.anilistId);
+    if (!data) {
+      return NextResponse.json({ error: "AniList fetch failed" }, { status: 502 });
+    }
+
+    const updated = await db.anime.update({
+      where: { id: animeId },
+      data: {
+        titleRomaji: data.title.romaji,
+        titleEnglish: data.title.english ?? null,
+        titleNative: data.title.native ?? null,
+        coverImageUrl: data.coverImage.large,
+        synopsis: data.description ?? null,
+        genres: JSON.stringify(data.genres),
+        totalEpisodes: data.episodes ?? null,
+        durationMins: data.duration ?? null,
+        airingStatus: data.status,
+        displayFormat: mapDisplayFormat(data.format),
+        sourceMaterial: mapSourceMaterial(data.source),
+        season: data.season ?? null,
+        seasonYear: data.seasonYear ?? null,
+        meanScore: data.meanScore ?? null,
+        nextAiringEp: data.nextAiringEpisode?.episode ?? null,
+        nextAiringAt: data.nextAiringEpisode
+          ? new Date(data.nextAiringEpisode.airingAt * 1000)
+          : null,
+        lastSyncedAt: new Date(),
+      },
+    });
+
+    await autoPopulateFranchise(animeId, data, userId);
+    await refreshSeasonData(animeId);
+
+    return NextResponse.json(updated);
   });
-
-  await autoPopulateFranchise(Number(id), data, userId);
-  await refreshSeasonData(Number(id));
-
-  return NextResponse.json(updated);
 }

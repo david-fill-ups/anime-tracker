@@ -33,6 +33,10 @@ export default function AddAnimeForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Franchise
+  const [franchiseId, setFranchiseId] = useState("");
+  const [franchiseEntryType, setFranchiseEntryType] = useState("MAIN");
+
   // User entry fields
   const [watchStatus, setWatchStatus] = useState("PLAN_TO_WATCH");
   const [watchContext, setWatchContext] = useState("");
@@ -100,6 +104,16 @@ export default function AddAnimeForm({
       setError(data.error || "Something went wrong.");
       setSubmitting(false);
       return;
+    }
+
+    const anime = await res.json();
+
+    if (franchiseId && anime?.id) {
+      await fetch(`/api/franchises/${franchiseId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ animeId: anime.id, entryType: franchiseEntryType }),
+      });
     }
 
     router.push("/library");
@@ -324,6 +338,43 @@ export default function AddAnimeForm({
           </div>
         )}
       </div>
+
+      {/* Franchise (optional) */}
+      {franchises.length > 0 && (
+        <div className="space-y-2 border-t border-slate-800 pt-4">
+          <h3 className="text-sm font-medium text-slate-300">Franchise</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Add to Franchise</label>
+              <select
+                value={franchiseId}
+                onChange={(e) => setFranchiseId(e.target.value)}
+                className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+              >
+                <option value="">— None —</option>
+                {franchises.map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </select>
+            </div>
+            {franchiseId && (
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">Entry Type</label>
+                <select
+                  value={franchiseEntryType}
+                  onChange={(e) => setFranchiseEntryType(e.target.value)}
+                  className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                >
+                  <option value="MAIN">Main</option>
+                  <option value="SIDE_STORY">Side Story</option>
+                  <option value="MOVIE">Movie</option>
+                  <option value="OVA">OVA</option>
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 

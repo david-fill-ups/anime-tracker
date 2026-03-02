@@ -4,14 +4,18 @@ import { useState, useRef } from "react";
 import { signOut } from "next-auth/react";
 
 type RefreshResult = { synced: number; errors: number; total: number };
-type ImportResult = { imported: number; updated: number; errors: number };
+type ImportResult = { imported: number; updated: number; skipped: number; errors: number };
+type PreviewResult = { newCount: number; existingCount: number; invalidCount: number };
 
 export default function ProfileActions() {
   const [refreshing, setRefreshing] = useState(false);
   const [refreshResult, setRefreshResult] = useState<RefreshResult | null>(null);
   const [refreshError, setRefreshError] = useState<string | null>(null);
 
+  const [previewing, setPreviewing] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [previewData, setPreviewData] = useState<PreviewResult | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -25,7 +29,10 @@ export default function ProfileActions() {
     setRefreshError(null);
     try {
       const res = await fetch("/api/sync-all", { method: "POST" });
-      if (!res.ok) throw new Error("Refresh failed");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error ?? "Refresh failed");
+      }
       const data = await res.json();
       setRefreshResult(data);
     } catch (e) {
@@ -35,32 +42,78 @@ export default function ProfileActions() {
     }
   }
 
-  async function handleImport(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const file = fileInputRef.current?.files?.[0];
-    if (!file) return;
-
+  async function doImport(file: File, conflictMode: "update" | "skip") {
     setImporting(true);
-    setImportResult(null);
-    setImportError(null);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
+    setPreviewData(null);
     try {
-      const res = await fetch("/api/import", { method: "POST", body: formData });
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("conflictMode", conflictMode);
+      const res = await fetch("/api/import", { method: "POST", body: fd });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error ?? "Import failed");
       }
-      const data = await res.json();
+      const data: ImportResult = await res.json();
       setImportResult(data);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      setPendingFile(null);
     } catch (e) {
       setImportError(e instanceof Error ? e.message : "Import failed");
     } finally {
       setImporting(false);
     }
+  }
+
+  async function handleImport(e: React.SyntheticEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) return;
+
+    setPendingFile(file);
+    setPreviewing(true);
+    setPreviewData(null);
+    setImportResult(null);
+    setImportError(null);
+
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("mode", "preview");
+      const res = await fetch("/api/import", { method: "POST", body: fd });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? "Validation failed");
+      }
+      const data: PreviewResult = await res.json();
+      setPreviewing(false);
+
+      if (data.existingCount === 0) {
+        // No conflicts — import directly without prompting
+        await doImport(file, "update");
+      } else {
+        // Show conflict resolution prompt
+        setPreviewData(data);
+      }
+    } catch (e) {
+      setImportError(e instanceof Error ? e.message : "Import failed");
+      setPreviewing(false);
+    }
+  }
+
+  function handleCancelImport() {
+    setPreviewData(null);
+    setPendingFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function formatImportResult(r: ImportResult): string {
+    const parts: string[] = [];
+    if (r.imported > 0) parts.push(`${r.imported} added`);
+    if (r.updated > 0) parts.push(`${r.updated} updated`);
+    if (r.skipped > 0) parts.push(`${r.skipped} skipped`);
+    if (r.errors > 0) parts.push(`${r.errors} error${r.errors > 1 ? "s" : ""}`);
+    return parts.length ? parts.join(", ") + "." : "Nothing to import.";
   }
 
   async function handleDeleteProfile() {
@@ -75,6 +128,8 @@ export default function ProfileActions() {
       alert(e instanceof Error ? e.message : "Delete failed");
     }
   }
+
+  const isBusy = previewing || importing;
 
   return (
     <div className="space-y-4">
@@ -94,30 +149,70 @@ export default function ProfileActions() {
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-slate-300 mb-1">Import Data</h3>
         <p className="text-xs text-slate-500 mb-3">
-          Import from a CSV exported by this app. Existing entries will be updated; new AniList
-          entries will be fetched and added automatically.
+          Import from a CSV exported by this app. New entries will be added automatically; you
+          choose what to do with any existing ones.
         </p>
         <form onSubmit={handleImport} className="flex items-center gap-3 flex-wrap">
           <input
             ref={fileInputRef}
             type="file"
             accept=".csv"
-            disabled={importing}
+            disabled={isBusy}
             className="text-sm text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-slate-800 file:text-white hover:file:bg-slate-700 file:cursor-pointer"
           />
           <button
             type="submit"
-            disabled={importing}
+            disabled={isBusy}
             className="px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50"
           >
-            {importing ? "Importing…" : "Import"}
+            {previewing ? "Validating…" : importing ? "Importing…" : "Import"}
           </button>
         </form>
+
+        {/* Conflict resolution prompt */}
+        {previewData && !importing && (
+          <div className="mt-3 rounded-lg bg-slate-800 border border-slate-700 p-4 space-y-3">
+            <p className="text-sm text-slate-300">
+              Found{" "}
+              <span className="text-white font-medium">{previewData.newCount} new</span>{" "}
+              {previewData.newCount === 1 ? "entry" : "entries"} and{" "}
+              <span className="text-yellow-400 font-medium">
+                {previewData.existingCount} already in your library
+              </span>
+              {previewData.invalidCount > 0 && (
+                <span className="text-slate-500">
+                  {" "}
+                  ({previewData.invalidCount} row{previewData.invalidCount > 1 ? "s" : ""} skipped
+                  due to invalid data)
+                </span>
+              )}
+              . What should happen to the existing entries?
+            </p>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => pendingFile && doImport(pendingFile, "update")}
+                className="px-3 py-1.5 rounded-md text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+              >
+                Update existing
+              </button>
+              <button
+                onClick={() => pendingFile && doImport(pendingFile, "skip")}
+                className="px-3 py-1.5 rounded-md text-sm font-medium bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"
+              >
+                Skip existing
+              </button>
+              <button
+                onClick={handleCancelImport}
+                className="px-3 py-1.5 rounded-md text-sm font-medium text-slate-500 hover:text-slate-400 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         {importResult && (
-          <p className="text-xs text-green-400 mt-2">
-            {importResult.imported} added, {importResult.updated} updated
-            {importResult.errors > 0 && `, ${importResult.errors} errors`}.
-          </p>
+          <p className="text-xs text-green-400 mt-2">{formatImportResult(importResult)}</p>
         )}
         {importError && <p className="text-xs text-red-400 mt-2">{importError}</p>}
       </div>

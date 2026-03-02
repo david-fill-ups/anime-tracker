@@ -56,16 +56,19 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
 import type { Anime, UserEntry, Person, Franchise } from "@/app/generated/prisma";
 
 type Props = {
-  anime: Anime & { franchiseEntries: { franchise: { id: number; name: string } }[] };
+  anime: Anime & { franchiseEntries: { id: number; franchise: { id: number; name: string } }[] };
   entry: UserEntry & { recommender: Person | null; watchContextPerson: Person | null } | null;
   people: Person[];
   franchises: Franchise[];
 };
 
-export default function AnimeEditForm({ anime, entry, people }: Props) {
+export default function AnimeEditForm({ anime, entry, people, franchises }: Props) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [addingFranchise, setAddingFranchise] = useState(false);
+  const [newFranchiseId, setNewFranchiseId] = useState("");
+  const [newFranchiseEntryType, setNewFranchiseEntryType] = useState("MAIN");
 
 
   const [msg, setMsg] = useState("");
@@ -171,6 +174,27 @@ export default function AnimeEditForm({ anime, entry, people }: Props) {
     router.push("/library");
     router.refresh();
   }
+
+  async function addToFranchise() {
+    if (!newFranchiseId) return;
+    await fetch(`/api/franchises/${newFranchiseId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ animeId: anime.id, entryType: newFranchiseEntryType }),
+    });
+    setAddingFranchise(false);
+    setNewFranchiseId("");
+    setNewFranchiseEntryType("MAIN");
+    router.refresh();
+  }
+
+  async function removeFromFranchise(entryId: number) {
+    await fetch(`/api/franchise-entries/${entryId}`, { method: "DELETE" });
+    router.refresh();
+  }
+
+  const joinedFranchiseIds = new Set(anime.franchiseEntries.map((fe) => fe.franchise.id));
+  const availableFranchises = franchises.filter((f) => !joinedFranchiseIds.has(f.id));
 
   return (
     <div className="space-y-4">
@@ -341,6 +365,61 @@ export default function AnimeEditForm({ anime, entry, people }: Props) {
             placeholder="https://www.themoviedb.org/tv/..."
             className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
           />
+        </div>
+      )}
+
+      {/* Franchises */}
+      {(anime.franchiseEntries.length > 0 || franchises.length > 0) && (
+        <div className="space-y-2 border-t border-slate-800 pt-4">
+          <label className="block text-xs text-slate-400 mb-1">Franchises</label>
+          {anime.franchiseEntries.map((fe) => (
+            <div key={fe.id} className="flex items-center gap-2">
+              <a href={`/franchises/${fe.franchise.id}`} className="text-sm text-indigo-400 hover:text-indigo-300 flex-1">
+                {fe.franchise.name}
+              </a>
+              <button
+                onClick={() => removeFromFranchise(fe.id)}
+                className="text-slate-600 hover:text-red-400 text-sm"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          {availableFranchises.length > 0 && (
+            addingFranchise ? (
+              <div className="flex gap-2 items-center">
+                <select
+                  value={newFranchiseId}
+                  onChange={(e) => setNewFranchiseId(e.target.value)}
+                  className="flex-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:border-indigo-500"
+                >
+                  <option value="">— Select franchise —</option>
+                  {availableFranchises.map((f) => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))}
+                </select>
+                <select
+                  value={newFranchiseEntryType}
+                  onChange={(e) => setNewFranchiseEntryType(e.target.value)}
+                  className="bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:border-indigo-500"
+                >
+                  <option value="MAIN">Main</option>
+                  <option value="SIDE_STORY">Side Story</option>
+                  <option value="MOVIE">Movie</option>
+                  <option value="OVA">OVA</option>
+                </select>
+                <button onClick={addToFranchise} disabled={!newFranchiseId} className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1.5 rounded-md disabled:opacity-50">Add</button>
+                <button onClick={() => { setAddingFranchise(false); setNewFranchiseId(""); }} className="text-sm text-slate-400 hover:text-white">✕</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setAddingFranchise(true)}
+                className="text-xs text-slate-500 hover:text-slate-300 border border-slate-700 hover:border-slate-500 px-2 py-1 rounded transition-colors"
+              >
+                + Add to franchise
+              </button>
+            )
+          )}
         </div>
       )}
 

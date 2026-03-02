@@ -1,106 +1,123 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
-import type { WatchStatus } from "@/app/generated/prisma";
+import { URLIdSchema, UpdateAnimeSchema, parseBody, wrapHandler } from "@/lib/validation";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: Params) {
-  const userId = await requireUserId();
-  const { id } = await params;
-  const anime = await db.anime.findUnique({
-    where: { id: Number(id) },
-    include: {
-      userEntries: {
-        where: { userId },
-        include: { recommender: true, watchContextPerson: true },
-        take: 1,
+  return wrapHandler(async () => {
+    const userId = await requireUserId();
+    const { id } = await params;
+    const idParsed = URLIdSchema.safeParse(id);
+    if (!idParsed.success) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+    const animeId = idParsed.data;
+
+    const anime = await db.anime.findUnique({
+      where: { id: animeId },
+      include: {
+        userEntries: {
+          where: { userId },
+          include: { recommender: true, watchContextPerson: true },
+          take: 1,
+        },
+        franchiseEntries: { include: { franchise: true } },
+        animeStudios: { include: { studio: true } },
       },
-      franchiseEntries: { include: { franchise: true } },
-      animeStudios: { include: { studio: true } },
-    },
+    });
+    if (!anime) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const { userEntries, ...rest } = anime;
+    return NextResponse.json({ ...rest, userEntry: userEntries[0] ?? null });
   });
-  if (!anime) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const { userEntries, ...rest } = anime;
-  return NextResponse.json({ ...rest, userEntry: userEntries[0] ?? null });
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
-  const userId = await requireUserId();
-  const { id } = await params;
-  const animeId = Number(id);
-  const body = await req.json();
+  return wrapHandler(async () => {
+    const userId = await requireUserId();
+    const { id } = await params;
+    const idParsed = URLIdSchema.safeParse(id);
+    if (!idParsed.success) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+    const animeId = idParsed.data;
 
-  // Split updates between Anime and UserEntry
-  // TODO[TEMP]: verified — remove after data review
-  const { watchStatus, currentEpisode, score, notes, watchContextPersonId, recommenderId, startedAt, completedAt, verified, ...animeFields } = body;
+    const parsed = parseBody(UpdateAnimeSchema, await req.json());
+    if (!parsed.success) return parsed.response;
 
-  const updates: Promise<unknown>[] = [];
+    // Split updates between Anime and UserEntry
+    // TODO[TEMP]: verified — remove after data review
+    const { watchStatus, currentEpisode, score, notes, watchContextPersonId, recommenderId, startedAt, completedAt, verified, ...animeFields } = parsed.data;
 
-  if (Object.keys(animeFields).length > 0) {
-    updates.push(
-      db.anime.update({ where: { id: animeId }, data: animeFields })
-    );
-  }
+    const updates: Promise<unknown>[] = [];
 
-  const entryData: Record<string, unknown> = {};
-  if (watchStatus !== undefined) entryData.watchStatus = watchStatus as WatchStatus;
-  if (currentEpisode !== undefined) entryData.currentEpisode = currentEpisode;
-  if (score !== undefined) entryData.score = score;
-  if (notes !== undefined) entryData.notes = notes;
-  if (watchContextPersonId !== undefined) entryData.watchContextPersonId = watchContextPersonId;
-  if (recommenderId !== undefined) entryData.recommenderId = recommenderId;
-  if (startedAt !== undefined) entryData.startedAt = startedAt ? new Date(startedAt) : null;
-  if (completedAt !== undefined) entryData.completedAt = completedAt ? new Date(completedAt) : null;
-  if (verified !== undefined) entryData.verified = verified; // TODO[TEMP]: remove after data review
+    if (Object.keys(animeFields).length > 0) {
+      updates.push(
+        db.anime.update({ where: { id: animeId }, data: animeFields })
+      );
+    }
 
-  // Auto-set completedAt when marking complete
-  if (watchStatus === "COMPLETED" && completedAt === undefined) {
-    entryData.completedAt = new Date();
-  }
-  // Auto-set startedAt when starting to watch
-  if (watchStatus === "WATCHING" && startedAt === undefined) {
-    const existing = await db.userEntry.findFirst({ where: { animeId, userId } });
-    if (!existing?.startedAt) entryData.startedAt = new Date();
-  }
+    const entryData: Record<string, unknown> = {};
+    if (watchStatus !== undefined) entryData.watchStatus = watchStatus;
+    if (currentEpisode !== undefined) entryData.currentEpisode = currentEpisode;
+    if (score !== undefined) entryData.score = score;
+    if (notes !== undefined) entryData.notes = notes;
+    if (watchContextPersonId !== undefined) entryData.watchContextPersonId = watchContextPersonId;
+    if (recommenderId !== undefined) entryData.recommenderId = recommenderId;
+    if (startedAt !== undefined) entryData.startedAt = startedAt ? new Date(startedAt) : null;
+    if (completedAt !== undefined) entryData.completedAt = completedAt ? new Date(completedAt) : null;
+    if (verified !== undefined) entryData.verified = verified; // TODO[TEMP]: remove after data review
 
-  if (Object.keys(entryData).length > 0) {
-    updates.push(
-      db.userEntry.update({
-        where: { animeId_userId: { animeId, userId } },
-        data: entryData,
-      })
-    );
-  }
+    // Auto-set completedAt when marking complete
+    if (watchStatus === "COMPLETED" && completedAt === undefined) {
+      entryData.completedAt = new Date();
+    }
+    // Auto-set startedAt when starting to watch
+    if (watchStatus === "WATCHING" && startedAt === undefined) {
+      const existing = await db.userEntry.findFirst({ where: { animeId, userId } });
+      if (!existing?.startedAt) entryData.startedAt = new Date();
+    }
 
-  await Promise.all(updates);
+    if (Object.keys(entryData).length > 0) {
+      updates.push(
+        db.userEntry.update({
+          where: { animeId_userId: { animeId, userId } },
+          data: entryData,
+        })
+      );
+    }
 
-  const anime = await db.anime.findUnique({
-    where: { id: animeId },
-    include: {
-      userEntries: {
-        where: { userId },
-        include: { recommender: true, watchContextPerson: true },
-        take: 1,
+    await Promise.all(updates);
+
+    const anime = await db.anime.findUnique({
+      where: { id: animeId },
+      include: {
+        userEntries: {
+          where: { userId },
+          include: { recommender: true, watchContextPerson: true },
+          take: 1,
+        },
+        franchiseEntries: { include: { franchise: true } },
+        animeStudios: { include: { studio: true } },
       },
-      franchiseEntries: { include: { franchise: true } },
-      animeStudios: { include: { studio: true } },
-    },
+    });
+    if (!anime) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const { userEntries, ...rest } = anime;
+    return NextResponse.json({ ...rest, userEntry: userEntries[0] ?? null });
   });
-  if (!anime) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const { userEntries, ...rest } = anime;
-  return NextResponse.json({ ...rest, userEntry: userEntries[0] ?? null });
 }
 
 // Removes this anime from the user's library (deletes UserEntry only, not global Anime)
 export async function DELETE(_req: NextRequest, { params }: Params) {
-  const userId = await requireUserId();
-  const { id } = await params;
-  const animeId = Number(id);
-  try {
-    await db.userEntry.delete({ where: { animeId_userId: { animeId, userId } } });
-  } catch {
-    // Entry may not exist
-  }
-  return NextResponse.json({ ok: true });
+  return wrapHandler(async () => {
+    const userId = await requireUserId();
+    const { id } = await params;
+    const idParsed = URLIdSchema.safeParse(id);
+    if (!idParsed.success) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+    const animeId = idParsed.data;
+
+    try {
+      await db.userEntry.delete({ where: { animeId_userId: { animeId, userId } } });
+    } catch {
+      // Entry may not exist
+    }
+    return NextResponse.json({ ok: true });
+  });
 }

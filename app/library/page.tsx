@@ -21,7 +21,7 @@ export default async function LibraryPage({
   const userId = session.user.id;
 
   const params = await searchParams;
-  const { status, search, franchise, format, context, sort = "updatedAt", genre, studio, verified } = params; // TODO[TEMP]: verified
+  const { status, search, franchise, format, context, sort = "updatedAt", genre, studio, verified, minScore, maxScore } = params; // TODO[TEMP]: verified
 
   // Build the userEntry filter (always scoped to this user)
   const userEntryFilter: Record<string, unknown> = { userId };
@@ -32,8 +32,17 @@ export default async function LibraryPage({
     userEntryFilter.watchStatus = { in: LIBRARY_STATUSES };
   }
 
-  if (context) {
+  if (context === "NONE") {
+    userEntryFilter.watchContextPersonId = null;
+  } else if (context) {
     userEntryFilter.watchContextPersonId = Number(context);
+  }
+
+  if (minScore || maxScore) {
+    const scoreFilter: Record<string, number> = {};
+    if (minScore) scoreFilter.gte = parseFloat(minScore);
+    if (maxScore) scoreFilter.lte = parseFloat(maxScore);
+    userEntryFilter.score = scoreFilter;
   }
 
   // TODO[TEMP]: verified filter — remove after data review
@@ -47,11 +56,16 @@ export default async function LibraryPage({
     mergedIntoId: null,
   };
 
+  // Collect AND conditions so title-search OR and genre OR don't overwrite each other
+  const andConditions: Record<string, unknown>[] = [];
+
   if (search) {
-    where.OR = [
-      { titleEnglish: { contains: search } },
-      { titleRomaji: { contains: search } },
-    ];
+    andConditions.push({
+      OR: [
+        { titleEnglish: { contains: search } },
+        { titleRomaji: { contains: search } },
+      ],
+    });
   }
 
   if (franchise) {
@@ -63,11 +77,29 @@ export default async function LibraryPage({
   }
 
   if (genre) {
-    where.genres = { contains: genre };
+    const genreList = genre.split(",").filter(Boolean);
+    if (genreList.length === 1) {
+      andConditions.push({ genres: { contains: genreList[0] } });
+    } else {
+      andConditions.push({ OR: genreList.map((g) => ({ genres: { contains: g } })) });
+    }
   }
 
   if (studio) {
-    where.animeStudios = { some: { isMainStudio: true, studio: { name: studio } } };
+    const studioList = studio.split(",").filter(Boolean);
+    if (studioList.length === 1) {
+      where.animeStudios = { some: { isMainStudio: true, studio: { name: studioList[0] } } };
+    } else {
+      andConditions.push({
+        OR: studioList.map((s) => ({
+          animeStudios: { some: { isMainStudio: true, studio: { name: s } } },
+        })),
+      });
+    }
+  }
+
+  if (andConditions.length > 0) {
+    where.AND = andConditions;
   }
 
   // Build sort — use aggregation ordering for userEntry fields

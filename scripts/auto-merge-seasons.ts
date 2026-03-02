@@ -32,10 +32,15 @@ const FORMATS_TO_MERGE = new Set(["TV", "TV_SHORT"]);
 
 /**
  * Fetch AniList data with a delay to respect rate limits (~85 req/min).
- * Returns null on failure.
+ * Retries once after 3s on failure before giving up.
  */
 async function fetchWithDelay(id: number) {
-  await sleep(750);
+  await sleep(1000);
+  const result = await fetchAniListById(id);
+  if (result) return result;
+  // Retry after longer wait (rate limit recovery)
+  console.log(`  ⟳ Retrying AniList id=${id} after 15s...`);
+  await sleep(15000);
   return fetchAniListById(id);
 }
 
@@ -47,14 +52,14 @@ async function fetchWithDelay(id: number) {
 async function getSequelChain(startAnilistId: number): Promise<number[]> {
   const chain: number[] = [];
   const visited = new Set<number>([startAnilistId]);
-  let currentId: number | null = startAnilistId;
 
-  while (currentId !== null) {
-    const data = await fetchWithDelay(currentId);
-    if (!data) break;
+  // Fetch the start entry first
+  let currentData = await fetchWithDelay(startAnilistId);
+  if (!currentData) return chain;
 
+  while (true) {
     // Find the first direct ANIME SEQUEL
-    const sequelEdge = data.relations.edges.find(
+    const sequelEdge = currentData.relations.edges.find(
       (e) => e.relationType === "SEQUEL" && e.node.type === "ANIME"
     );
     if (!sequelEdge) break;
@@ -63,7 +68,7 @@ async function getSequelChain(startAnilistId: number): Promise<number[]> {
     if (visited.has(nextId)) break; // cycle guard
     visited.add(nextId);
 
-    // Fetch the sequel to check its format
+    // Fetch the sequel (reuse this data in the next loop iteration — no double fetch)
     const nextData = await fetchWithDelay(nextId);
     if (!nextData) break;
 
@@ -74,7 +79,7 @@ async function getSequelChain(startAnilistId: number): Promise<number[]> {
     }
 
     chain.push(nextId);
-    currentId = nextId;
+    currentData = nextData; // reuse in next iteration — avoids double-fetch
   }
 
   return chain;
@@ -82,14 +87,14 @@ async function getSequelChain(startAnilistId: number): Promise<number[]> {
 
 // ── Merge helpers ────────────────────────────────────────────────────────────
 
-async function upsertAnimeFromAniList(anilistId: number) {
-  let record = await db.anime.findUnique({ where: { anilistId } });
-  if (record) return record;
+async function upsertAnimeFromAniList(anilistId: number): Promise<{ id: number; titleEnglish: string | null; titleRomaji: string } | null> {
+  const existing = await db.anime.findUnique({ where: { anilistId } });
+  if (existing) return existing;
 
-  const data = await fetchAniListById(anilistId);
-  if (!data) throw new Error(`AniList id ${anilistId} not found`);
+  const data = await fetchWithDelay(anilistId);
+  if (!data) return null;
 
-  record = await db.anime.create({
+  const record = await db.anime.create({
     data: {
       anilistId: data.id,
       source: "ANILIST",
@@ -198,6 +203,11 @@ async function main() {
         console.log(`  → [DRY] Would merge ${label} into ${title}`);
       } else {
         const secondary = await upsertAnimeFromAniList(sequelAnilistId);
+        if (!secondary) {
+          console.log(`  ⚠ id=${sequelAnilistId} — AniList fetch failed, skipping.`);
+          skipped.push(`${title}: sequel id=${sequelAnilistId} could not be fetched from AniList`);
+          continue;
+        }
         await mergeInto(secondary.id, primary.id);
         console.log(`  ✅ Merged "${secondary.titleEnglish ?? secondary.titleRomaji}" (db#${secondary.id}) into ${title}`);
         mergedCount++;

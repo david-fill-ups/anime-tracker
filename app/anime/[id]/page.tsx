@@ -176,7 +176,7 @@ export default async function AnimeDetailPage({
 
       <SeasonsMerge animeId={anime.id} mergedAnimes={anime.mergedAnimes} />
 
-      <StreamingAutoRefresh animeId={anime.id} source={anime.source} />
+      <StreamingAutoRefresh animeId={anime.id} source={anime.source} streamingCheckedAt={anime.streamingCheckedAt} lastSyncedAt={anime.lastSyncedAt} />
       <WhereToWatch animeId={anime.id} initialLinks={anime.streamingLinks} />
 
       <div>

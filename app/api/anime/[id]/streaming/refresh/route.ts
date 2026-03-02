@@ -16,6 +16,6 @@ export async function POST(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[streaming/refresh] Unexpected error:", err);
-    return NextResponse.json({ ok: false, error: String(err) }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "Failed to refresh streaming data" }, { status: 500 });
   }
 }

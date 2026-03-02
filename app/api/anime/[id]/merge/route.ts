@@ -74,14 +74,14 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "This season is already merged into another anime" }, { status: 409 });
   }
 
-  // If secondary already has a UserEntry for this user, remove it
-  await db.userEntry.deleteMany({ where: { animeId: secondary.id, userId } });
-
-  // Set the merge link
-  await db.anime.update({
-    where: { id: secondary.id },
-    data: { mergedIntoId: primaryId },
-  });
+  // If secondary already has a UserEntry for this user, remove it, then set the merge link
+  await db.$transaction([
+    db.userEntry.deleteMany({ where: { animeId: secondary.id, userId } }),
+    db.anime.update({
+      where: { id: secondary.id },
+      data: { mergedIntoId: primaryId },
+    }),
+  ]);
 
   return NextResponse.json({ ok: true });
 }

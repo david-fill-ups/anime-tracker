@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import StatusBadge from "./StatusBadge";
-import type { Anime, UserEntry, FranchiseEntry, Franchise, WatchStatus } from "@/app/generated/prisma";
+import type { Anime, UserEntry, FranchiseEntry, Franchise } from "@/app/generated/prisma";
 
 type EntryWithAnime = FranchiseEntry & {
   anime: Anime & { userEntry: UserEntry | null };
@@ -34,12 +34,6 @@ export default function FranchiseManager({
     setNewName("");
     setNewDesc("");
     setSubmitting(false);
-    router.refresh();
-  }
-
-  async function deleteFranchise(id: number) {
-    if (!confirm("Delete this franchise? Anime entries will not be deleted.")) return;
-    await fetch(`/api/franchises/${id}`, { method: "DELETE" });
     router.refresh();
   }
 
@@ -108,34 +102,22 @@ export default function FranchiseManager({
           const next = getNextUnwatched(franchise.entries);
           return (
             <div key={franchise.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-white">{franchise.name}</h3>
-                  {franchise.description && (
-                    <p className="text-sm text-slate-400 mt-0.5">{franchise.description}</p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Link
-                    href={`/franchises/${franchise.id}`}
-                    className="text-xs text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 px-2 py-1 rounded transition-colors"
-                  >
-                    Manage
-                  </Link>
-                  <button
-                    onClick={() => deleteFranchise(franchise.id)}
-                    className="text-xs text-red-500 hover:text-red-400 border border-red-900 hover:border-red-700 px-2 py-1 rounded transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
+              <div className="mb-3">
+                <Link
+                  href={`/franchises/${franchise.id}`}
+                  className="font-semibold text-white hover:text-indigo-400 transition-colors"
+                >
+                  {franchise.name}
+                </Link>
+                {franchise.description && (
+                  <p className="text-sm text-slate-400 mt-0.5">{franchise.description}</p>
+                )}
               </div>
 
               {/* Entries */}
               <div className="space-y-2">
                 {franchise.entries.map((entry) => (
                   <div key={entry.id} className="flex items-center gap-3">
-                    <span className="text-xs text-slate-600 w-5 text-right">{entry.order}.</span>
                     <Link
                       href={`/anime/${entry.anime.id}`}
                       className="flex-1 text-sm text-slate-300 hover:text-white truncate"
