@@ -51,6 +51,8 @@ export const StreamingServiceSchema = z.enum([
   "HIDIVE",
 ]);
 
+export const DiscoveryTypeSchema = z.enum(["PERSONAL", "PLATFORM", "OTHER", "UNKNOWN"]);
+
 // ── Domain schemas ────────────────────────────────────────────────────────────
 
 export const CreateAnimeAniListSchema = z.object({
@@ -59,6 +61,8 @@ export const CreateAnimeAniListSchema = z.object({
   watchStatus: WatchStatusSchema.optional(),
   watchContextPersonId: z.number().int().positive().nullable().optional(),
   recommenderId: z.number().int().positive().nullable().optional(),
+  discoveryType: DiscoveryTypeSchema.nullable().optional(),
+  discoverySource: z.string().nullable().optional(),
 });
 
 export const CreateAnimeManualSchema = z.object({
@@ -79,6 +83,8 @@ export const CreateAnimeManualSchema = z.object({
   watchStatus: WatchStatusSchema.optional(),
   watchContextPersonId: z.number().int().positive().nullable().optional(),
   recommenderId: z.number().int().positive().nullable().optional(),
+  discoveryType: DiscoveryTypeSchema.nullable().optional(),
+  discoverySource: z.string().nullable().optional(),
 });
 
 export const CreateAnimeSchema = z.discriminatedUnion("source", [
@@ -94,6 +100,8 @@ export const UpdateAnimeSchema = z.object({
   notes: z.string().nullable().optional(),
   watchContextPersonId: z.number().int().positive().nullable().optional(),
   recommenderId: z.number().int().positive().nullable().optional(),
+  discoveryType: DiscoveryTypeSchema.nullable().optional(),
+  discoverySource: z.string().nullable().optional(),
   startedAt: z.string().nullable().optional(),
   completedAt: z.string().nullable().optional(),
   verified: z.boolean().optional(),

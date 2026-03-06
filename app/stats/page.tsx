@@ -4,12 +4,16 @@ import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-export default async function StatsPage() {
+// Statuses that represent genuine watch engagement (excludes wishlist/recommendations)
+const ENGAGED_STATUSES = ["WATCHING", "COMPLETED", "ON_HOLD", "DROPPED"] as const;
+type EngagedStatus = typeof ENGAGED_STATUSES[number];
+
+export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   const userId = session.user.id;
 
-  const [entries, animes] = await Promise.all([
+  const [entries, engagedAnimes] = await Promise.all([
     db.userEntry.findMany({
       where: { userId },
       include: {
@@ -18,16 +22,22 @@ export default async function StatsPage() {
         },
       },
     }),
-    db.anime.findMany({ where: { userEntries: { some: { userId } }, mergedIntoId: null } }),
+    // Only anime the user has actually engaged with for genre/format/studio stats
+    db.anime.findMany({
+      where: {
+        userEntries: { some: { userId, watchStatus: { in: ENGAGED_STATUSES as unknown as EngagedStatus[] } } },
+        mergedIntoId: null,
+      },
+    }),
   ]);
 
-  // Status breakdown
+  // Status breakdown (all statuses, for the library breakdown bar chart)
   const statusCounts: Record<string, number> = {};
   for (const e of entries) {
     statusCounts[e.watchStatus] = (statusCounts[e.watchStatus] ?? 0) + 1;
   }
 
-  // Total hours watched (completed + watching)
+  // Total hours watched (completed + watching only)
   const activeEntries = entries.filter(
     (e) => e.watchStatus === "COMPLETED" || e.watchStatus === "WATCHING"
   );
@@ -37,15 +47,16 @@ export default async function StatsPage() {
   }, 0);
   const totalHours = Math.round(totalMinutes / 60);
 
-  // Score distribution
-  const rated = entries.filter((e) => e.score != null);
+  // Avg score — engaged entries only (excludes wishlist/recommendations)
+  const engagedStatuses = new Set<string>(ENGAGED_STATUSES);
+  const rated = entries.filter((e) => e.score != null && engagedStatuses.has(e.watchStatus));
   const avgScore = rated.length
     ? Math.round((rated.reduce((s, e) => s + (e.score ?? 0), 0) / rated.length) * 10) / 10
     : null;
 
-  // Genre breakdown
+  // Genre breakdown — engaged anime only
   const genreCounts: Record<string, number> = {};
-  for (const anime of animes) {
+  for (const anime of engagedAnimes) {
     const genres: string[] = JSON.parse(anime.genres || "[]");
     for (const g of genres) {
       genreCounts[g] = (genreCounts[g] ?? 0) + 1;
@@ -55,7 +66,7 @@ export default async function StatsPage() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10);
 
-  // Studio breakdown (avg score per main studio)
+  // Studio scores — engaged + rated entries only
   const studioScores: Record<string, { sum: number; count: number }> = {};
   for (const e of rated) {
     const studio = e.anime.animeStudios[0]?.studio.name;
@@ -71,9 +82,9 @@ export default async function StatsPage() {
     .sort((a, b) => b.avg - a.avg)
     .slice(0, 10);
 
-  // Format breakdown
+  // Format breakdown — engaged anime only
   const formatCounts: Record<string, number> = {};
-  for (const a of animes) formatCounts[a.displayFormat] = (formatCounts[a.displayFormat] ?? 0) + 1;
+  for (const a of engagedAnimes) formatCounts[a.displayFormat] = (formatCounts[a.displayFormat] ?? 0) + 1;
 
   const STATUS_LABELS: Record<string, string> = {
     WATCHING: "Watching",
@@ -96,12 +107,12 @@ export default async function StatsPage() {
   return (
     <div className="space-y-8 max-w-4xl">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Stats</h2>
+        <h2 className="text-2xl font-bold text-white">Dashboard</h2>
       </div>
 
       {/* Top-line numbers */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total Tracked" value={String(entries.length)} href="/library" />
+        <StatCard label="Total Watched" value={String(engagedAnimes.length)} href="/library" />
         <StatCard label="Completed" value={String(statusCounts["COMPLETED"] ?? 0)} href="/library?status=COMPLETED" />
         <StatCard label="Hours Watched" value={String(totalHours)} href="/library?status=COMPLETED" />
         <StatCard label="Avg Score" value={avgScore != null ? `${avgScore}/10` : "—"} href="/library?sort=score" />

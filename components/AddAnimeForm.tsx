@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { AniListAnime } from "@/lib/anilist";
@@ -41,7 +41,22 @@ export default function AddAnimeForm({
   const [watchStatus, setWatchStatus] = useState("PLAN_TO_WATCH");
   const [watchContext, setWatchContext] = useState("");
   const [watchPartyWith, setWatchPartyWith] = useState("");
+  const [discoveryType, setDiscoveryTypeState] = useState("");
   const [recommenderId, setRecommenderId] = useState("");
+  const [discoverySource, setDiscoverySource] = useState("");
+  const [sourceSuggestions, setSourceSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/discovery-sources")
+      .then((r) => r.json())
+      .then((d) => setSourceSuggestions(d.sources ?? []));
+  }, []);
+
+  function setDiscoveryType(type: string) {
+    setDiscoveryTypeState(type);
+    if (type !== "PERSONAL") setRecommenderId("");
+    if (type !== "PLATFORM" && type !== "OTHER") setDiscoverySource("");
+  }
 
   // Manual fields
   const [manual, setManual] = useState({
@@ -72,7 +87,9 @@ export default function AddAnimeForm({
       watchStatus,
       watchContext: watchContext || null,
       watchPartyWith: watchContext === "WATCH_PARTY" ? watchPartyWith : null,
-      recommenderId: recommenderId ? Number(recommenderId) : null,
+      recommenderId: discoveryType === "PERSONAL" && recommenderId ? Number(recommenderId) : null,
+      discoveryType: discoveryType || null,
+      discoverySource: (discoveryType === "PLATFORM" || discoveryType === "OTHER") ? discoverySource || null : null,
     };
 
     let body: Record<string, unknown>;
@@ -322,9 +339,31 @@ export default function AddAnimeForm({
           </div>
         )}
 
-        {watchStatus === "RECOMMENDED" && (
-          <div>
-            <label className="block text-xs text-slate-400 mb-1">Recommended by</label>
+        <div>
+          <label className="block text-xs text-slate-400 mb-1">How did you find this?</label>
+          <div className="flex flex-wrap gap-1 mb-2">
+            {([
+              { value: "", label: "—" },
+              { value: "PERSONAL", label: "Personal" },
+              { value: "PLATFORM", label: "Platform" },
+              { value: "OTHER", label: "Other" },
+              { value: "UNKNOWN", label: "Don't remember" },
+            ] as const).map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setDiscoveryType(value)}
+                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                  discoveryType === value
+                    ? "bg-indigo-600 text-white"
+                    : "bg-slate-800 text-slate-400 hover:text-white border border-slate-700"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {discoveryType === "PERSONAL" && (
             <select
               value={recommenderId}
               onChange={(e) => setRecommenderId(e.target.value)}
@@ -335,8 +374,30 @@ export default function AddAnimeForm({
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
-          </div>
-        )}
+          )}
+          {discoveryType === "PLATFORM" && (
+            <>
+              <input
+                list="add-discovery-source-suggestions"
+                value={discoverySource}
+                onChange={(e) => setDiscoverySource(e.target.value)}
+                placeholder="e.g. Netflix, TikTok..."
+                className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+              />
+              <datalist id="add-discovery-source-suggestions">
+                {sourceSuggestions.map((s) => <option key={s} value={s} />)}
+              </datalist>
+            </>
+          )}
+          {discoveryType === "OTHER" && (
+            <input
+              value={discoverySource}
+              onChange={(e) => setDiscoverySource(e.target.value)}
+              placeholder="Describe..."
+              className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+            />
+          )}
+        </div>
       </div>
 
       {/* Franchise (optional) */}

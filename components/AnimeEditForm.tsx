@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const STAR_PATH =
@@ -64,14 +64,13 @@ type Props = {
 
 export default function AnimeEditForm({ anime, entry, people, franchises }: Props) {
   const router = useRouter();
-  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [addingFranchise, setAddingFranchise] = useState(false);
   const [newFranchiseId, setNewFranchiseId] = useState("");
   const [newFranchiseEntryType, setNewFranchiseEntryType] = useState("MAIN");
 
 
-  const [msg, setMsg] = useState("");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   // Season/episode helpers — derived from prop (updates after router.refresh())
   const parsedEpsPerSeason: number[] = anime.episodesPerSeason
@@ -109,13 +108,32 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
     notes: entry?.notes ?? "",
     watchContextPersonId: entry?.watchContextPersonId ? String(entry.watchContextPersonId) : "",
     recommenderId: entry?.recommenderId ? String(entry.recommenderId) : "",
+    discoveryType: entry?.discoveryType ?? "",
+    discoverySource: entry?.discoverySource ?? "",
     startedAt: entry?.startedAt ? entry.startedAt.toISOString().split("T")[0] : "",
     completedAt: entry?.completedAt ? entry.completedAt.toISOString().split("T")[0] : "",
   });
   // TODO[TEMP]: verified state — remove after data review
   const [verified, setVerified] = useState(entry?.verified ?? false);
+  const [sourceSuggestions, setSourceSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/discovery-sources")
+      .then((r) => r.json())
+      .then((d) => setSourceSuggestions(d.sources ?? []));
+  }, []);
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  function setDiscoveryType(type: string) {
+    const updates = {
+      discoveryType: type,
+      recommenderId: type === "PERSONAL" ? form.recommenderId : "",
+      discoverySource: (type === "PLATFORM" || type === "OTHER") ? form.discoverySource : "",
+    };
+    setForm((f) => ({ ...f, ...updates }));
+    return updates;
+  }
 
   function seasonToFlat(season: number, episode: number) {
     if (totalSeasons <= 1) return episode;
@@ -132,38 +150,44 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
       ? totalSeasons * (anime.totalEpisodes ?? 1)
       : null;
 
-  async function save() {
-    setSaving(true);
-    setMsg("");
+  async function save(formOverrides: Partial<typeof form> = {}, euOverride?: string, verifiedOverride?: boolean) {
+    const f = { ...form, ...formOverrides };
+    const eu = euOverride ?? externalUrl;
+    const v = verifiedOverride ?? verified;
+    const isComp = f.watchStatus === "COMPLETED";
+
+    setSaveStatus("saving");
 
     // Compute flat currentEpisode
     let flatEpisode: number;
-    if (isCompleted && totalEpisodesCount) {
+    if (isComp && totalEpisodesCount) {
       flatEpisode = totalEpisodesCount;
     } else if (useSeasonDropdowns) {
-      flatEpisode = seasonToFlat(Number(form.currentSeason), Number(form.currentEpisodeInSeason));
+      flatEpisode = seasonToFlat(Number(f.currentSeason), Number(f.currentEpisodeInSeason));
     } else {
-      flatEpisode = Number(form.currentEpisode);
+      flatEpisode = Number(f.currentEpisode);
     }
 
     await fetch(`/api/anime/${anime.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        watchStatus: form.watchStatus,
+        watchStatus: f.watchStatus,
         currentEpisode: flatEpisode,
-        score: form.score ? Number(form.score) : null,
-        notes: form.notes || null,
-        watchContextPersonId: form.watchContextPersonId ? Number(form.watchContextPersonId) : null,
-        recommenderId: form.recommenderId ? Number(form.recommenderId) : null,
-        startedAt: form.startedAt || null,
-        completedAt: isCompleted ? (form.completedAt || null) : null,
-        verified, // TODO[TEMP]: remove after data review
-        ...(anime.source === "MANUAL" && { externalUrl: externalUrl.trim() || null }),
+        score: f.score ? Number(f.score) : null,
+        notes: f.notes || null,
+        watchContextPersonId: f.watchContextPersonId ? Number(f.watchContextPersonId) : null,
+        recommenderId: f.discoveryType === "PERSONAL" && f.recommenderId ? Number(f.recommenderId) : null,
+        discoveryType: f.discoveryType || null,
+        discoverySource: (f.discoveryType === "PLATFORM" || f.discoveryType === "OTHER") ? f.discoverySource || null : null,
+        startedAt: f.startedAt || null,
+        completedAt: isComp ? (f.completedAt || null) : null,
+        verified: v, // TODO[TEMP]: remove after data review
+        ...(anime.source === "MANUAL" && { externalUrl: eu.trim() || null }),
       }),
     });
-    setSaving(false);
-    setMsg("Saved.");
+    setSaveStatus("saved");
+    setTimeout(() => setSaveStatus("idle"), 2000);
     router.refresh();
   }
 
@@ -203,7 +227,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
         <input
           type="checkbox"
           checked={verified}
-          onChange={(e) => setVerified(e.target.checked)}
+          onChange={(e) => { setVerified(e.target.checked); save({}, undefined, e.target.checked); }}
           className="w-4 h-4 cursor-pointer accent-green-500"
         />
         <span className={`text-sm font-medium ${verified ? "text-green-400" : "text-slate-400"}`}>
@@ -217,7 +241,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
           <label className="block text-xs text-slate-400 mb-1">Personal Rating</label>
           <StarRating
             value={form.score ? Number(form.score) : 0}
-            onChange={(v) => set("score", v > 0 ? String(v) : "")}
+            onChange={(v) => { const s = v > 0 ? String(v) : ""; set("score", s); save({ score: s }); }}
           />
         </div>
 
@@ -226,7 +250,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
           <label className="block text-xs text-slate-400 mb-1">Watch Status</label>
           <select
             value={form.watchStatus}
-            onChange={(e) => set("watchStatus", e.target.value)}
+            onChange={(e) => { set("watchStatus", e.target.value); save({ watchStatus: e.target.value as typeof form.watchStatus }); }}
             className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
           >
             <option value="WATCHING">Watching</option>
@@ -256,7 +280,9 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
                   const newSeason = Number(e.target.value);
                   const maxEp = getEpsForSeason(newSeason);
                   const clampedEp = Math.min(Number(form.currentEpisodeInSeason), maxEp);
-                  setForm((f) => ({ ...f, currentSeason: e.target.value, currentEpisodeInSeason: String(clampedEp) }));
+                  const updates = { currentSeason: e.target.value, currentEpisodeInSeason: String(clampedEp) };
+                  setForm((f) => ({ ...f, ...updates }));
+                  save(updates);
                 }}
                 className="flex-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
               >
@@ -266,7 +292,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
               </select>
               <select
                 value={form.currentEpisodeInSeason}
-                onChange={(e) => set("currentEpisodeInSeason", e.target.value)}
+                onChange={(e) => { set("currentEpisodeInSeason", e.target.value); save({ currentEpisodeInSeason: e.target.value }); }}
                 className="flex-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
               >
                 <option value={0}>E0</option>
@@ -282,20 +308,22 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
               max={anime.totalEpisodes ?? undefined}
               value={form.currentEpisode}
               onChange={(e) => set("currentEpisode", e.target.value)}
+              onBlur={() => save()}
               className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
             />
           )}
         </div>
 
-        {/* Row 3: Watch Party | Recommended By */}
+        {/* Row 3: Watch Party | How did you find this? */}
         <div>
           <label className="block text-xs text-slate-400 mb-1">Watch Party</label>
           <select
             value={form.watchContextPersonId}
-            onChange={(e) => set("watchContextPersonId", e.target.value)}
+            onChange={(e) => { set("watchContextPersonId", e.target.value); save({ watchContextPersonId: e.target.value }); }}
             className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
           >
-            <option value="">— None —</option>
+            <option value="">Personal Enjoyment</option>
+            {people.length > 0 && <option disabled>────────────</option>}
             {people.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -303,17 +331,65 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
         </div>
 
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Recommended By</label>
-          <select
-            value={form.recommenderId}
-            onChange={(e) => set("recommenderId", e.target.value)}
-            className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
-          >
-            <option value="">— None —</option>
-            {people.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
+          <label className="block text-xs text-slate-400 mb-1">How did you find this?</label>
+          <div className="flex flex-wrap gap-1 mb-2">
+            {([
+              { value: "", label: "—" },
+              { value: "PERSONAL", label: "Personal" },
+              { value: "PLATFORM", label: "Platform" },
+              { value: "OTHER", label: "Other" },
+              { value: "UNKNOWN", label: "Don't remember" },
+            ] as const).map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => { const updates = setDiscoveryType(value); save(updates); }}
+                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                  form.discoveryType === value
+                    ? "bg-indigo-600 text-white"
+                    : "bg-slate-800 text-slate-400 hover:text-white border border-slate-700"
+                }`}
+              >
+                {label}
+              </button>
             ))}
-          </select>
+          </div>
+          {form.discoveryType === "PERSONAL" && (
+            <select
+              value={form.recommenderId}
+              onChange={(e) => { set("recommenderId", e.target.value); save({ recommenderId: e.target.value }); }}
+              className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+            >
+              <option value="">— Select person —</option>
+              {people.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          )}
+          {form.discoveryType === "PLATFORM" && (
+            <>
+              <input
+                list="discovery-source-suggestions"
+                value={form.discoverySource}
+                onChange={(e) => set("discoverySource", e.target.value)}
+                onBlur={() => save()}
+                placeholder="e.g. Netflix, TikTok..."
+                className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+              />
+              <datalist id="discovery-source-suggestions">
+                {sourceSuggestions.map((s) => <option key={s} value={s} />)}
+              </datalist>
+            </>
+          )}
+          {form.discoveryType === "OTHER" && (
+            <input
+              value={form.discoverySource}
+              onChange={(e) => set("discoverySource", e.target.value)}
+              onBlur={() => save()}
+              placeholder="Describe..."
+              className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+            />
+          )}
         </div>
 
         {/* Row 4: Start Date | Completed Date */}
@@ -323,6 +399,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
             type="date"
             value={form.startedAt}
             onChange={(e) => set("startedAt", e.target.value)}
+            onBlur={() => save()}
             className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
           />
         </div>
@@ -333,6 +410,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
             type="date"
             value={isCompleted ? form.completedAt : ""}
             onChange={(e) => set("completedAt", e.target.value)}
+            onBlur={() => save()}
             disabled={!isCompleted}
             className={`w-full border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none ${
               isCompleted
@@ -348,12 +426,11 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
         <textarea
           value={form.notes}
           onChange={(e) => set("notes", e.target.value)}
+          onBlur={() => save()}
           rows={4}
           className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 resize-none"
         />
       </div>
-
-      {msg && <p className="text-sm text-green-400">{msg}</p>}
 
       {anime.source === "MANUAL" && (
         <div>
@@ -362,6 +439,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
             type="url"
             value={externalUrl}
             onChange={(e) => setExternalUrl(e.target.value)}
+            onBlur={(e) => save({}, e.target.value)}
             placeholder="https://www.themoviedb.org/tv/..."
             className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
           />
@@ -385,7 +463,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
               </button>
             </div>
           ))}
-          {availableFranchises.length > 0 && (
+          {availableFranchises.length > 0 && anime.franchiseEntries.length === 0 && (
             addingFranchise ? (
               <div className="flex gap-2 items-center">
                 <select
@@ -423,14 +501,9 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
         </div>
       )}
 
-      <div className="flex gap-3 flex-wrap">
-        <button
-          onClick={save}
-          disabled={saving}
-          className="px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-md transition-colors disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
+      <div className="flex gap-3 flex-wrap items-center">
+        {saveStatus === "saving" && <span className="text-xs text-slate-500">Saving…</span>}
+        {saveStatus === "saved" && <span className="text-xs text-green-500">Saved</span>}
 
         <button
           onClick={deleteAnime}

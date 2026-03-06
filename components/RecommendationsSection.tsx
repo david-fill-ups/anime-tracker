@@ -86,7 +86,7 @@ function RecommendationCard({
 
   return (
     <div className={`group bg-slate-900 border border-slate-800 hover:border-slate-600 rounded-xl overflow-hidden transition-all ${loading ? "opacity-60 pointer-events-none" : ""}`}>
-      <div className="relative aspect-[2/3] bg-slate-800">
+      <Link href={`/anime/${anime.id}`} className="relative aspect-[2/3] bg-slate-800 block">
         {anime.coverImageUrl ? (
           <Image
             src={anime.coverImageUrl}
@@ -106,7 +106,7 @@ function RecommendationCard({
             ★ {(anime.meanScore / 10).toFixed(1)}
           </div>
         )}
-      </div>
+      </Link>
 
       <div className="p-3 space-y-2">
         <Link href={`/anime/${anime.id}`} className="block">

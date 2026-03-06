@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import StatusBadge from "./StatusBadge";
+import { useSpotlight } from "./SpotlightContext";
 import type { Anime, UserEntry, WatchStatus } from "@/app/generated/prisma";
 
 type AnimeWithEntry = Anime & {
@@ -18,6 +19,19 @@ export default function AnimeCard({ anime, onUpdate }: {
 }) {
   const entry = anime.userEntry;
   const [loading, setLoading] = useState(false);
+  const { setSpotlight } = useSpotlight();
+
+  const title = anime.titleEnglish || anime.titleRomaji;
+
+  function handleCardClick() {
+    if (anime.coverImageUrl) {
+      setSpotlight({
+        coverImageUrl: anime.coverImageUrl,
+        title,
+        score: entry?.score ?? null,
+      });
+    }
+  }
 
   const mainStudio = anime.animeStudios.find((s) => s.isMainStudio)?.studio.name;
   const franchise = anime.franchiseEntries[0]?.franchise.name;
@@ -47,12 +61,10 @@ export default function AnimeCard({ anime, onUpdate }: {
     ? `${entry.currentEpisode}${anime.totalEpisodes ? ` / ${anime.totalEpisodes}` : ""}`
     : null;
 
-  const title = anime.titleEnglish || anime.titleRomaji;
-
   return (
     <div className={`group relative bg-slate-900 rounded-xl overflow-hidden border border-slate-800 hover:border-slate-600 transition-all ${loading ? "opacity-60" : ""}`}>
       {/* Cover image */}
-      <Link href={`/anime/${anime.id}`} className="block relative aspect-[2/3] bg-slate-800">
+      <Link href={`/anime/${anime.id}`} onClick={handleCardClick} className="block relative aspect-[2/3] bg-slate-800">
         {anime.coverImageUrl ? (
           <Image
             src={anime.coverImageUrl}
@@ -83,7 +95,7 @@ export default function AnimeCard({ anime, onUpdate }: {
 
       {/* Content */}
       <div className="p-3 space-y-2">
-        <Link href={`/anime/${anime.id}`} className="block">
+        <Link href={`/anime/${anime.id}`} onClick={handleCardClick} className="block">
           <h3 className="text-sm font-semibold text-white leading-tight line-clamp-2 hover:text-indigo-300 transition-colors">
             {title}
           </h3>

@@ -1,7 +1,10 @@
-import { signIn } from "@/auth";
+import { auth, signIn } from "@/auth";
 import AboutModal from "@/components/AboutModal";
+import { redirect } from "next/navigation";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await auth();
+  if (session) redirect("/library");
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
       <div className="text-center space-y-6">

@@ -1495,6 +1495,8 @@ export const UserEntryScalarFieldEnum = {
   notes: 'notes',
   watchContextPersonId: 'watchContextPersonId',
   recommenderId: 'recommenderId',
+  discoveryType: 'discoveryType',
+  discoverySource: 'discoverySource',
   startedAt: 'startedAt',
   completedAt: 'completedAt',
   verified: 'verified',
@@ -1707,6 +1709,20 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DiscoveryType'
+ */
+export type EnumDiscoveryTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DiscoveryType'>
+    
+
+
+/**
+ * Reference to a field of type 'DiscoveryType[]'
+ */
+export type ListEnumDiscoveryTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DiscoveryType[]'>
     
 
 /**

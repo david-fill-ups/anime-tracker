@@ -4,20 +4,21 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import NavLinks from "./NavLinks";
+import { useSpotlight } from "./SpotlightContext";
 import { signOutAction } from "@/app/actions/auth";
 import type { Session } from "next-auth";
 
-type RecentAnime = { coverImageUrl: string; title: string; score: number | null };
-type Props = { user: Session["user"]; initial: RecentAnime | null };
-
-export default function SidebarShell({ user, initial }: Props) {
-  const [anime, setAnime] = useState(initial);
+export default function SidebarShell({ user }: { user: Session["user"] }) {
+  const { spotlight: anime, setSpotlight } = useSpotlight();
   const [shuffling, setShuffling] = useState(false);
 
   async function shuffle() {
     setShuffling(true);
     const res = await fetch("/api/sidebar-feature");
-    if (res.ok) setAnime((await res.json()).anime ?? null);
+    if (res.ok) {
+      const data = (await res.json()).anime;
+      if (data) setSpotlight(data);
+    }
     setShuffling(false);
   }
 
@@ -34,9 +35,9 @@ export default function SidebarShell({ user, initial }: Props) {
               backgroundImage: `url(${anime.coverImageUrl})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
-              filter: "blur(8px)",
+              filter: "blur(0px)",
               transform: "scale(1.08)",
-              opacity: 0.4,
+              opacity: 0.3,
             }}
           />
           <div className="absolute inset-0 bg-slate-950/70 pointer-events-none" />
@@ -85,7 +86,7 @@ export default function SidebarShell({ user, initial }: Props) {
                 className="w-8 h-12 object-cover rounded shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Last finished</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Spotlight</p>
                 <p className="text-xs text-slate-200 font-medium truncate leading-tight">{anime.title}</p>
                 {anime.score !== null && (
                   <p className="text-[10px] text-yellow-400 mt-0.5">★ {anime.score}</p>

@@ -69,6 +69,13 @@ enum StreamingService {
   HIDIVE
 }
 
+enum DiscoveryType {
+  PERSONAL
+  PLATFORM
+  OTHER
+  UNKNOWN
+}
+
 // ── Auth.js required models ──────────────────────────────────────────────────
 
 model User {
@@ -238,6 +245,8 @@ model UserEntry {
   watchContextPersonId Int?
   recommender          Person?      @relation("Recommender", fields: [recommenderId], references: [id])
   recommenderId        Int?
+  discoveryType        DiscoveryType?
+  discoverySource      String?
   startedAt      DateTime?
   completedAt    DateTime?
   verified       Boolean      @default(false) // TODO[TEMP]: remove after data review

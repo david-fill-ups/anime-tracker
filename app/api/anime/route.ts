@@ -66,6 +66,8 @@ export async function POST(req: NextRequest) {
         watchStatus: body.watchStatus ?? "PLAN_TO_WATCH",
         watchContextPersonId: body.watchContextPersonId ?? null,
         recommenderId: body.recommenderId ?? null,
+        discoveryType: body.discoveryType ?? null,
+        discoverySource: body.discoverySource ?? null,
       },
     });
 
@@ -102,6 +104,8 @@ export async function POST(req: NextRequest) {
       watchStatus: body.watchStatus ?? "PLAN_TO_WATCH",
       watchContextPersonId: body.watchContextPersonId ?? null,
       recommenderId: body.recommenderId ?? null,
+      discoveryType: body.discoveryType ?? null,
+      discoverySource: body.discoverySource ?? null,
     },
   });
 

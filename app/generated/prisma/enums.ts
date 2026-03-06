@@ -93,3 +93,13 @@ export const StreamingService = {
 } as const
 
 export type StreamingService = (typeof StreamingService)[keyof typeof StreamingService]
+
+
+export const DiscoveryType = {
+  PERSONAL: 'PERSONAL',
+  PLATFORM: 'PLATFORM',
+  OTHER: 'OTHER',
+  UNKNOWN: 'UNKNOWN'
+} as const
+
+export type DiscoveryType = (typeof DiscoveryType)[keyof typeof DiscoveryType]

@@ -27,7 +27,11 @@ export default async function FranchiseDetailPage({
       },
     }),
     db.anime.findMany({
-      where: { userEntries: { some: { userId } }, mergedIntoId: null },
+      where: {
+        userEntries: { some: { userId } },
+        mergedIntoId: null,
+        franchiseEntries: { none: { franchise: { userId } } },
+      },
       orderBy: { titleRomaji: "asc" },
     }),
   ]);

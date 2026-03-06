@@ -234,6 +234,8 @@ export const UserEntryScalarFieldEnum = {
   notes: 'notes',
   watchContextPersonId: 'watchContextPersonId',
   recommenderId: 'recommenderId',
+  discoveryType: 'discoveryType',
+  discoverySource: 'discoverySource',
   startedAt: 'startedAt',
   completedAt: 'completedAt',
   verified: 'verified',

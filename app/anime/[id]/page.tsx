@@ -22,6 +22,8 @@ import AnimeMetaEdit from "@/components/AnimeMetaEdit";
 import SeasonsMerge from "@/components/SeasonsMerge";
 import { effectiveTotalEpisodes, effectiveAiringStatus, MERGED_ANIME_SELECT } from "@/lib/anime-utils";
 import type { AiringStatus } from "@/app/generated/prisma";
+import { Suspense } from "react";
+import RelatedAnime from "@/components/RelatedAnime";
 
 export default async function AnimeDetailPage({
   params,
@@ -175,6 +177,12 @@ export default async function AnimeDetailPage({
       )}
 
       <SeasonsMerge animeId={anime.id} mergedAnimes={anime.mergedAnimes} />
+
+      {anime.anilistId && (
+        <Suspense fallback={null}>
+          <RelatedAnime anilistId={anime.anilistId} userId={userId} />
+        </Suspense>
+      )}
 
       <StreamingAutoRefresh animeId={anime.id} source={anime.source} streamingCheckedAt={anime.streamingCheckedAt} lastSyncedAt={anime.lastSyncedAt} />
       <WhereToWatch animeId={anime.id} initialLinks={anime.streamingLinks} />

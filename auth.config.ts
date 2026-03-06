@@ -17,7 +17,7 @@ export const authConfig = {
       ) {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
       }
-      return false; // redirects to pages.signIn (/login)
+      return Response.redirect(new URL("/login", nextUrl)); // redirect without callbackUrl
     },
     jwt({ token, user }) {
       if (user?.id) token.id = user.id;

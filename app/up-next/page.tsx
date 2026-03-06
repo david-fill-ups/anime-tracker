@@ -100,11 +100,13 @@ export default async function QueuePage() {
       }
 
       seenIds.add(anime.id);
+      const isNotInterested = status === "NOT_INTERESTED";
+      if (!isNotInterested && recommendations.filter((r) => !r.isNotInterested).length >= 6) continue;
       recommendations.push({
         anime,
         franchise: { id: franchise.id, name: franchise.name },
         franchiseOrder: entry.order,
-        isNotInterested: status === "NOT_INTERESTED",
+        isNotInterested,
       });
     }
   }
@@ -112,7 +114,7 @@ export default async function QueuePage() {
   return (
     <div className="space-y-10">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Queue</h2>
+        <h2 className="text-2xl font-bold text-white">Up Next</h2>
         <Link
           href="/library/add"
           className="text-sm text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 px-3 py-1.5 rounded-md transition-colors"

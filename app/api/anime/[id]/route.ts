@@ -44,7 +44,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     // Split updates between Anime and UserEntry
     // TODO[TEMP]: verified — remove after data review
-    const { watchStatus, currentEpisode, score, notes, watchContextPersonId, recommenderId, startedAt, completedAt, verified, ...animeFields } = parsed.data;
+    const { watchStatus, currentEpisode, score, notes, watchContextPersonId, recommenderId, discoveryType, discoverySource, startedAt, completedAt, verified, ...animeFields } = parsed.data;
 
     const updates: Promise<unknown>[] = [];
 
@@ -61,6 +61,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (notes !== undefined) entryData.notes = notes;
     if (watchContextPersonId !== undefined) entryData.watchContextPersonId = watchContextPersonId;
     if (recommenderId !== undefined) entryData.recommenderId = recommenderId;
+    if (discoveryType !== undefined) entryData.discoveryType = discoveryType;
+    if (discoverySource !== undefined) entryData.discoverySource = discoverySource;
     if (startedAt !== undefined) entryData.startedAt = startedAt ? new Date(startedAt) : null;
     if (completedAt !== undefined) entryData.completedAt = completedAt ? new Date(completedAt) : null;
     if (verified !== undefined) entryData.verified = verified; // TODO[TEMP]: remove after data review
