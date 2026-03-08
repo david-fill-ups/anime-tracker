@@ -39,7 +39,7 @@ export default async function PeoplePage() {
       ratedCount: rated.length,
       avgScore,
       recentRecommendations: person.entries.slice(0, 3).map((e) => {
-        const anime = e.link.linkedAnime[0]?.anime;
+        const anime = e.link?.linkedAnime[0]?.anime;
         return {
           title: anime ? (anime.titleEnglish || anime.titleRomaji) : "(unknown)",
           status: e.watchStatus,
