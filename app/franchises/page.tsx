@@ -16,7 +16,13 @@ export default async function FranchisesPage() {
         orderBy: { order: "asc" },
         include: {
           anime: {
-            include: { userEntries: { where: { userId }, take: 1 } },
+            include: {
+              linkedIn: {
+                where: { link: { userId } },
+                include: { link: { include: { userEntry: true } } },
+                take: 1,
+              },
+            },
           },
         },
       },
@@ -24,14 +30,17 @@ export default async function FranchisesPage() {
     orderBy: { name: "asc" },
   });
 
-  // Transform nested userEntries[] -> userEntry; exclude merged secondaries from display
+  // Transform: extract userEntry from link; exclude non-primary linked anime from display
   const franchises = rawFranchises.map((f) => ({
     ...f,
     entries: f.entries
-      .filter((e) => e.anime.mergedIntoId === null)
+      .filter((e) => {
+        const userLinked = e.anime.linkedIn[0];
+        return !userLinked || userLinked.order === 0;
+      })
       .map((e) => ({
         ...e,
-        anime: { ...e.anime, userEntry: e.anime.userEntries[0] ?? null },
+        anime: { ...e.anime, userEntry: e.anime.linkedIn[0]?.link.userEntry ?? null },
       })),
   }));
 

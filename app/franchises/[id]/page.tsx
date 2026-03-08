@@ -22,14 +22,23 @@ export default async function FranchiseDetailPage({
       include: {
         entries: {
           orderBy: { order: "asc" },
-          include: { anime: { include: { userEntries: { where: { userId }, take: 1 } } } },
+          include: {
+            anime: {
+              include: {
+                linkedIn: {
+                  where: { link: { userId } },
+                  include: { link: { include: { userEntry: true } } },
+                  take: 1,
+                },
+              },
+            },
+          },
         },
       },
     }),
     db.anime.findMany({
       where: {
-        userEntries: { some: { userId } },
-        mergedIntoId: null,
+        linkedIn: { some: { order: 0, link: { userId } } },
         franchiseEntries: { none: { franchise: { userId } } },
       },
       orderBy: { titleRomaji: "asc" },
@@ -38,14 +47,17 @@ export default async function FranchiseDetailPage({
 
   if (!rawFranchise) notFound();
 
-  // Transform nested userEntries[] -> userEntry; exclude merged secondaries from display
+  // Transform: extract userEntry from link; exclude non-primary linked anime from display
   const franchise = {
     ...rawFranchise,
     entries: rawFranchise.entries
-      .filter((e) => e.anime.mergedIntoId === null)
+      .filter((e) => {
+        const userLinked = e.anime.linkedIn[0];
+        return !userLinked || userLinked.order === 0;
+      })
       .map((e) => ({
         ...e,
-        anime: { ...e.anime, userEntry: e.anime.userEntries[0] ?? null },
+        anime: { ...e.anime, userEntry: e.anime.linkedIn[0]?.link.userEntry ?? null },
       })),
   };
 

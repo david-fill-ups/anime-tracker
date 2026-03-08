@@ -14,6 +14,38 @@ type Props = {
   allAnime: Anime[];
 };
 
+function AddToLibraryButton({ animeId }: { animeId: number }) {
+  const router = useRouter();
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
+
+  async function handleAdd(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setState("loading");
+    const res = await fetch(`/api/anime/${animeId}/add-to-library`, { method: "POST" });
+    if (res.ok) {
+      setState("done");
+      router.refresh();
+    } else {
+      setState("error");
+    }
+  }
+
+  if (state === "done") return <span className="text-xs text-emerald-400 flex-shrink-0 w-6 text-center">✓</span>;
+  if (state === "error") return <span className="text-xs text-red-400 flex-shrink-0 w-6 text-center" title="Failed to add">!</span>;
+
+  return (
+    <button
+      onClick={handleAdd}
+      disabled={state === "loading"}
+      title="Add to library"
+      className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded text-slate-400 hover:text-white hover:bg-indigo-600 transition-colors disabled:opacity-50"
+    >
+      {state === "loading" ? <span className="text-xs">…</span> : <span className="text-base leading-none">+</span>}
+    </button>
+  );
+}
+
 export default function FranchiseDetail({ franchise, allAnime }: Props) {
   const router = useRouter();
   const [addingEntry, setAddingEntry] = useState(false);
@@ -25,7 +57,6 @@ export default function FranchiseDetail({ franchise, allAnime }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [name, setName] = useState(franchise.name);
   const [description, setDescription] = useState(franchise.description ?? "");
-  const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -73,15 +104,14 @@ export default function FranchiseDetail({ franchise, allAnime }: Props) {
     router.refresh();
   }
 
-  async function saveMeta() {
-    if (!name.trim()) return;
-    setSaving(true);
+  async function saveMeta(nameOverride?: string, descOverride?: string) {
+    const n = (nameOverride ?? name).trim();
+    if (!n) return;
     await fetch(`/api/franchises/${franchise.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), description: description.trim() || null }),
+      body: JSON.stringify({ name: n, description: (descOverride ?? description).trim() || null }),
     });
-    setSaving(false);
     router.refresh();
   }
 
@@ -92,18 +122,23 @@ export default function FranchiseDetail({ franchise, allAnime }: Props) {
     router.push("/franchises");
   }
 
+  const trackedEntries = franchise.entries.filter((e) => e.anime.userEntry !== null);
+  const untrackedEntries = franchise.entries.filter((e) => e.anime.userEntry === null);
+
   return (
     <div className="space-y-6">
-      {/* Header — always-editable */}
+      {/* Header — auto-saves on blur */}
       <div className="space-y-2">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
+          onBlur={(e) => saveMeta(e.target.value)}
           className="w-full bg-transparent text-white text-2xl font-bold border-b border-transparent hover:border-slate-700 focus:border-indigo-500 focus:outline-none px-0 py-1 transition-colors"
         />
         <input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          onBlur={(e) => saveMeta(undefined, e.target.value)}
           placeholder="Description (optional)"
           className="w-full bg-transparent text-slate-400 text-sm border-b border-transparent hover:border-slate-700 focus:border-indigo-500 focus:outline-none px-0 py-1 transition-colors placeholder:text-slate-600"
         />
@@ -111,13 +146,6 @@ export default function FranchiseDetail({ franchise, allAnime }: Props) {
           <Link href="/franchises" className="text-sm text-slate-400 hover:text-white border border-slate-700 px-3 py-1.5 rounded-md">
             ← Back
           </Link>
-          <button
-            onClick={saveMeta}
-            disabled={saving || !name.trim()}
-            className="text-sm bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-md disabled:opacity-50"
-          >
-            {saving ? "Saving…" : "Save"}
-          </button>
           <button
             onClick={deleteFranchise}
             disabled={deleting}
@@ -128,20 +156,16 @@ export default function FranchiseDetail({ franchise, allAnime }: Props) {
         </div>
       </div>
 
-      {/* Entries list */}
+      {/* Tracked entries list */}
       <div className="space-y-2">
-        {franchise.entries.map((entry) => (
+        {trackedEntries.map((entry) => (
           <div key={entry.id} className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-lg px-4 py-3">
             <span className="text-slate-500 text-sm w-6 text-right">{entry.order}.</span>
             <Link href={`/anime/${entry.anime.id}`} className="flex-1 text-sm text-slate-200 hover:text-white font-medium truncate">
               {entry.anime.titleEnglish || entry.anime.titleRomaji}
             </Link>
             <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded">{entry.entryType}</span>
-            {entry.anime.userEntry ? (
-              <StatusBadge status={entry.anime.userEntry.watchStatus} />
-            ) : (
-              <span className="text-xs text-slate-600">Untracked</span>
-            )}
+            <StatusBadge status={entry.anime.userEntry!.watchStatus} />
             <button
               onClick={() => removeEntry(entry.id)}
               className="text-slate-600 hover:text-red-400 text-sm ml-1"
@@ -155,6 +179,34 @@ export default function FranchiseDetail({ franchise, allAnime }: Props) {
           <p className="text-slate-500 text-sm">No entries yet.</p>
         )}
       </div>
+
+      {/* Not in library section */}
+      {untrackedEntries.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-slate-300 mb-3">Not In Your Library</h3>
+          <div className="space-y-2">
+            {untrackedEntries.map((entry) => (
+              <div
+                key={entry.id}
+                className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2.5 hover:border-slate-600 transition-colors"
+              >
+                <Link href={`/anime/${entry.anime.id}`} className="flex-1 min-w-0">
+                  <p className="text-sm text-white truncate">{entry.anime.titleEnglish || entry.anime.titleRomaji}</p>
+                  <p className="text-xs text-slate-500">{entry.entryType}</p>
+                </Link>
+                <AddToLibraryButton animeId={entry.anime.id} />
+                <button
+                  onClick={() => removeEntry(entry.id)}
+                  className="text-slate-600 hover:text-red-400 text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
 
       {/* Add entry */}
       {!addingEntry ? (

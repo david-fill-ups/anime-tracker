@@ -83,7 +83,12 @@ async function tmdbFetch<T>(path: string): Promise<T | null> {
       cache: "no-store",
     });
     if (!res.ok) {
-      console.warn(`[tmdb] ${res.status} ${res.statusText} for ${url}`);
+      if (res.status === 429) {
+        const retryAfter = res.headers.get("Retry-After");
+        console.warn(`[tmdb] Rate limited (429) for ${url}. Retry-After: ${retryAfter ?? "unknown"}s`);
+      } else {
+        console.warn(`[tmdb] ${res.status} ${res.statusText} for ${url}`);
+      }
       return null;
     }
     return res.json() as Promise<T>;
@@ -241,6 +246,26 @@ async function getWatchProviders(
   }
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// Season episode details (episode names)
+// ---------------------------------------------------------------------------
+
+interface TmdbSeasonDetails {
+  episodes: Array<{
+    episode_number: number;
+    name: string;
+  }>;
+}
+
+export async function fetchSeasonEpisodes(
+  tmdbId: number,
+  seasonNumber: number
+): Promise<Array<{ number: number; name: string }>> {
+  const data = await tmdbFetch<TmdbSeasonDetails>(`/tv/${tmdbId}/season/${seasonNumber}`);
+  if (!data) return [];
+  return data.episodes.map((ep) => ({ number: ep.episode_number, name: ep.name }));
 }
 
 // ---------------------------------------------------------------------------

@@ -5,11 +5,13 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import LibraryFilters from "@/components/LibraryFilters";
 import AnimeGrid from "@/components/AnimeGrid";
+import LibraryUrlSaver from "@/components/LibraryUrlSaver";
 import type { WatchStatus, DisplayFormat, AiringStatus } from "@/app/generated/prisma";
-import { effectiveTotalEpisodes, effectiveAiringStatus, MERGED_ANIME_SELECT } from "@/lib/anime-utils";
+import { effectiveTotalEpisodesFromLink, effectiveAiringStatusFromLink } from "@/lib/anime-utils";
+import LibraryRefreshFooter from "@/components/LibraryRefreshFooter";
 
 // Statuses that belong to the Library (watched / watching)
-const LIBRARY_STATUSES: WatchStatus[] = ["WATCHING", "COMPLETED", "ON_HOLD", "DROPPED"];
+const LIBRARY_STATUSES: WatchStatus[] = ["WATCHING", "COMPLETED", "DROPPED"];
 
 export default async function LibraryPage({
   searchParams,
@@ -24,7 +26,7 @@ export default async function LibraryPage({
   const { status, search, franchise, format, context, sort = "updatedAt", genre, studio, verified, minScore, maxScore } = params; // TODO[TEMP]: verified
 
   // Build the userEntry filter (always scoped to this user)
-  const userEntryFilter: Record<string, unknown> = { userId };
+  const userEntryFilter: Record<string, unknown> = {};
 
   if (status && LIBRARY_STATUSES.includes(status as WatchStatus)) {
     userEntryFilter.watchStatus = status as WatchStatus;
@@ -50,10 +52,14 @@ export default async function LibraryPage({
     userEntryFilter.verified = verified === "true";
   }
 
-  // Build anime filters
+  // Filter to "primary" anime (order=0 in their Link) owned by this user
   const where: Record<string, unknown> = {
-    userEntries: { some: userEntryFilter },
-    mergedIntoId: null,
+    linkedIn: {
+      some: {
+        order: 0,
+        link: { userId, userEntry: { is: userEntryFilter } },
+      },
+    },
   };
 
   // Collect AND conditions so title-search OR and genre OR don't overwrite each other
@@ -62,8 +68,8 @@ export default async function LibraryPage({
   if (search) {
     andConditions.push({
       OR: [
-        { titleEnglish: { contains: search } },
-        { titleRomaji: { contains: search } },
+        { titleEnglish: { contains: search, mode: "insensitive" } },
+        { titleRomaji: { contains: search, mode: "insensitive" } },
       ],
     });
   }
@@ -106,17 +112,27 @@ export default async function LibraryPage({
   const orderBy = buildOrderBy(sort);
 
   const include = {
-    userEntries: {
-      where: { userId },
-      include: { recommender: true, watchContextPerson: true },
+    // Include Link + all linkedAnime for episode/airing aggregation + userEntry
+    linkedIn: {
+      where: { order: 0, link: { userId } },
+      include: {
+        link: {
+          include: {
+            linkedAnime: {
+              include: { anime: { select: { totalEpisodes: true, airingStatus: true } } },
+              orderBy: { order: "asc" as const },
+            },
+            userEntry: { include: { recommender: true, watchContextPerson: true } },
+          },
+        },
+      },
       take: 1,
     },
     franchiseEntries: { include: { franchise: true } },
     animeStudios: { include: { studio: true } },
-    mergedAnimes: { select: MERGED_ANIME_SELECT },
   };
 
-  const [rawAnimes, franchises, people, rawCounts] = await Promise.all([
+  const [rawAnimes, franchises, people, rawCounts, mostRecentSync] = await Promise.all([
     db.anime.findMany({ where, include, orderBy }),
     db.franchise.findMany({ where: { userId }, orderBy: { name: "asc" } }),
     db.person.findMany({ where: { userId }, orderBy: { name: "asc" } }),
@@ -125,18 +141,35 @@ export default async function LibraryPage({
       _count: { watchStatus: true },
       where: { watchStatus: { in: LIBRARY_STATUSES }, userId },
     }),
+    db.anime.findFirst({
+      where: {
+        linkedIn: {
+          some: {
+            order: 0,
+            link: { userId, userEntry: { is: { watchStatus: { in: LIBRARY_STATUSES } } } },
+          },
+        },
+        lastSyncedAt: { not: null },
+      },
+      orderBy: { lastSyncedAt: "desc" },
+      select: { lastSyncedAt: true },
+    }),
   ]);
 
-  // Transform userEntries[] -> userEntry, compute effective totals for merged seasons,
-  // then sort client-side for user-entry fields
-  // (Prisma 7.4 doesn't support _max aggregate ordering on one-to-many relations)
+  // Transform: extract userEntry and compute effective totals from Link's linked anime
   const animes = rawAnimes
-    .map((a) => ({
-      ...a,
-      userEntry: a.userEntries[0] ?? null,
-      totalEpisodes: effectiveTotalEpisodes(a),
-      airingStatus: effectiveAiringStatus(a) as AiringStatus,
-    }))
+    .map((a) => {
+      const link = a.linkedIn[0]?.link;
+      return {
+        ...a,
+        link: link ?? null,
+        userEntry: link?.userEntry ?? null,
+        totalEpisodes: link ? effectiveTotalEpisodesFromLink(link.linkedAnime) : a.totalEpisodes,
+        airingStatus: link
+          ? (effectiveAiringStatusFromLink(link.linkedAnime) as AiringStatus)
+          : (a.airingStatus as AiringStatus),
+      };
+    })
     .sort((a, b) => {
       const ae = a.userEntry;
       const be = b.userEntry;
@@ -169,9 +202,11 @@ export default async function LibraryPage({
 
       <Suspense>
         <LibraryFilters franchises={franchises} people={people} counts={counts} />
+        <LibraryUrlSaver />
       </Suspense>
 
       <AnimeGrid animes={animes} />
+      <LibraryRefreshFooter lastSyncedAt={mostRecentSync?.lastSyncedAt?.toISOString() ?? null} />
     </div>
   );
 }

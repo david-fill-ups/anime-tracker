@@ -394,6 +394,8 @@ export const ModelName = {
   Studio: 'Studio',
   AnimeStudio: 'AnimeStudio',
   Anime: 'Anime',
+  Link: 'Link',
+  LinkedAnime: 'LinkedAnime',
   StreamingLink: 'StreamingLink',
   UserEntry: 'UserEntry'
 } as const
@@ -411,7 +413,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "session" | "verificationToken" | "person" | "franchise" | "franchiseEntry" | "studio" | "animeStudio" | "anime" | "streamingLink" | "userEntry"
+    modelProps: "user" | "account" | "session" | "verificationToken" | "person" | "franchise" | "franchiseEntry" | "studio" | "animeStudio" | "anime" | "link" | "linkedAnime" | "streamingLink" | "userEntry"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1155,6 +1157,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Link: {
+      payload: Prisma.$LinkPayload<ExtArgs>
+      fields: Prisma.LinkFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LinkFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LinkFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload>
+        }
+        findFirst: {
+          args: Prisma.LinkFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LinkFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload>
+        }
+        findMany: {
+          args: Prisma.LinkFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload>[]
+        }
+        create: {
+          args: Prisma.LinkCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload>
+        }
+        createMany: {
+          args: Prisma.LinkCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LinkCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload>[]
+        }
+        delete: {
+          args: Prisma.LinkDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload>
+        }
+        update: {
+          args: Prisma.LinkUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload>
+        }
+        deleteMany: {
+          args: Prisma.LinkDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LinkUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LinkUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload>[]
+        }
+        upsert: {
+          args: Prisma.LinkUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkPayload>
+        }
+        aggregate: {
+          args: Prisma.LinkAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLink>
+        }
+        groupBy: {
+          args: Prisma.LinkGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LinkGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LinkCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LinkCountAggregateOutputType> | number
+        }
+      }
+    }
+    LinkedAnime: {
+      payload: Prisma.$LinkedAnimePayload<ExtArgs>
+      fields: Prisma.LinkedAnimeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LinkedAnimeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LinkedAnimeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload>
+        }
+        findFirst: {
+          args: Prisma.LinkedAnimeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LinkedAnimeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload>
+        }
+        findMany: {
+          args: Prisma.LinkedAnimeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload>[]
+        }
+        create: {
+          args: Prisma.LinkedAnimeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload>
+        }
+        createMany: {
+          args: Prisma.LinkedAnimeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LinkedAnimeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload>[]
+        }
+        delete: {
+          args: Prisma.LinkedAnimeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload>
+        }
+        update: {
+          args: Prisma.LinkedAnimeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload>
+        }
+        deleteMany: {
+          args: Prisma.LinkedAnimeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LinkedAnimeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LinkedAnimeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload>[]
+        }
+        upsert: {
+          args: Prisma.LinkedAnimeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LinkedAnimePayload>
+        }
+        aggregate: {
+          args: Prisma.LinkedAnimeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLinkedAnime>
+        }
+        groupBy: {
+          args: Prisma.LinkedAnimeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LinkedAnimeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LinkedAnimeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LinkedAnimeCountAggregateOutputType> | number
+        }
+      }
+    }
     StreamingLink: {
       payload: Prisma.$StreamingLinkPayload<ExtArgs>
       fields: Prisma.StreamingLinkFieldRefs
@@ -1469,10 +1619,32 @@ export const AnimeScalarFieldEnum = {
   streamingCheckedAt: 'streamingCheckedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  mergedIntoId: 'mergedIntoId'
+  mergedIntoId: 'mergedIntoId',
+  mergeOrder: 'mergeOrder'
 } as const
 
 export type AnimeScalarFieldEnum = (typeof AnimeScalarFieldEnum)[keyof typeof AnimeScalarFieldEnum]
+
+
+export const LinkScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LinkScalarFieldEnum = (typeof LinkScalarFieldEnum)[keyof typeof LinkScalarFieldEnum]
+
+
+export const LinkedAnimeScalarFieldEnum = {
+  id: 'id',
+  linkId: 'linkId',
+  animeId: 'animeId',
+  order: 'order'
+} as const
+
+export type LinkedAnimeScalarFieldEnum = (typeof LinkedAnimeScalarFieldEnum)[keyof typeof LinkedAnimeScalarFieldEnum]
 
 
 export const StreamingLinkScalarFieldEnum = {
@@ -1488,6 +1660,7 @@ export type StreamingLinkScalarFieldEnum = (typeof StreamingLinkScalarFieldEnum)
 export const UserEntryScalarFieldEnum = {
   id: 'id',
   animeId: 'animeId',
+  linkId: 'linkId',
   userId: 'userId',
   watchStatus: 'watchStatus',
   currentEpisode: 'currentEpisode',
@@ -1830,6 +2003,8 @@ export type GlobalOmitConfig = {
   studio?: Prisma.StudioOmit
   animeStudio?: Prisma.AnimeStudioOmit
   anime?: Prisma.AnimeOmit
+  link?: Prisma.LinkOmit
+  linkedAnime?: Prisma.LinkedAnimeOmit
   streamingLink?: Prisma.StreamingLinkOmit
   userEntry?: Prisma.UserEntryOmit
 }

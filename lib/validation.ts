@@ -10,7 +10,6 @@ export const URLIdSchema = z.coerce.number().int().positive();
 export const WatchStatusSchema = z.enum([
   "WATCHING",
   "COMPLETED",
-  "ON_HOLD",
   "DROPPED",
   "PLAN_TO_WATCH",
   "RECOMMENDED",

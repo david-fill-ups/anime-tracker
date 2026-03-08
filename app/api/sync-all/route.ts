@@ -4,8 +4,15 @@ import { requireUserId } from "@/lib/auth-helpers";
 import { fetchAniListById, mapDisplayFormat, mapSourceMaterial } from "@/lib/anilist";
 import { refreshStreamingForAnime } from "@/lib/tmdb";
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 // Per-user lock: tracks user IDs that currently have a sync job running.
 const activeRefreshes = new Set<string>();
+
+// Per-user cooldown: timestamp of when the last sync *finished*.
+const lastRefreshFinished = new Map<string, number>();
+const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+const ITER_DELAY_MS = 250; // pause between each anime to avoid rate-limit bursts
 
 // Syncs global Anime metadata from AniList and refreshes streaming links.
 // Only processes anime in the current user's library.
@@ -19,32 +26,39 @@ export async function POST() {
     );
   }
 
+  const lastFinished = lastRefreshFinished.get(userId);
+  if (lastFinished) {
+    const elapsed = Date.now() - lastFinished;
+    if (elapsed < COOLDOWN_MS) {
+      const secsLeft = Math.ceil((COOLDOWN_MS - elapsed) / 1000);
+      return NextResponse.json(
+        { error: `Refresh on cooldown — try again in ${secsLeft}s.` },
+        { status: 429 }
+      );
+    }
+  }
+
   activeRefreshes.add(userId);
 
-  const userEntries = await db.userEntry.findMany({
-    where: { userId },
+  // Find all anime in user's library (primary + linked) via Link records
+  const linkedAnimeRecords = await db.linkedAnime.findMany({
+    where: { link: { userId } },
     select: { anime: { select: { id: true, anilistId: true, source: true } } },
   });
 
-  const primaryAnime = userEntries.map((e) => e.anime);
-
-  // Also sync merged seasons (they have no UserEntry but are linked to primaries)
-  const mergedExtras = await db.anime.findMany({
-    where: {
-      mergedIntoId: { in: primaryAnime.map((a) => a.id) },
-      source: "ANILIST",
-      anilistId: { not: null },
-    },
-    select: { id: true, anilistId: true, source: true },
-  });
-
-  const allAnime = [...primaryAnime, ...mergedExtras];
+  // Deduplicate in case same anime appears in multiple links
+  const seen = new Set<number>();
+  const allAnime = linkedAnimeRecords
+    .map((la) => la.anime)
+    .filter((a) => { if (seen.has(a.id)) return false; seen.add(a.id); return true; });
 
   let synced = 0;
   let errors = 0;
 
   try {
-    for (const anime of allAnime) {
+    for (let i = 0; i < allAnime.length; i++) {
+      if (i > 0) await sleep(ITER_DELAY_MS);
+      const anime = allAnime[i];
       try {
         // AniList metadata (AniList entries only)
         if (anime.source === "ANILIST" && anime.anilistId) {
@@ -90,6 +104,7 @@ export async function POST() {
     }
   } finally {
     activeRefreshes.delete(userId);
+    lastRefreshFinished.set(userId, Date.now());
   }
 
   return NextResponse.json({ synced, errors, total: allAnime.length });

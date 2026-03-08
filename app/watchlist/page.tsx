@@ -6,11 +6,11 @@ import Link from "next/link";
 import Image from "next/image";
 import CatchUpAutoRefresh from "@/components/CatchUpAutoRefresh";
 
-const STALE_MS = 6 * 60 * 60 * 1000; // 6 hours
-
 function isStale(date: Date | null | undefined): boolean {
   if (!date) return true;
-  return Date.now() - new Date(date).getTime() > STALE_MS;
+  const todayMidnightUTC = new Date();
+  todayMidnightUTC.setUTCHours(0, 0, 0, 0);
+  return new Date(date) < todayMidnightUTC;
 }
 
 function formatCountdown(date: Date | null | undefined): string {
@@ -30,36 +30,88 @@ export default async function WatchListPage() {
   if (!session?.user?.id) redirect("/login");
   const userId = session.user.id;
 
-  const entries = await db.userEntry.findMany({
+  const links = await db.link.findMany({
     where: {
       userId,
-      watchStatus: "WATCHING",
-      anime: { airingStatus: "RELEASING", mergedIntoId: null },
+      OR: [
+        { userEntry: { is: { watchStatus: "WATCHING" } } },
+        {
+          userEntry: { is: { watchStatus: "COMPLETED" } },
+          linkedAnime: { some: { anime: { airingStatus: "RELEASING" } } },
+        },
+      ],
     },
-    include: { anime: true },
+    include: {
+      userEntry: true,
+      linkedAnime: {
+        include: {
+          anime: {
+            select: {
+              id: true,
+              source: true,
+              lastSyncedAt: true,
+              totalEpisodes: true,
+              nextAiringEp: true,
+              nextAiringAt: true,
+              airingStatus: true,
+              titleEnglish: true,
+              titleRomaji: true,
+              coverImageUrl: true,
+            },
+          },
+        },
+        orderBy: { order: "asc" },
+      },
+    },
   });
 
-  const staleIds = entries
-    .filter((e) => e.anime.source === "ANILIST" && isStale(e.anime.lastSyncedAt))
-    .map((e) => e.anime.id);
+  const staleMap = new Map<number, Date | null>();
+  for (const link of links) {
+    for (const la of link.linkedAnime) {
+      if (la.anime.source === "ANILIST" && isStale(la.anime.lastSyncedAt) && !staleMap.has(la.anime.id)) {
+        staleMap.set(la.anime.id, la.anime.lastSyncedAt ? new Date(la.anime.lastSyncedAt) : null);
+      }
+    }
+  }
+  // Sort: never-synced (null) first, then oldest lastSyncedAt first
+  const staleIds = [...staleMap.entries()]
+    .sort(([, a], [, b]) => {
+      if (!a && !b) return 0;
+      if (!a) return -1;
+      if (!b) return 1;
+      return a.getTime() - b.getTime();
+    })
+    .map(([id]) => id);
 
-  const items = entries.map((e) => {
-    const anime = e.anime;
-    const nextEp = anime.nextAiringEp;
-    const nextAt = anime.nextAiringAt;
+  const items = links.map((link) => {
+    const entry = link.userEntry!;
+    const primaryAnime = link.linkedAnime[0]?.anime;
+    const allShows = link.linkedAnime.map((la) => la.anime);
 
+    // Calculate total episodes aired across all linked anime (in order)
     let episodesAired: number | null = null;
-    if (nextEp != null) {
-      const isPast = nextAt ? new Date(nextAt).getTime() < Date.now() : false;
-      episodesAired = isPast ? nextEp : nextEp - 1;
-    } else if (anime.totalEpisodes != null) {
-      episodesAired = anime.totalEpisodes;
+    let nextAt: Date | null = null;
+
+    for (const show of allShows) {
+      if (show.airingStatus === "FINISHED" || show.airingStatus === "CANCELLED") {
+        if (show.totalEpisodes != null) episodesAired = (episodesAired ?? 0) + show.totalEpisodes;
+      } else if (show.airingStatus === "RELEASING") {
+        if (show.nextAiringEp != null) {
+          const showNextAt = show.nextAiringAt ? new Date(show.nextAiringAt) : null;
+          const isPast = showNextAt ? showNextAt.getTime() < Date.now() : false;
+          episodesAired = (episodesAired ?? 0) + (isPast ? show.nextAiringEp : show.nextAiringEp - 1);
+          if (!nextAt && showNextAt && !isPast) nextAt = showNextAt;
+        } else if (show.totalEpisodes != null) {
+          episodesAired = (episodesAired ?? 0) + show.totalEpisodes;
+        }
+      }
+      // NOT_YET_RELEASED: 0 episodes aired, skip
     }
 
-    const behind =
-      episodesAired != null ? Math.max(0, episodesAired - e.currentEpisode) : null;
+    const behind = episodesAired != null ? Math.max(0, episodesAired - entry.currentEpisode) : null;
+    const isReleasing = allShows.some((s) => s.airingStatus === "RELEASING");
 
-    return { anime, entry: e, episodesAired, behind, nextAt };
+    return { anime: primaryAnime, entry, episodesAired, behind, nextAt, isReleasing };
   });
 
   // Catch Up: behind on episodes, sorted most behind first
@@ -72,9 +124,9 @@ export default async function WatchListPage() {
       return b.behind - a.behind;
     });
 
-  // Keep Up: fully caught up, sorted by soonest next episode
+  // Keep Up: fully caught up on a currently-releasing show, sorted by soonest next episode
   const keepUpItems = items
-    .filter((i) => i.behind === 0)
+    .filter((i) => i.behind === 0 && i.isReleasing)
     .sort((a, b) => {
       if (!a.nextAt && !b.nextAt) return 0;
       if (!a.nextAt) return 1;
@@ -103,6 +155,7 @@ export default async function WatchListPage() {
         ) : (
           <div className="space-y-3">
             {catchUpItems.map(({ anime, entry, episodesAired, behind, nextAt }) => {
+              if (!anime) return null;
               const title = anime.titleEnglish || anime.titleRomaji;
               return (
                 <Link
@@ -154,6 +207,7 @@ export default async function WatchListPage() {
         ) : (
           <div className="space-y-3">
             {keepUpItems.map(({ anime, entry, episodesAired, nextAt }) => {
+              if (!anime) return null;
               const title = anime.titleEnglish || anime.titleRomaji;
               return (
                 <Link

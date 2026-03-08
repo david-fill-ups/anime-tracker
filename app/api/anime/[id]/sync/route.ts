@@ -8,10 +8,11 @@ import { URLIdSchema, wrapHandler } from "@/lib/validation";
 
 type Params = { params: Promise<{ id: string }> };
 
-export async function POST(_req: NextRequest, { params }: Params) {
+export async function POST(req: NextRequest, { params }: Params) {
   return wrapHandler(async () => {
     const userId = await requireUserId();
     const { id } = await params;
+    const anilistOnly = new URL(req.url).searchParams.get("anilistOnly") === "true";
     const idParsed = URLIdSchema.safeParse(id);
     if (!idParsed.success) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     const animeId = idParsed.data;
@@ -53,7 +54,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
     });
 
     await autoPopulateFranchise(animeId, data, userId);
-    await refreshSeasonData(animeId);
+    if (!anilistOnly) await refreshSeasonData(animeId);
 
     return NextResponse.json(updated);
   });

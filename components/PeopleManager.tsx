@@ -94,12 +94,12 @@ export default function PeopleManager({ people }: { people: PersonStats[] }) {
                   <input
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && saveName(person.id)}
+                    onKeyDown={(e) => { if (e.key === "Enter") saveName(person.id); if (e.key === "Escape") setEditingId(null); }}
+                    onBlur={() => saveName(person.id)}
                     autoFocus
                     className="flex-1 bg-slate-800 text-white border border-slate-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-indigo-500"
                   />
-                  <button onClick={() => setEditingId(null)} className="text-xs text-slate-400">Cancel</button>
-                  <button onClick={() => saveName(person.id)} className="text-xs text-indigo-400">Save</button>
+                  <button onMouseDown={(e) => e.preventDefault()} onClick={() => setEditingId(null)} className="text-xs text-slate-400">Done</button>
                 </div>
               ) : (
                 <h3 className="font-semibold text-white">{person.name}</h3>

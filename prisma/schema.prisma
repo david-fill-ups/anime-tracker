@@ -52,7 +52,6 @@ enum FranchiseEntryType {
 enum WatchStatus {
   WATCHING
   COMPLETED
-  ON_HOLD
   DROPPED
   PLAN_TO_WATCH
   RECOMMENDED
@@ -87,6 +86,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   userEntries   UserEntry[]
+  links         Link[]
   franchises    Franchise[]
   people        Person[]
   createdAt     DateTime    @default(now())
@@ -211,7 +211,9 @@ model Anime {
   createdAt          DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
+  // DEPRECATED: replaced by LinkedAnime — kept during migration, remove after
   mergedIntoId     Int?
+  mergeOrder       Int              @default(0)
   mergedInto       Anime?           @relation("AnimeMerge", fields: [mergedIntoId], references: [id])
   mergedAnimes     Anime[]          @relation("AnimeMerge")
 
@@ -219,6 +221,29 @@ model Anime {
   animeStudios     AnimeStudio[]
   userEntries      UserEntry[]
   streamingLinks   StreamingLink[]
+  linkedIn         LinkedAnime[]
+}
+
+model Link {
+  id          Int           @id @default(autoincrement())
+  name        String?
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkedAnime LinkedAnime[]
+  userEntry   UserEntry?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model LinkedAnime {
+  id      Int   @id @default(autoincrement())
+  linkId  Int
+  link    Link  @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  animeId Int
+  anime   Anime @relation(fields: [animeId], references: [id])
+  order   Int   @default(0)
+
+  @@unique([linkId, animeId])
 }
 
 model StreamingLink {
@@ -233,8 +258,11 @@ model StreamingLink {
 
 model UserEntry {
   id             Int          @id @default(autoincrement())
-  anime          Anime        @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  animeId        Int
+  // DEPRECATED: animeId kept during migration — will be removed after migrate-links script runs
+  anime          Anime?       @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  animeId        Int?
+  link           Link?        @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  linkId         Int?         @unique
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
   watchStatus    WatchStatus  @default(PLAN_TO_WATCH)

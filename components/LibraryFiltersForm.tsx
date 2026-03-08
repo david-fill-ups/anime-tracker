@@ -148,7 +148,6 @@ function TagSelect({
 const WATCH_STATUSES: { value: WatchStatus; label: string }[] = [
   { value: "WATCHING", label: "Watching" },
   { value: "COMPLETED", label: "Completed" },
-  { value: "ON_HOLD", label: "On Hold" },
   { value: "DROPPED", label: "Dropped" },
 ];
 

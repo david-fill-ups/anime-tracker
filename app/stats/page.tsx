@@ -1,11 +1,12 @@
 export const dynamic = "force-dynamic";
+import React from "react";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 // Statuses that represent genuine watch engagement (excludes wishlist/recommendations)
-const ENGAGED_STATUSES = ["WATCHING", "COMPLETED", "ON_HOLD", "DROPPED"] as const;
+const ENGAGED_STATUSES = ["WATCHING", "COMPLETED", "DROPPED"] as const;
 type EngagedStatus = typeof ENGAGED_STATUSES[number];
 
 export default async function DashboardPage() {
@@ -13,23 +14,33 @@ export default async function DashboardPage() {
   if (!session?.user?.id) redirect("/login");
   const userId = session.user.id;
 
-  const [entries, engagedAnimes] = await Promise.all([
-    db.userEntry.findMany({
-      where: { userId },
+  const [links, engagedAnimes] = await Promise.all([
+    db.link.findMany({
+      where: { userId, userEntry: { isNot: null } },
       include: {
-        anime: {
-          include: { animeStudios: { include: { studio: true }, where: { isMainStudio: true } } },
+        userEntry: true,
+        linkedAnime: {
+          where: { order: 0 },
+          include: {
+            anime: {
+              include: { animeStudios: { include: { studio: true }, where: { isMainStudio: true } } },
+            },
+          },
+          take: 1,
         },
       },
     }),
-    // Only anime the user has actually engaged with for genre/format/studio stats
+    // Only primary anime the user has actually engaged with for genre/format/studio stats
     db.anime.findMany({
       where: {
-        userEntries: { some: { userId, watchStatus: { in: ENGAGED_STATUSES as unknown as EngagedStatus[] } } },
-        mergedIntoId: null,
+        linkedIn: { some: { order: 0, link: { userId, userEntry: { is: { watchStatus: { in: ENGAGED_STATUSES as unknown as EngagedStatus[] } } } } } },
       },
     }),
   ]);
+
+  const entries = links
+    .filter((l) => l.userEntry && l.linkedAnime[0]?.anime)
+    .map((l) => ({ ...l.userEntry!, anime: l.linkedAnime[0].anime }));
 
   // Status breakdown (all statuses, for the library breakdown bar chart)
   const statusCounts: Record<string, number> = {};
@@ -89,7 +100,6 @@ export default async function DashboardPage() {
   const STATUS_LABELS: Record<string, string> = {
     WATCHING: "Watching",
     COMPLETED: "Completed",
-    ON_HOLD: "On Hold",
     DROPPED: "Dropped",
     PLAN_TO_WATCH: "Plan to Watch",
     RECOMMENDED: "Recommended",
@@ -98,7 +108,6 @@ export default async function DashboardPage() {
   const STATUS_COLORS: Record<string, string> = {
     WATCHING: "bg-blue-500",
     COMPLETED: "bg-green-500",
-    ON_HOLD: "bg-yellow-500",
     DROPPED: "bg-red-500",
     PLAN_TO_WATCH: "bg-purple-500",
     RECOMMENDED: "bg-orange-500",
@@ -115,7 +124,12 @@ export default async function DashboardPage() {
         <StatCard label="Total Watched" value={String(engagedAnimes.length)} href="/library" />
         <StatCard label="Completed" value={String(statusCounts["COMPLETED"] ?? 0)} href="/library?status=COMPLETED" />
         <StatCard label="Hours Watched" value={String(totalHours)} href="/library?status=COMPLETED" />
-        <StatCard label="Avg Score" value={avgScore != null ? `${avgScore}/10` : "—"} href="/library?sort=score" />
+        <StatCard
+          label="Avg Score"
+          value={avgScore != null ? `${avgScore} / 5` : "—"}
+          href="/library?sort=score"
+          subtitle={avgScore != null ? <Stars score={avgScore} /> : undefined}
+        />
       </div>
 
       {/* Status breakdown */}
@@ -208,13 +222,46 @@ export default async function DashboardPage() {
   );
 }
 
-function StatCard({ label, value, href }: { label: string; value: string; href: string }) {
+function Stars({ score }: { score: number }) {
+  return (
+    <div className="flex justify-center gap-0.5 mt-1">
+      {[1, 2, 3, 4, 5].map((i) => {
+        const filled = score >= i;
+        const half = !filled && score >= i - 0.5;
+        return (
+          <svg key={i} viewBox="0 0 24 24" className="w-3.5 h-3.5">
+            <path
+              d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              fill="#475569"
+            />
+            {filled && (
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                fill="#facc15"
+              />
+            )}
+            {half && (
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                fill="#facc15"
+                style={{ clipPath: "inset(0 50% 0 0)" }}
+              />
+            )}
+          </svg>
+        );
+      })}
+    </div>
+  );
+}
+
+function StatCard({ label, value, href, subtitle }: { label: string; value: string; href: string; subtitle?: React.ReactNode }) {
   return (
     <Link
       href={href}
       className="bg-slate-900 border border-slate-800 rounded-xl p-5 text-center hover:border-slate-600 hover:bg-slate-800/50 transition-colors block"
     >
       <p className="text-2xl font-bold text-white">{value}</p>
+      {subtitle}
       <p className="text-xs text-slate-400 mt-1">{label}</p>
     </Link>
   );

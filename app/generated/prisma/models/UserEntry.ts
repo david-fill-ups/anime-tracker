@@ -29,6 +29,7 @@ export type AggregateUserEntry = {
 export type UserEntryAvgAggregateOutputType = {
   id: number | null
   animeId: number | null
+  linkId: number | null
   currentEpisode: number | null
   score: number | null
   watchContextPersonId: number | null
@@ -38,6 +39,7 @@ export type UserEntryAvgAggregateOutputType = {
 export type UserEntrySumAggregateOutputType = {
   id: number | null
   animeId: number | null
+  linkId: number | null
   currentEpisode: number | null
   score: number | null
   watchContextPersonId: number | null
@@ -47,6 +49,7 @@ export type UserEntrySumAggregateOutputType = {
 export type UserEntryMinAggregateOutputType = {
   id: number | null
   animeId: number | null
+  linkId: number | null
   userId: string | null
   watchStatus: $Enums.WatchStatus | null
   currentEpisode: number | null
@@ -66,6 +69,7 @@ export type UserEntryMinAggregateOutputType = {
 export type UserEntryMaxAggregateOutputType = {
   id: number | null
   animeId: number | null
+  linkId: number | null
   userId: string | null
   watchStatus: $Enums.WatchStatus | null
   currentEpisode: number | null
@@ -85,6 +89,7 @@ export type UserEntryMaxAggregateOutputType = {
 export type UserEntryCountAggregateOutputType = {
   id: number
   animeId: number
+  linkId: number
   userId: number
   watchStatus: number
   currentEpisode: number
@@ -106,6 +111,7 @@ export type UserEntryCountAggregateOutputType = {
 export type UserEntryAvgAggregateInputType = {
   id?: true
   animeId?: true
+  linkId?: true
   currentEpisode?: true
   score?: true
   watchContextPersonId?: true
@@ -115,6 +121,7 @@ export type UserEntryAvgAggregateInputType = {
 export type UserEntrySumAggregateInputType = {
   id?: true
   animeId?: true
+  linkId?: true
   currentEpisode?: true
   score?: true
   watchContextPersonId?: true
@@ -124,6 +131,7 @@ export type UserEntrySumAggregateInputType = {
 export type UserEntryMinAggregateInputType = {
   id?: true
   animeId?: true
+  linkId?: true
   userId?: true
   watchStatus?: true
   currentEpisode?: true
@@ -143,6 +151,7 @@ export type UserEntryMinAggregateInputType = {
 export type UserEntryMaxAggregateInputType = {
   id?: true
   animeId?: true
+  linkId?: true
   userId?: true
   watchStatus?: true
   currentEpisode?: true
@@ -162,6 +171,7 @@ export type UserEntryMaxAggregateInputType = {
 export type UserEntryCountAggregateInputType = {
   id?: true
   animeId?: true
+  linkId?: true
   userId?: true
   watchStatus?: true
   currentEpisode?: true
@@ -267,7 +277,8 @@ export type UserEntryGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 
 export type UserEntryGroupByOutputType = {
   id: number
-  animeId: number
+  animeId: number | null
+  linkId: number | null
   userId: string
   watchStatus: $Enums.WatchStatus
   currentEpisode: number
@@ -309,7 +320,8 @@ export type UserEntryWhereInput = {
   OR?: Prisma.UserEntryWhereInput[]
   NOT?: Prisma.UserEntryWhereInput | Prisma.UserEntryWhereInput[]
   id?: Prisma.IntFilter<"UserEntry"> | number
-  animeId?: Prisma.IntFilter<"UserEntry"> | number
+  animeId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
+  linkId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
   userId?: Prisma.StringFilter<"UserEntry"> | string
   watchStatus?: Prisma.EnumWatchStatusFilter<"UserEntry"> | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFilter<"UserEntry"> | number
@@ -324,7 +336,8 @@ export type UserEntryWhereInput = {
   verified?: Prisma.BoolFilter<"UserEntry"> | boolean
   createdAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
-  anime?: Prisma.XOR<Prisma.AnimeScalarRelationFilter, Prisma.AnimeWhereInput>
+  anime?: Prisma.XOR<Prisma.AnimeNullableScalarRelationFilter, Prisma.AnimeWhereInput> | null
+  link?: Prisma.XOR<Prisma.LinkNullableScalarRelationFilter, Prisma.LinkWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   watchContextPerson?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
   recommender?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
@@ -332,7 +345,8 @@ export type UserEntryWhereInput = {
 
 export type UserEntryOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  animeId?: Prisma.SortOrder
+  animeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  linkId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -348,6 +362,7 @@ export type UserEntryOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   anime?: Prisma.AnimeOrderByWithRelationInput
+  link?: Prisma.LinkOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
   watchContextPerson?: Prisma.PersonOrderByWithRelationInput
   recommender?: Prisma.PersonOrderByWithRelationInput
@@ -355,11 +370,12 @@ export type UserEntryOrderByWithRelationInput = {
 
 export type UserEntryWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  linkId?: number
   animeId_userId?: Prisma.UserEntryAnimeIdUserIdCompoundUniqueInput
   AND?: Prisma.UserEntryWhereInput | Prisma.UserEntryWhereInput[]
   OR?: Prisma.UserEntryWhereInput[]
   NOT?: Prisma.UserEntryWhereInput | Prisma.UserEntryWhereInput[]
-  animeId?: Prisma.IntFilter<"UserEntry"> | number
+  animeId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
   userId?: Prisma.StringFilter<"UserEntry"> | string
   watchStatus?: Prisma.EnumWatchStatusFilter<"UserEntry"> | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFilter<"UserEntry"> | number
@@ -374,15 +390,17 @@ export type UserEntryWhereUniqueInput = Prisma.AtLeast<{
   verified?: Prisma.BoolFilter<"UserEntry"> | boolean
   createdAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
-  anime?: Prisma.XOR<Prisma.AnimeScalarRelationFilter, Prisma.AnimeWhereInput>
+  anime?: Prisma.XOR<Prisma.AnimeNullableScalarRelationFilter, Prisma.AnimeWhereInput> | null
+  link?: Prisma.XOR<Prisma.LinkNullableScalarRelationFilter, Prisma.LinkWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   watchContextPerson?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
   recommender?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
-}, "id" | "animeId_userId">
+}, "id" | "linkId" | "animeId_userId">
 
 export type UserEntryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  animeId?: Prisma.SortOrder
+  animeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  linkId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -409,7 +427,8 @@ export type UserEntryScalarWhereWithAggregatesInput = {
   OR?: Prisma.UserEntryScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserEntryScalarWhereWithAggregatesInput | Prisma.UserEntryScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"UserEntry"> | number
-  animeId?: Prisma.IntWithAggregatesFilter<"UserEntry"> | number
+  animeId?: Prisma.IntNullableWithAggregatesFilter<"UserEntry"> | number | null
+  linkId?: Prisma.IntNullableWithAggregatesFilter<"UserEntry"> | number | null
   userId?: Prisma.StringWithAggregatesFilter<"UserEntry"> | string
   watchStatus?: Prisma.EnumWatchStatusWithAggregatesFilter<"UserEntry"> | $Enums.WatchStatus
   currentEpisode?: Prisma.IntWithAggregatesFilter<"UserEntry"> | number
@@ -438,7 +457,8 @@ export type UserEntryCreateInput = {
   verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  anime: Prisma.AnimeCreateNestedOneWithoutUserEntriesInput
+  anime?: Prisma.AnimeCreateNestedOneWithoutUserEntriesInput
+  link?: Prisma.LinkCreateNestedOneWithoutUserEntryInput
   user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
   watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
   recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
@@ -446,7 +466,8 @@ export type UserEntryCreateInput = {
 
 export type UserEntryUncheckedCreateInput = {
   id?: number
-  animeId: number
+  animeId?: number | null
+  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -475,7 +496,8 @@ export type UserEntryUpdateInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  anime?: Prisma.AnimeUpdateOneRequiredWithoutUserEntriesNestedInput
+  anime?: Prisma.AnimeUpdateOneWithoutUserEntriesNestedInput
+  link?: Prisma.LinkUpdateOneWithoutUserEntryNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
   watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
   recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
@@ -483,7 +505,8 @@ export type UserEntryUpdateInput = {
 
 export type UserEntryUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  animeId?: Prisma.IntFieldUpdateOperationsInput | number
+  animeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -502,7 +525,8 @@ export type UserEntryUncheckedUpdateInput = {
 
 export type UserEntryCreateManyInput = {
   id?: number
-  animeId: number
+  animeId?: number | null
+  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -535,7 +559,8 @@ export type UserEntryUpdateManyMutationInput = {
 
 export type UserEntryUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  animeId?: Prisma.IntFieldUpdateOperationsInput | number
+  animeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -562,6 +587,11 @@ export type UserEntryOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type UserEntryNullableScalarRelationFilter = {
+  is?: Prisma.UserEntryWhereInput | null
+  isNot?: Prisma.UserEntryWhereInput | null
+}
+
 export type UserEntryAnimeIdUserIdCompoundUniqueInput = {
   animeId: number
   userId: string
@@ -570,6 +600,7 @@ export type UserEntryAnimeIdUserIdCompoundUniqueInput = {
 export type UserEntryCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   animeId?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -589,6 +620,7 @@ export type UserEntryCountOrderByAggregateInput = {
 export type UserEntryAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   animeId?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
   score?: Prisma.SortOrder
   watchContextPersonId?: Prisma.SortOrder
@@ -598,6 +630,7 @@ export type UserEntryAvgOrderByAggregateInput = {
 export type UserEntryMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   animeId?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -617,6 +650,7 @@ export type UserEntryMaxOrderByAggregateInput = {
 export type UserEntryMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   animeId?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -636,6 +670,7 @@ export type UserEntryMinOrderByAggregateInput = {
 export type UserEntrySumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   animeId?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
   score?: Prisma.SortOrder
   watchContextPersonId?: Prisma.SortOrder
@@ -810,6 +845,38 @@ export type UserEntryUncheckedUpdateManyWithoutAnimeNestedInput = {
   deleteMany?: Prisma.UserEntryScalarWhereInput | Prisma.UserEntryScalarWhereInput[]
 }
 
+export type UserEntryCreateNestedOneWithoutLinkInput = {
+  create?: Prisma.XOR<Prisma.UserEntryCreateWithoutLinkInput, Prisma.UserEntryUncheckedCreateWithoutLinkInput>
+  connectOrCreate?: Prisma.UserEntryCreateOrConnectWithoutLinkInput
+  connect?: Prisma.UserEntryWhereUniqueInput
+}
+
+export type UserEntryUncheckedCreateNestedOneWithoutLinkInput = {
+  create?: Prisma.XOR<Prisma.UserEntryCreateWithoutLinkInput, Prisma.UserEntryUncheckedCreateWithoutLinkInput>
+  connectOrCreate?: Prisma.UserEntryCreateOrConnectWithoutLinkInput
+  connect?: Prisma.UserEntryWhereUniqueInput
+}
+
+export type UserEntryUpdateOneWithoutLinkNestedInput = {
+  create?: Prisma.XOR<Prisma.UserEntryCreateWithoutLinkInput, Prisma.UserEntryUncheckedCreateWithoutLinkInput>
+  connectOrCreate?: Prisma.UserEntryCreateOrConnectWithoutLinkInput
+  upsert?: Prisma.UserEntryUpsertWithoutLinkInput
+  disconnect?: Prisma.UserEntryWhereInput | boolean
+  delete?: Prisma.UserEntryWhereInput | boolean
+  connect?: Prisma.UserEntryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserEntryUpdateToOneWithWhereWithoutLinkInput, Prisma.UserEntryUpdateWithoutLinkInput>, Prisma.UserEntryUncheckedUpdateWithoutLinkInput>
+}
+
+export type UserEntryUncheckedUpdateOneWithoutLinkNestedInput = {
+  create?: Prisma.XOR<Prisma.UserEntryCreateWithoutLinkInput, Prisma.UserEntryUncheckedCreateWithoutLinkInput>
+  connectOrCreate?: Prisma.UserEntryCreateOrConnectWithoutLinkInput
+  upsert?: Prisma.UserEntryUpsertWithoutLinkInput
+  disconnect?: Prisma.UserEntryWhereInput | boolean
+  delete?: Prisma.UserEntryWhereInput | boolean
+  connect?: Prisma.UserEntryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserEntryUpdateToOneWithWhereWithoutLinkInput, Prisma.UserEntryUpdateWithoutLinkInput>, Prisma.UserEntryUncheckedUpdateWithoutLinkInput>
+}
+
 export type EnumWatchStatusFieldUpdateOperationsInput = {
   set?: $Enums.WatchStatus
 }
@@ -838,14 +905,16 @@ export type UserEntryCreateWithoutUserInput = {
   verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  anime: Prisma.AnimeCreateNestedOneWithoutUserEntriesInput
+  anime?: Prisma.AnimeCreateNestedOneWithoutUserEntriesInput
+  link?: Prisma.LinkCreateNestedOneWithoutUserEntryInput
   watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
   recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
 }
 
 export type UserEntryUncheckedCreateWithoutUserInput = {
   id?: number
-  animeId: number
+  animeId?: number | null
+  linkId?: number | null
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
   score?: number | null
@@ -892,7 +961,8 @@ export type UserEntryScalarWhereInput = {
   OR?: Prisma.UserEntryScalarWhereInput[]
   NOT?: Prisma.UserEntryScalarWhereInput | Prisma.UserEntryScalarWhereInput[]
   id?: Prisma.IntFilter<"UserEntry"> | number
-  animeId?: Prisma.IntFilter<"UserEntry"> | number
+  animeId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
+  linkId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
   userId?: Prisma.StringFilter<"UserEntry"> | string
   watchStatus?: Prisma.EnumWatchStatusFilter<"UserEntry"> | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFilter<"UserEntry"> | number
@@ -921,14 +991,16 @@ export type UserEntryCreateWithoutRecommenderInput = {
   verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  anime: Prisma.AnimeCreateNestedOneWithoutUserEntriesInput
+  anime?: Prisma.AnimeCreateNestedOneWithoutUserEntriesInput
+  link?: Prisma.LinkCreateNestedOneWithoutUserEntryInput
   user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
   watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
 }
 
 export type UserEntryUncheckedCreateWithoutRecommenderInput = {
   id?: number
-  animeId: number
+  animeId?: number | null
+  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -966,14 +1038,16 @@ export type UserEntryCreateWithoutWatchContextPersonInput = {
   verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  anime: Prisma.AnimeCreateNestedOneWithoutUserEntriesInput
+  anime?: Prisma.AnimeCreateNestedOneWithoutUserEntriesInput
+  link?: Prisma.LinkCreateNestedOneWithoutUserEntryInput
   user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
   recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
 }
 
 export type UserEntryUncheckedCreateWithoutWatchContextPersonInput = {
   id?: number
-  animeId: number
+  animeId?: number | null
+  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -1043,6 +1117,7 @@ export type UserEntryCreateWithoutAnimeInput = {
   verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  link?: Prisma.LinkCreateNestedOneWithoutUserEntryInput
   user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
   watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
   recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
@@ -1050,6 +1125,7 @@ export type UserEntryCreateWithoutAnimeInput = {
 
 export type UserEntryUncheckedCreateWithoutAnimeInput = {
   id?: number
+  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -1092,9 +1168,100 @@ export type UserEntryUpdateManyWithWhereWithoutAnimeInput = {
   data: Prisma.XOR<Prisma.UserEntryUpdateManyMutationInput, Prisma.UserEntryUncheckedUpdateManyWithoutAnimeInput>
 }
 
+export type UserEntryCreateWithoutLinkInput = {
+  watchStatus?: $Enums.WatchStatus
+  currentEpisode?: number
+  score?: number | null
+  notes?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  discoverySource?: string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  verified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  anime?: Prisma.AnimeCreateNestedOneWithoutUserEntriesInput
+  user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
+  watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
+  recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
+}
+
+export type UserEntryUncheckedCreateWithoutLinkInput = {
+  id?: number
+  animeId?: number | null
+  userId: string
+  watchStatus?: $Enums.WatchStatus
+  currentEpisode?: number
+  score?: number | null
+  notes?: string | null
+  watchContextPersonId?: number | null
+  recommenderId?: number | null
+  discoveryType?: $Enums.DiscoveryType | null
+  discoverySource?: string | null
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  verified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UserEntryCreateOrConnectWithoutLinkInput = {
+  where: Prisma.UserEntryWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserEntryCreateWithoutLinkInput, Prisma.UserEntryUncheckedCreateWithoutLinkInput>
+}
+
+export type UserEntryUpsertWithoutLinkInput = {
+  update: Prisma.XOR<Prisma.UserEntryUpdateWithoutLinkInput, Prisma.UserEntryUncheckedUpdateWithoutLinkInput>
+  create: Prisma.XOR<Prisma.UserEntryCreateWithoutLinkInput, Prisma.UserEntryUncheckedCreateWithoutLinkInput>
+  where?: Prisma.UserEntryWhereInput
+}
+
+export type UserEntryUpdateToOneWithWhereWithoutLinkInput = {
+  where?: Prisma.UserEntryWhereInput
+  data: Prisma.XOR<Prisma.UserEntryUpdateWithoutLinkInput, Prisma.UserEntryUncheckedUpdateWithoutLinkInput>
+}
+
+export type UserEntryUpdateWithoutLinkInput = {
+  watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
+  currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
+  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  anime?: Prisma.AnimeUpdateOneWithoutUserEntriesNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
+  watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
+  recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
+}
+
+export type UserEntryUncheckedUpdateWithoutLinkInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  animeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
+  currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
+  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  watchContextPersonId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  recommenderId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type UserEntryCreateManyUserInput = {
   id?: number
-  animeId: number
+  animeId?: number | null
+  linkId?: number | null
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
   score?: number | null
@@ -1122,14 +1289,16 @@ export type UserEntryUpdateWithoutUserInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  anime?: Prisma.AnimeUpdateOneRequiredWithoutUserEntriesNestedInput
+  anime?: Prisma.AnimeUpdateOneWithoutUserEntriesNestedInput
+  link?: Prisma.LinkUpdateOneWithoutUserEntryNestedInput
   watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
   recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
 }
 
 export type UserEntryUncheckedUpdateWithoutUserInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  animeId?: Prisma.IntFieldUpdateOperationsInput | number
+  animeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1147,7 +1316,8 @@ export type UserEntryUncheckedUpdateWithoutUserInput = {
 
 export type UserEntryUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  animeId?: Prisma.IntFieldUpdateOperationsInput | number
+  animeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1165,7 +1335,8 @@ export type UserEntryUncheckedUpdateManyWithoutUserInput = {
 
 export type UserEntryCreateManyRecommenderInput = {
   id?: number
-  animeId: number
+  animeId?: number | null
+  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -1183,7 +1354,8 @@ export type UserEntryCreateManyRecommenderInput = {
 
 export type UserEntryCreateManyWatchContextPersonInput = {
   id?: number
-  animeId: number
+  animeId?: number | null
+  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -1211,14 +1383,16 @@ export type UserEntryUpdateWithoutRecommenderInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  anime?: Prisma.AnimeUpdateOneRequiredWithoutUserEntriesNestedInput
+  anime?: Prisma.AnimeUpdateOneWithoutUserEntriesNestedInput
+  link?: Prisma.LinkUpdateOneWithoutUserEntryNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
   watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
 }
 
 export type UserEntryUncheckedUpdateWithoutRecommenderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  animeId?: Prisma.IntFieldUpdateOperationsInput | number
+  animeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1236,7 +1410,8 @@ export type UserEntryUncheckedUpdateWithoutRecommenderInput = {
 
 export type UserEntryUncheckedUpdateManyWithoutRecommenderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  animeId?: Prisma.IntFieldUpdateOperationsInput | number
+  animeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1264,14 +1439,16 @@ export type UserEntryUpdateWithoutWatchContextPersonInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  anime?: Prisma.AnimeUpdateOneRequiredWithoutUserEntriesNestedInput
+  anime?: Prisma.AnimeUpdateOneWithoutUserEntriesNestedInput
+  link?: Prisma.LinkUpdateOneWithoutUserEntryNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
   recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
 }
 
 export type UserEntryUncheckedUpdateWithoutWatchContextPersonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  animeId?: Prisma.IntFieldUpdateOperationsInput | number
+  animeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1289,7 +1466,8 @@ export type UserEntryUncheckedUpdateWithoutWatchContextPersonInput = {
 
 export type UserEntryUncheckedUpdateManyWithoutWatchContextPersonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  animeId?: Prisma.IntFieldUpdateOperationsInput | number
+  animeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1307,6 +1485,7 @@ export type UserEntryUncheckedUpdateManyWithoutWatchContextPersonInput = {
 
 export type UserEntryCreateManyAnimeInput = {
   id?: number
+  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -1335,6 +1514,7 @@ export type UserEntryUpdateWithoutAnimeInput = {
   verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  link?: Prisma.LinkUpdateOneWithoutUserEntryNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
   watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
   recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
@@ -1342,6 +1522,7 @@ export type UserEntryUpdateWithoutAnimeInput = {
 
 export type UserEntryUncheckedUpdateWithoutAnimeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1360,6 +1541,7 @@ export type UserEntryUncheckedUpdateWithoutAnimeInput = {
 
 export type UserEntryUncheckedUpdateManyWithoutAnimeInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1381,6 +1563,7 @@ export type UserEntryUncheckedUpdateManyWithoutAnimeInput = {
 export type UserEntrySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   animeId?: boolean
+  linkId?: boolean
   userId?: boolean
   watchStatus?: boolean
   currentEpisode?: boolean
@@ -1395,7 +1578,8 @@ export type UserEntrySelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   verified?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  anime?: boolean | Prisma.UserEntry$animeArgs<ExtArgs>
+  link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
   recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
@@ -1404,6 +1588,7 @@ export type UserEntrySelect<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type UserEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   animeId?: boolean
+  linkId?: boolean
   userId?: boolean
   watchStatus?: boolean
   currentEpisode?: boolean
@@ -1418,7 +1603,8 @@ export type UserEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   verified?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  anime?: boolean | Prisma.UserEntry$animeArgs<ExtArgs>
+  link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
   recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
@@ -1427,6 +1613,7 @@ export type UserEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type UserEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   animeId?: boolean
+  linkId?: boolean
   userId?: boolean
   watchStatus?: boolean
   currentEpisode?: boolean
@@ -1441,7 +1628,8 @@ export type UserEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   verified?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  anime?: boolean | Prisma.UserEntry$animeArgs<ExtArgs>
+  link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
   recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
@@ -1450,6 +1638,7 @@ export type UserEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type UserEntrySelectScalar = {
   id?: boolean
   animeId?: boolean
+  linkId?: boolean
   userId?: boolean
   watchStatus?: boolean
   currentEpisode?: boolean
@@ -1466,21 +1655,24 @@ export type UserEntrySelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "animeId" | "userId" | "watchStatus" | "currentEpisode" | "score" | "notes" | "watchContextPersonId" | "recommenderId" | "discoveryType" | "discoverySource" | "startedAt" | "completedAt" | "verified" | "createdAt" | "updatedAt", ExtArgs["result"]["userEntry"]>
+export type UserEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "animeId" | "linkId" | "userId" | "watchStatus" | "currentEpisode" | "score" | "notes" | "watchContextPersonId" | "recommenderId" | "discoveryType" | "discoverySource" | "startedAt" | "completedAt" | "verified" | "createdAt" | "updatedAt", ExtArgs["result"]["userEntry"]>
 export type UserEntryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  anime?: boolean | Prisma.UserEntry$animeArgs<ExtArgs>
+  link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
   recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
 }
 export type UserEntryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  anime?: boolean | Prisma.UserEntry$animeArgs<ExtArgs>
+  link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
   recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
 }
 export type UserEntryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  anime?: boolean | Prisma.UserEntry$animeArgs<ExtArgs>
+  link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
   recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
@@ -1489,14 +1681,16 @@ export type UserEntryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
 export type $UserEntryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "UserEntry"
   objects: {
-    anime: Prisma.$AnimePayload<ExtArgs>
+    anime: Prisma.$AnimePayload<ExtArgs> | null
+    link: Prisma.$LinkPayload<ExtArgs> | null
     user: Prisma.$UserPayload<ExtArgs>
     watchContextPerson: Prisma.$PersonPayload<ExtArgs> | null
     recommender: Prisma.$PersonPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    animeId: number
+    animeId: number | null
+    linkId: number | null
     userId: string
     watchStatus: $Enums.WatchStatus
     currentEpisode: number
@@ -1905,7 +2099,8 @@ readonly fields: UserEntryFieldRefs;
  */
 export interface Prisma__UserEntryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  anime<T extends Prisma.AnimeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AnimeDefaultArgs<ExtArgs>>): Prisma.Prisma__AnimeClient<runtime.Types.Result.GetResult<Prisma.$AnimePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  anime<T extends Prisma.UserEntry$animeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserEntry$animeArgs<ExtArgs>>): Prisma.Prisma__AnimeClient<runtime.Types.Result.GetResult<Prisma.$AnimePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  link<T extends Prisma.UserEntry$linkArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserEntry$linkArgs<ExtArgs>>): Prisma.Prisma__LinkClient<runtime.Types.Result.GetResult<Prisma.$LinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   watchContextPerson<T extends Prisma.UserEntry$watchContextPersonArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserEntry$watchContextPersonArgs<ExtArgs>>): Prisma.Prisma__PersonClient<runtime.Types.Result.GetResult<Prisma.$PersonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   recommender<T extends Prisma.UserEntry$recommenderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserEntry$recommenderArgs<ExtArgs>>): Prisma.Prisma__PersonClient<runtime.Types.Result.GetResult<Prisma.$PersonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -1940,6 +2135,7 @@ export interface Prisma__UserEntryClient<T, Null = never, ExtArgs extends runtim
 export interface UserEntryFieldRefs {
   readonly id: Prisma.FieldRef<"UserEntry", 'Int'>
   readonly animeId: Prisma.FieldRef<"UserEntry", 'Int'>
+  readonly linkId: Prisma.FieldRef<"UserEntry", 'Int'>
   readonly userId: Prisma.FieldRef<"UserEntry", 'String'>
   readonly watchStatus: Prisma.FieldRef<"UserEntry", 'WatchStatus'>
   readonly currentEpisode: Prisma.FieldRef<"UserEntry", 'Int'>
@@ -2347,6 +2543,44 @@ export type UserEntryDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many UserEntries to delete.
    */
   limit?: number
+}
+
+/**
+ * UserEntry.anime
+ */
+export type UserEntry$animeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Anime
+   */
+  select?: Prisma.AnimeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Anime
+   */
+  omit?: Prisma.AnimeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AnimeInclude<ExtArgs> | null
+  where?: Prisma.AnimeWhereInput
+}
+
+/**
+ * UserEntry.link
+ */
+export type UserEntry$linkArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Link
+   */
+  select?: Prisma.LinkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Link
+   */
+  omit?: Prisma.LinkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LinkInclude<ExtArgs> | null
+  where?: Prisma.LinkWhereInput
 }
 
 /**

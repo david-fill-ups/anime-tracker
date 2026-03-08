@@ -260,7 +260,7 @@ async function main() {
   for (const user of users as { id: string; name: string | null; email: string | null }[]) {
     console.log(`\n=== Processing user: ${user.name ?? user.email ?? user.id} ===`);
 
-    const libraryStatuses = ["WATCHING", "COMPLETED", "ON_HOLD", "DROPPED"];
+    const libraryStatuses = ["WATCHING", "COMPLETED", "DROPPED"];
     const entries = await db.userEntry.findMany({
       where: { userId: user.id, watchStatus: { in: libraryStatuses as any[] } },
       include: { anime: true },

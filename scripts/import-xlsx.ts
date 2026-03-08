@@ -35,10 +35,11 @@ function parseLastWatched(raw: string): { currentEpisode: number; rawNote: strin
   return { currentEpisode: 0, rawNote: `Last watched: ${raw.trim()}` };
 }
 
-function mapActiveStatus(raw: string): "WATCHING" | "COMPLETED" | "ON_HOLD" {
+function mapActiveStatus(raw: string): "WATCHING" | "COMPLETED" {
   switch (raw.toLowerCase().trim()) {
-    case "active": return "WATCHING";
-    case "hiatus": return "ON_HOLD";
+    case "active":
+    case "hiatus":
+      return "WATCHING";
     default: return "COMPLETED"; // "Completed" or blank
   }
 }

@@ -92,6 +92,16 @@ export type AnimeStudio = Prisma.AnimeStudioModel
  */
 export type Anime = Prisma.AnimeModel
 /**
+ * Model Link
+ * 
+ */
+export type Link = Prisma.LinkModel
+/**
+ * Model LinkedAnime
+ * 
+ */
+export type LinkedAnime = Prisma.LinkedAnimeModel
+/**
  * Model StreamingLink
  * 
  */

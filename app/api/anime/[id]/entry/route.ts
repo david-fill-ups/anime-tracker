@@ -17,13 +17,39 @@ export async function POST(req: NextRequest, { params }: Params) {
     const parsed = parseBody(UpdateUserEntrySchema, await req.json());
     if (!parsed.success) return parsed.response;
 
-    const entry = await db.userEntry.upsert({
-      where: { animeId_userId: { animeId, userId } },
-      create: { animeId, userId, watchStatus: parsed.data.watchStatus },
-      update: { watchStatus: parsed.data.watchStatus },
+    // Find existing Link for this anime
+    const link = await db.link.findFirst({
+      where: { userId, linkedAnime: { some: { animeId } } },
+      select: { id: true, userEntry: { select: { id: true } } },
     });
 
-    return NextResponse.json(entry);
+    if (link?.userEntry) {
+      // Update existing entry
+      const entry = await db.userEntry.update({
+        where: { linkId: link.id },
+        data: { watchStatus: parsed.data.watchStatus },
+      });
+      return NextResponse.json(entry);
+    }
+
+    if (link) {
+      // Link exists but no UserEntry — create one
+      const entry = await db.userEntry.create({
+        data: { linkId: link.id, userId, watchStatus: parsed.data.watchStatus },
+      });
+      return NextResponse.json(entry);
+    }
+
+    // No link at all — create Link + LinkedAnime + UserEntry
+    const newLink = await db.link.create({
+      data: {
+        userId,
+        linkedAnime: { create: { animeId, order: 0 } },
+        userEntry: { create: { userId, watchStatus: parsed.data.watchStatus } },
+      },
+      include: { userEntry: true },
+    });
+    return NextResponse.json(newLink.userEntry);
   });
 }
 
@@ -36,10 +62,17 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     if (!idParsed.success) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     const animeId = idParsed.data;
 
-    try {
-      await db.userEntry.delete({ where: { animeId_userId: { animeId, userId } } });
-    } catch {
-      // Entry may not exist — that's fine
+    const link = await db.link.findFirst({
+      where: { userId, linkedAnime: { some: { animeId } } },
+      select: { id: true },
+    });
+
+    if (link) {
+      try {
+        await db.userEntry.delete({ where: { linkId: link.id } });
+      } catch {
+        // Entry may not exist — that's fine
+      }
     }
 
     return NextResponse.json({ ok: true });

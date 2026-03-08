@@ -1,6 +1,6 @@
 import { db } from "./db";
 import type { AniListAnime } from "./anilist";
-import type { FranchiseEntryType } from "@/app/generated/prisma";
+import type { FranchiseEntryType, DisplayFormat } from "@/app/generated/prisma";
 
 // Relation types that indicate "same franchise"
 const FRANCHISE_RELATION_TYPES = new Set([
@@ -29,6 +29,11 @@ function computeOrder(seasonYear: number | null, season: string | null): number 
 function getEntryType(format: AniListAnime["format"]): FranchiseEntryType {
   if (format === "MOVIE") return "MOVIE";
   if (format === "OVA" || format === "SPECIAL") return "OVA";
+  return "MAIN";
+}
+
+function entryTypeFromDisplayFormat(displayFormat: DisplayFormat): FranchiseEntryType {
+  if (displayFormat === "MOVIE") return "MOVIE";
   return "MAIN";
 }
 
@@ -77,12 +82,16 @@ export async function autoPopulateFranchise(
 
   if (relatedAnilistIds.length === 0) return;
 
-  // Find which of those related anime are already in our DB
+  // Only consider related anime that are in the user's library
   const relatedInDb = await db.anime.findMany({
-    where: { anilistId: { in: relatedAnilistIds } },
-    select: { id: true },
+    where: {
+      anilistId: { in: relatedAnilistIds },
+      userEntries: { some: { userId } },
+    },
+    select: { id: true, anilistId: true, seasonYear: true, season: true, displayFormat: true },
   });
 
+  // No related anime in user's library — nothing to group
   if (relatedInDb.length === 0) return;
 
   const relatedIds = relatedInDb.map((a) => a.id);
@@ -102,7 +111,7 @@ export async function autoPopulateFranchise(
   let targetFranchiseId: number;
 
   if (franchiseIds.length === 0) {
-    // No franchise yet — create one named after the current anime
+    // No franchise yet — create one and add all related library anime
     const franchise = await db.franchise.create({
       data: {
         name: anilistData.title.english ?? anilistData.title.romaji,
@@ -110,8 +119,41 @@ export async function autoPopulateFranchise(
       },
     });
     targetFranchiseId = franchise.id;
+
+    // Add all related library anime to the new franchise
+    for (const relatedAnime of relatedInDb) {
+      const baseOrder = computeOrder(relatedAnime.seasonYear, relatedAnime.season);
+      const order = await findAvailableOrder(targetFranchiseId, baseOrder);
+      await db.franchiseEntry.create({
+        data: {
+          franchiseId: targetFranchiseId,
+          animeId: relatedAnime.id,
+          order,
+          entryType: entryTypeFromDisplayFormat(relatedAnime.displayFormat),
+        },
+      });
+    }
   } else if (franchiseIds.length === 1) {
     targetFranchiseId = franchiseIds[0];
+
+    // Also add any related library anime not yet in this franchise
+    for (const relatedAnime of relatedInDb) {
+      const alreadyIn = existingEntries.some(
+        (e) => e.franchiseId === targetFranchiseId && e.animeId === relatedAnime.id
+      );
+      if (!alreadyIn) {
+        const baseOrder = computeOrder(relatedAnime.seasonYear, relatedAnime.season);
+        const order = await findAvailableOrder(targetFranchiseId, baseOrder);
+        await db.franchiseEntry.create({
+          data: {
+            franchiseId: targetFranchiseId,
+            animeId: relatedAnime.id,
+            order,
+            entryType: entryTypeFromDisplayFormat(relatedAnime.displayFormat),
+          },
+        });
+      }
+    }
   } else {
     // Multiple franchises — merge them all into the one with the lowest ID
     franchiseIds.sort((a, b) => a - b);

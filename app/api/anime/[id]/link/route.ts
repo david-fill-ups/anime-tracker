@@ -6,6 +6,22 @@ import { URLIdSchema, LinkAniListSchema, parseBody, wrapHandler } from "@/lib/va
 
 type Params = { params: Promise<{ id: string }> };
 
+export async function DELETE(_req: NextRequest, { params }: Params) {
+  return wrapHandler(async () => {
+    await requireUserId();
+    const { id } = await params;
+    const idParsed = URLIdSchema.safeParse(id);
+    if (!idParsed.success) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+    const animeId = idParsed.data;
+
+    const anime = await db.anime.update({
+      where: { id: animeId },
+      data: { anilistId: null, source: "MANUAL" },
+    });
+    return NextResponse.json(anime);
+  });
+}
+
 export async function POST(req: NextRequest, { params }: Params) {
   return wrapHandler(async () => {
     await requireUserId();
@@ -19,12 +35,19 @@ export async function POST(req: NextRequest, { params }: Params) {
     const { anilistId } = parsed.data;
 
     // Check if this anilistId is already linked to a different entry
-    const conflict = await db.anime.findUnique({ where: { anilistId } });
+    const conflict = await db.anime.findUnique({
+      where: { anilistId },
+      include: { linkedIn: { select: { id: true }, take: 1 } },
+    });
     if (conflict && conflict.id !== animeId) {
-      return NextResponse.json(
-        { error: "This AniList ID is already linked to another entry in your library" },
-        { status: 409 }
-      );
+      if (conflict.linkedIn.length > 0) {
+        return NextResponse.json(
+          { error: "This AniList ID is already linked to another entry in your library" },
+          { status: 409 }
+        );
+      }
+      // Orphaned Anime record (no user entries) — clear its anilistId so we can claim it
+      await db.anime.update({ where: { id: conflict.id }, data: { anilistId: null, source: "MANUAL" } });
     }
 
     // Save the link first

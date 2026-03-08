@@ -18,7 +18,6 @@ const STATUS_TABS: { value: WatchStatus | "ALL"; label: string }[] = [
   { value: "ALL", label: "All" },
   { value: "WATCHING", label: "Watching" },
   { value: "COMPLETED", label: "Completed" },
-  { value: "ON_HOLD", label: "On Hold" },
   { value: "DROPPED", label: "Dropped" },
 ];
 

@@ -61,6 +61,8 @@ export const ModelName = {
   Studio: 'Studio',
   AnimeStudio: 'AnimeStudio',
   Anime: 'Anime',
+  Link: 'Link',
+  LinkedAnime: 'LinkedAnime',
   StreamingLink: 'StreamingLink',
   UserEntry: 'UserEntry'
 } as const
@@ -208,10 +210,32 @@ export const AnimeScalarFieldEnum = {
   streamingCheckedAt: 'streamingCheckedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  mergedIntoId: 'mergedIntoId'
+  mergedIntoId: 'mergedIntoId',
+  mergeOrder: 'mergeOrder'
 } as const
 
 export type AnimeScalarFieldEnum = (typeof AnimeScalarFieldEnum)[keyof typeof AnimeScalarFieldEnum]
+
+
+export const LinkScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LinkScalarFieldEnum = (typeof LinkScalarFieldEnum)[keyof typeof LinkScalarFieldEnum]
+
+
+export const LinkedAnimeScalarFieldEnum = {
+  id: 'id',
+  linkId: 'linkId',
+  animeId: 'animeId',
+  order: 'order'
+} as const
+
+export type LinkedAnimeScalarFieldEnum = (typeof LinkedAnimeScalarFieldEnum)[keyof typeof LinkedAnimeScalarFieldEnum]
 
 
 export const StreamingLinkScalarFieldEnum = {
@@ -227,6 +251,7 @@ export type StreamingLinkScalarFieldEnum = (typeof StreamingLinkScalarFieldEnum)
 export const UserEntryScalarFieldEnum = {
   id: 'id',
   animeId: 'animeId',
+  linkId: 'linkId',
   userId: 'userId',
   watchStatus: 'watchStatus',
   currentEpisode: 'currentEpisode',

@@ -1,5 +1,6 @@
 import { fetchAniListById } from "@/lib/anilist";
 import { db } from "@/lib/db";
+import AddRelatedAnimeButton from "./AddRelatedAnimeButton";
 
 const RELATION_LABELS: Record<string, string> = {
   PREQUEL: "Prequel",
@@ -16,21 +17,42 @@ const RELATION_ORDER = ["PREQUEL", "SEQUEL", "PARENT", "SIDE_STORY", "SPIN_OFF",
 export default async function RelatedAnime({
   anilistId,
   userId,
+  franchiseIds,
+  linkId,
+  linkedAnilistIds,
+  currentAnimeId,
 }: {
   anilistId: number;
   userId: string;
+  franchiseIds?: number[];
+  linkId?: number | null;
+  linkedAnilistIds?: (number | null)[];
+  currentAnimeId?: number;
 }) {
-  const [anilistData, userAnimes] = await Promise.all([
+  const [anilistData, userAnimes, franchiseMembers] = await Promise.all([
     fetchAniListById(anilistId),
     db.anime.findMany({
-      where: { userEntries: { some: { userId } }, anilistId: { not: null } },
+      where: { linkedIn: { some: { link: { userId } } }, anilistId: { not: null } },
       select: { anilistId: true },
     }),
+    franchiseIds && franchiseIds.length > 0
+      ? db.franchiseEntry.findMany({
+          where: { franchiseId: { in: franchiseIds }, anime: { anilistId: { not: null } } },
+          select: { anime: { select: { anilistId: true } } },
+        })
+      : Promise.resolve([]),
   ]);
 
   if (!anilistData) return null;
 
   const seenIds = new Set(userAnimes.map((a) => a.anilistId));
+  for (const fm of franchiseMembers) {
+    if (fm.anime.anilistId) seenIds.add(fm.anime.anilistId);
+  }
+  // Exclude already-linked anime so they don't appear as "related"
+  for (const id of linkedAnilistIds ?? []) {
+    if (id) seenIds.add(id);
+  }
 
   const related = anilistData.relations.edges
     .filter(
@@ -54,19 +76,24 @@ export default async function RelatedAnime({
           const title = e.node.title.english || e.node.title.romaji;
           const label = RELATION_LABELS[e.relationType];
           return (
-            <a
+            <div
               key={e.node.id}
-              href={`https://anilist.co/anime/${e.node.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2.5 hover:border-slate-600 transition-colors"
+              className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2.5 hover:border-slate-600 transition-colors"
             >
-              <div className="min-w-0">
-                <p className="text-sm text-white truncate">{title}</p>
-                <p className="text-xs text-slate-500">{label}</p>
-              </div>
-              <span className="text-xs text-indigo-400 flex-shrink-0">AniList ↗</span>
-            </a>
+              <a
+                href={`https://anilist.co/anime/${e.node.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-3 flex-1 min-w-0"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm text-white truncate">{title}</p>
+                  <p className="text-xs text-slate-500">{label}</p>
+                </div>
+                <span className="text-xs text-indigo-400 flex-shrink-0">AniList ↗</span>
+              </a>
+              <AddRelatedAnimeButton anilistId={e.node.id} linkId={linkId ?? null} />
+            </div>
           );
         })}
       </div>

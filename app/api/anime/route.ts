@@ -51,23 +51,29 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Check if user already has an entry for this anime
-    const existingEntry = await db.userEntry.findFirst({
-      where: { animeId: anime.id, userId },
+    // Check if user already has this anime in any link
+    const existingLinked = await db.linkedAnime.findFirst({
+      where: { animeId: anime.id, link: { userId } },
     });
-    if (existingEntry) {
+    if (existingLinked) {
       return NextResponse.json({ error: "Already in your library" }, { status: 409 });
     }
 
-    await db.userEntry.create({
+    // Create Link + LinkedAnime + UserEntry atomically
+    await db.link.create({
       data: {
-        animeId: anime.id,
         userId,
-        watchStatus: body.watchStatus ?? "PLAN_TO_WATCH",
-        watchContextPersonId: body.watchContextPersonId ?? null,
-        recommenderId: body.recommenderId ?? null,
-        discoveryType: body.discoveryType ?? null,
-        discoverySource: body.discoverySource ?? null,
+        linkedAnime: { create: { animeId: anime.id, order: 0 } },
+        userEntry: {
+          create: {
+            userId,
+            watchStatus: body.watchStatus ?? "PLAN_TO_WATCH",
+            watchContextPersonId: body.watchContextPersonId ?? null,
+            recommenderId: body.recommenderId ?? null,
+            discoveryType: body.discoveryType ?? null,
+            discoverySource: body.discoverySource ?? null,
+          },
+        },
       },
     });
 
@@ -97,15 +103,20 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  await db.userEntry.create({
+  await db.link.create({
     data: {
-      animeId: anime.id,
       userId,
-      watchStatus: body.watchStatus ?? "PLAN_TO_WATCH",
-      watchContextPersonId: body.watchContextPersonId ?? null,
-      recommenderId: body.recommenderId ?? null,
-      discoveryType: body.discoveryType ?? null,
-      discoverySource: body.discoverySource ?? null,
+      linkedAnime: { create: { animeId: anime.id, order: 0 } },
+      userEntry: {
+        create: {
+          userId,
+          watchStatus: body.watchStatus ?? "PLAN_TO_WATCH",
+          watchContextPersonId: body.watchContextPersonId ?? null,
+          recommenderId: body.recommenderId ?? null,
+          discoveryType: body.discoveryType ?? null,
+          discoverySource: body.discoverySource ?? null,
+        },
+      },
     },
   });
 

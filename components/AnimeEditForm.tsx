@@ -55,14 +55,30 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
 }
 import type { Anime, UserEntry, Person, Franchise } from "@/app/generated/prisma";
 
+type LinkedAnimeSeason = {
+  order: number;
+  anime: {
+    id: number;
+    titleRomaji: string;
+    titleEnglish: string | null;
+    totalEpisodes: number | null;
+    totalSeasons: number | null;
+    episodesPerSeason: string | null;
+  };
+};
+
 type Props = {
-  anime: Anime & { franchiseEntries: { id: number; franchise: { id: number; name: string } }[] };
+  anime: Anime & {
+    franchiseEntries: { id: number; franchise: { id: number; name: string } }[];
+  };
   entry: UserEntry & { recommender: Person | null; watchContextPerson: Person | null } | null;
   people: Person[];
   franchises: Franchise[];
+  // All linked anime in order (from Link.linkedAnime); undefined for standalone
+  linkedAnime?: LinkedAnimeSeason[];
 };
 
-export default function AnimeEditForm({ anime, entry, people, franchises }: Props) {
+export default function AnimeEditForm({ anime, entry, people, franchises, linkedAnime }: Props) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [addingFranchise, setAddingFranchise] = useState(false);
@@ -73,22 +89,45 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   // Season/episode helpers — derived from prop (updates after router.refresh())
-  const parsedEpsPerSeason: number[] = anime.episodesPerSeason
-    ? JSON.parse(anime.episodesPerSeason)
-    : [];
-  const getEpsForSeason = (season: number) =>
-    parsedEpsPerSeason[season - 1] ?? anime.totalEpisodes ?? 1;
+  // If there are multiple linked anime, each is treated as one virtual "season".
+  // For a standalone anime (or a link of 1), use the anime's own episodesPerSeason.
+  const linkedSorted = (linkedAnime ?? []).slice().sort((a, b) => a.order - b.order);
+  const isMultiLink = linkedSorted.length > 1;
 
-  const totalSeasons = Math.max(1, anime.totalSeasons ?? 1);
-  const useSeasonDropdowns = totalSeasons > 1 || !!(anime.totalEpisodes);
+  let virtualEpsPerSeason: number[];
+  let seasonLabels: string[];
+
+  if (isMultiLink) {
+    // Each linked anime = one virtual season
+    virtualEpsPerSeason = linkedSorted.map((la) => la.anime.totalEpisodes ?? 1);
+    seasonLabels = linkedSorted.map((la, i) =>
+      la.anime.titleEnglish ?? la.anime.titleRomaji ?? `Season ${i + 1}`
+    );
+  } else {
+    // Single anime: use its own episodesPerSeason breakdown
+    const parsedEpsPerSeason: number[] = anime.episodesPerSeason
+      ? JSON.parse(anime.episodesPerSeason)
+      : [];
+    const totalSeasons = Math.max(1, anime.totalSeasons ?? 1);
+    const eps: number[] = parsedEpsPerSeason.length > 0
+      ? parsedEpsPerSeason.slice(0, totalSeasons)
+      : Array.from({ length: totalSeasons }, () => Math.ceil((anime.totalEpisodes ?? 0) / totalSeasons) || 1);
+    virtualEpsPerSeason = eps;
+    seasonLabels = eps.map((_, i) => `Season ${i + 1}`);
+  }
+
+  const virtualTotalSeasons = Math.max(1, virtualEpsPerSeason.length);
+  const getEpsForSeason = (season: number) => virtualEpsPerSeason[season - 1] ?? 1;
+
+  const useSeasonDropdowns = virtualTotalSeasons > 1 || !!(anime.totalEpisodes);
 
   // Convert flat episode index → { season, episode }
   const flatToSE = (flat: number) => {
-    if (totalSeasons <= 1 || flat === 0) return { season: 1, episode: flat };
+    if (virtualTotalSeasons <= 1 || flat === 0) return { season: 1, episode: flat };
     let remaining = flat;
-    for (let s = 1; s <= totalSeasons; s++) {
+    for (let s = 1; s <= virtualTotalSeasons; s++) {
       const sEps = getEpsForSeason(s);
-      if (remaining <= sEps || s === totalSeasons) return { season: s, episode: remaining };
+      if (remaining <= sEps || s === virtualTotalSeasons) return { season: s, episode: remaining };
       remaining -= sEps;
     }
     return { season: 1, episode: flat };
@@ -116,12 +155,28 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
   // TODO[TEMP]: verified state — remove after data review
   const [verified, setVerified] = useState(entry?.verified ?? false);
   const [sourceSuggestions, setSourceSuggestions] = useState<string[]>([]);
+  const [episodeNames, setEpisodeNames] = useState<Record<number, { number: number; name: string }[]>>({});
 
   useEffect(() => {
     fetch("/api/discovery-sources")
       .then((r) => r.json())
       .then((d) => setSourceSuggestions(d.sources ?? []));
   }, []);
+
+  // Fetch episode names from TMDB for the current season (only primary seasons, not merged)
+  useEffect(() => {
+    const season = Number(form.currentSeason);
+    if (episodeNames[season] !== undefined) return;
+    fetch(`/api/anime/${anime.id}/season/${season}`)
+      .then((r) => r.json())
+      .then((d: { episodes?: { number: number; name: string }[] }) => {
+        setEpisodeNames((prev) => ({ ...prev, [season]: d.episodes ?? [] }));
+      })
+      .catch(() => {
+        setEpisodeNames((prev) => ({ ...prev, [season]: [] }));
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.currentSeason, anime.id]);
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -136,19 +191,17 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
   }
 
   function seasonToFlat(season: number, episode: number) {
-    if (totalSeasons <= 1) return episode;
+    if (virtualTotalSeasons <= 1) return episode;
     let flat = 0;
     for (let s = 1; s < season; s++) flat += getEpsForSeason(s);
     return flat + episode;
   }
 
   const isCompleted = form.watchStatus === "COMPLETED";
-  const totalEpisodesCount =
-    parsedEpsPerSeason.length > 0
-      ? parsedEpsPerSeason.slice(0, totalSeasons).reduce((a, b) => a + b, 0)
-      : anime.totalEpisodes
-      ? totalSeasons * (anime.totalEpisodes ?? 1)
-      : null;
+  const canBeCompleted = anime.airingStatus === "FINISHED" || anime.airingStatus === "CANCELLED" || anime.airingStatus === "HIATUS";
+  const totalEpisodesCount = virtualEpsPerSeason.length > 0
+    ? virtualEpsPerSeason.reduce((a, b) => a + b, 0)
+    : null;
 
   async function save(formOverrides: Partial<typeof form> = {}, euOverride?: string, verifiedOverride?: boolean) {
     const f = { ...form, ...formOverrides };
@@ -254,8 +307,9 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
             className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
           >
             <option value="WATCHING">Watching</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="ON_HOLD">On Hold</option>
+            <option value="COMPLETED" disabled={!canBeCompleted}>
+              {canBeCompleted ? "Completed" : "Completed (series not finished)"}
+            </option>
             <option value="DROPPED">Dropped</option>
             <option value="PLAN_TO_WATCH">Plan to Watch</option>
             <option value="RECOMMENDED">Recommended</option>
@@ -267,13 +321,13 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
           {isCompleted ? (
             <div className="w-full bg-slate-800/50 text-slate-500 border border-slate-700 rounded-md px-3 py-2 text-sm cursor-not-allowed">
               {totalEpisodesCount
-                ? totalSeasons > 1
-                  ? `S${totalSeasons} E${getEpsForSeason(totalSeasons)} (complete)`
+                ? virtualTotalSeasons > 1
+                  ? `${seasonLabels[virtualTotalSeasons - 1]} · Ep ${getEpsForSeason(virtualTotalSeasons)} (complete)`
                   : `${totalEpisodesCount} / ${totalEpisodesCount} (complete)`
                 : "Complete"}
             </div>
           ) : useSeasonDropdowns ? (
-            <div className="flex gap-2 items-center">
+            <div className="space-y-2">
               <select
                 value={form.currentSeason}
                 onChange={(e) => {
@@ -284,21 +338,26 @@ export default function AnimeEditForm({ anime, entry, people, franchises }: Prop
                   setForm((f) => ({ ...f, ...updates }));
                   save(updates);
                 }}
-                className="flex-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
               >
-                {Array.from({ length: totalSeasons }, (_, i) => i + 1).map((s) => (
-                  <option key={s} value={s}>S{s}</option>
+                {seasonLabels.map((label, i) => (
+                  <option key={i + 1} value={i + 1}>{label}</option>
                 ))}
               </select>
               <select
                 value={form.currentEpisodeInSeason}
                 onChange={(e) => { set("currentEpisodeInSeason", e.target.value); save({ currentEpisodeInSeason: e.target.value }); }}
-                className="flex-1 bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
               >
-                <option value={0}>E0</option>
-                {Array.from({ length: getEpsForSeason(Number(form.currentSeason)) }, (_, i) => i + 1).map((e) => (
-                  <option key={e} value={e}>E{e}</option>
-                ))}
+                <option value={0}>Not started</option>
+                {Array.from({ length: getEpsForSeason(Number(form.currentSeason)) }, (_, i) => i + 1).map((ep) => {
+                  const title = episodeNames[Number(form.currentSeason)]?.find((e) => e.number === ep)?.name;
+                  return (
+                    <option key={ep} value={ep}>
+                      {title ? `Ep ${ep} – ${title}` : `Ep ${ep}`}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           ) : (

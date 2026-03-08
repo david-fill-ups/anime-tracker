@@ -154,7 +154,6 @@ function AnimeListRow({ anime, onUpdate }: { anime: AnimeWithEntry; onUpdate: ()
           >
             <option value="WATCHING">Watching</option>
             <option value="COMPLETED">Completed</option>
-            <option value="ON_HOLD">On Hold</option>
             <option value="DROPPED">Dropped</option>
             <option value="PLAN_TO_WATCH">Plan to Watch</option>
             <option value="RECOMMENDED">Recommended</option>

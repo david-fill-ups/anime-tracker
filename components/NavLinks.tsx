@@ -2,26 +2,34 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const links = [
-  { href: "/watchlist", label: "Watch List" },
-  { href: "/library", label: "Library" },
-  { href: "/up-next", label: "Up Next" },
-  { href: "/franchises", label: "Franchises" },
-  { href: "/people", label: "People" },
-  { href: "/stats", label: "Dashboard" },
-];
 
 export default function NavLinks() {
   const pathname = usePathname();
+  const [libraryUrl, setLibraryUrl] = useState("/library");
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("libraryUrl");
+    if (saved) setLibraryUrl(saved);
+  }, [pathname]);
+
+  const allLinks = [
+    { href: "/watchlist", label: "Watch List", match: "/watchlist" },
+    { href: libraryUrl, label: "Library", match: "/library" },
+    { href: "/up-next", label: "Up Next", match: "/up-next" },
+    { href: "/franchises", label: "Franchises", match: "/franchises" },
+    { href: "/people", label: "People", match: "/people" },
+    { href: "/stats", label: "Dashboard", match: "/stats" },
+  ];
 
   return (
     <nav className="flex-1 p-4 space-y-1">
-      {links.map(({ href, label }) => {
-        const active = pathname === href || pathname.startsWith(href + "/");
+      {allLinks.map(({ href, label, match }) => {
+        const active = pathname === match || pathname.startsWith(match + "/");
         return (
           <Link
-            key={href}
+            key={label}
             href={href}
             className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
               active

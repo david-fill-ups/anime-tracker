@@ -20,11 +20,11 @@ export default async function LibraryFiltersPage({
     db.franchise.findMany({ where: { userId }, orderBy: { name: "asc" } }),
     db.person.findMany({ where: { userId }, orderBy: { name: "asc" } }),
     db.anime.findMany({
-      where: { userEntries: { some: { userId } }, mergedIntoId: null },
+      where: { linkedIn: { some: { order: 0, link: { userId } } } },
       select: { genres: true },
     }),
     db.anime.findMany({
-      where: { userEntries: { some: { userId } }, mergedIntoId: null },
+      where: { linkedIn: { some: { order: 0, link: { userId } } } },
       select: { animeStudios: { where: { isMainStudio: true }, include: { studio: true } } },
     }),
   ]);

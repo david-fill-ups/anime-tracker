@@ -156,11 +156,7 @@ export default function AnimeMetaEdit({ anime }: Props) {
   async function unlinkAniList() {
     if (!confirm("Unlink from AniList? Metadata will stay but won't auto-sync.")) return;
     setUnlinking(true);
-    await fetch(`/api/anime/${anime.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ anilistId: null, source: "MANUAL" }),
-    });
+    await fetch(`/api/anime/${anime.id}/link`, { method: "DELETE" });
     setUnlinking(false);
     router.refresh();
   }
@@ -169,6 +165,48 @@ export default function AnimeMetaEdit({ anime }: Props) {
   const disabledCls = "w-full bg-slate-800/40 text-slate-500 border border-slate-700/50 rounded-md px-3 py-2 text-sm cursor-not-allowed";
   const selectCls = "w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500";
   const disabledSelectCls = "w-full bg-slate-800/40 text-slate-500 border border-slate-700/50 rounded-md px-3 py-2 text-sm cursor-not-allowed";
+
+  // Always-visible AniList status row
+  const anilistRow = (
+    <div className="flex items-center gap-2 flex-wrap text-xs mt-1">
+      <span className="text-slate-500">AniList:</span>
+      {anime.anilistId ? (
+        <>
+          <a
+            href={`https://anilist.co/anime/${anime.anilistId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-400 hover:text-indigo-300 transition-colors"
+          >
+            #{anime.anilistId} ↗
+          </a>
+          <button
+            onClick={unlinkAniList}
+            disabled={unlinking}
+            className="text-slate-600 hover:text-red-400 transition-colors disabled:opacity-50"
+          >
+            {unlinking ? "unlinking…" : "unlink"}
+          </button>
+          <button
+            onClick={() => setOpen(true)}
+            className="text-slate-600 hover:text-indigo-400 transition-colors"
+          >
+            change
+          </button>
+        </>
+      ) : (
+        <>
+          <span className="text-slate-600">not linked</span>
+          <button
+            onClick={() => setOpen(true)}
+            className="text-slate-600 hover:text-indigo-400 transition-colors"
+          >
+            link
+          </button>
+        </>
+      )}
+    </div>
+  );
 
   // Always-visible TMDB status row
   const tmdbRow = (
@@ -218,6 +256,7 @@ export default function AnimeMetaEdit({ anime }: Props) {
   if (!open) {
     return (
       <div className="mt-1 space-y-1">
+        {anilistRow}
         {tmdbRow}
         <button
           onClick={() => setOpen(true)}
@@ -231,6 +270,7 @@ export default function AnimeMetaEdit({ anime }: Props) {
 
   return (
     <div className="space-y-2 mt-2">
+      {anilistRow}
       {tmdbRow}
       <div className="border border-slate-700 rounded-md p-4 space-y-4">
       {/* Metadata fields */}
@@ -383,97 +423,89 @@ export default function AnimeMetaEdit({ anime }: Props) {
       {/* AniList link */}
       <div className="border-t border-slate-700/50 pt-4 space-y-2">
         <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">AniList Link</p>
-        {anime.anilistId ? (
-          <div className="flex items-center gap-3">
-            <a
-              href={`https://anilist.co/anime/${anime.anilistId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
-              #{anime.anilistId} ↗
-            </a>
+        <div className="space-y-2">
+          {anime.anilistId && (
+            <p className="text-xs text-slate-500">
+              Search to change the linked entry, or{" "}
+              <button
+                onClick={unlinkAniList}
+                disabled={unlinking}
+                className="text-red-500 hover:text-red-400 transition-colors disabled:opacity-50"
+              >
+                {unlinking ? "unlinking…" : "unlink"}
+              </button>{" "}
+              to remove the connection.
+            </p>
+          )}
+          <div className="flex gap-2">
+            <input
+              value={linkQuery}
+              onChange={(e) => setLinkQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && searchForLink()}
+              placeholder="Search AniList..."
+              className="flex-1 bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-indigo-500"
+            />
             <button
-              onClick={unlinkAniList}
-              disabled={unlinking}
-              className="text-xs text-slate-600 hover:text-red-400 transition-colors disabled:opacity-50"
+              onClick={searchForLink}
+              disabled={linkSearching || linkQuery.trim().length < 2}
+              className="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md transition-colors disabled:opacity-50"
             >
-              {unlinking ? "Unlinking..." : "Unlink"}
+              {linkSearching ? "Searching..." : "Search"}
             </button>
           </div>
-        ) : (
-          <div className="space-y-2">
-            <p className="text-xs text-slate-600">Not linked</p>
-            <div className="flex gap-2">
-              <input
-                value={linkQuery}
-                onChange={(e) => setLinkQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && searchForLink()}
-                placeholder="Search AniList..."
-                className="flex-1 bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:border-indigo-500"
-              />
+
+          {linkResults.length > 0 && (
+            <ul className="max-h-56 overflow-y-auto space-y-1">
+              {linkResults.map((r) => (
+                <li key={r.id}>
+                  <button
+                    onClick={() => setLinkSelected(linkSelected?.id === r.id ? null : r)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left text-sm transition-colors ${
+                      linkSelected?.id === r.id
+                        ? "bg-indigo-600 text-white"
+                        : "bg-slate-800 hover:bg-slate-700 text-slate-300"
+                    }`}
+                  >
+                    {r.coverImage?.large && (
+                      <img src={r.coverImage.large} alt="" className="w-8 h-12 object-cover rounded flex-shrink-0" />
+                    )}
+                    <span className="flex-1 min-w-0">
+                      <span className="block truncate font-medium">{r.title.romaji}</span>
+                      {r.title.english && r.title.english !== r.title.romaji && (
+                        <span className="block truncate text-xs opacity-70">{r.title.english}</span>
+                      )}
+                      <span className="block text-xs opacity-60">
+                        {[r.season, r.seasonYear, r.episodes ? `${r.episodes} eps` : null].filter(Boolean).join(" · ")}
+                      </span>
+                    </span>
+                    <span className="text-xs opacity-50 flex-shrink-0">#{r.id}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {linkSelected && (
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm text-slate-300 truncate">
+                Selected: <span className="text-white font-medium">{linkSelected.title.romaji}</span>
+              </p>
               <button
-                onClick={searchForLink}
-                disabled={linkSearching || linkQuery.trim().length < 2}
-                className="px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md transition-colors disabled:opacity-50"
+                onClick={linkToAniList}
+                disabled={linking}
+                className="flex-shrink-0 px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-md transition-colors disabled:opacity-50"
               >
-                {linkSearching ? "Searching..." : "Search"}
+                {linking ? "Linking..." : anime.anilistId ? "Change Link" : "Confirm Link"}
               </button>
             </div>
+          )}
 
-            {linkResults.length > 0 && (
-              <ul className="max-h-56 overflow-y-auto space-y-1">
-                {linkResults.map((r) => (
-                  <li key={r.id}>
-                    <button
-                      onClick={() => setLinkSelected(linkSelected?.id === r.id ? null : r)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-left text-sm transition-colors ${
-                        linkSelected?.id === r.id
-                          ? "bg-indigo-600 text-white"
-                          : "bg-slate-800 hover:bg-slate-700 text-slate-300"
-                      }`}
-                    >
-                      {r.coverImage?.large && (
-                        <img src={r.coverImage.large} alt="" className="w-8 h-12 object-cover rounded flex-shrink-0" />
-                      )}
-                      <span className="flex-1 min-w-0">
-                        <span className="block truncate font-medium">{r.title.romaji}</span>
-                        {r.title.english && r.title.english !== r.title.romaji && (
-                          <span className="block truncate text-xs opacity-70">{r.title.english}</span>
-                        )}
-                        <span className="block text-xs opacity-60">
-                          {[r.season, r.seasonYear, r.episodes ? `${r.episodes} eps` : null].filter(Boolean).join(" · ")}
-                        </span>
-                      </span>
-                      <span className="text-xs opacity-50 flex-shrink-0">#{r.id}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {linkSelected && (
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm text-slate-300 truncate">
-                  Selected: <span className="text-white font-medium">{linkSelected.title.romaji}</span>
-                </p>
-                <button
-                  onClick={linkToAniList}
-                  disabled={linking}
-                  className="flex-shrink-0 px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-md transition-colors disabled:opacity-50"
-                >
-                  {linking ? "Linking..." : "Confirm Link"}
-                </button>
-              </div>
-            )}
-
-            {linkMsg && (
-              <p className={`text-sm ${linkMsg.startsWith("Linked") ? "text-green-400" : "text-red-400"}`}>
-                {linkMsg}
-              </p>
-            )}
-          </div>
-        )}
+          {linkMsg && (
+            <p className={`text-sm ${linkMsg.startsWith("Linked") ? "text-green-400" : "text-red-400"}`}>
+              {linkMsg}
+            </p>
+          )}
+        </div>
       </div>
     </div>
     </div>

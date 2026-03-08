@@ -13,20 +13,48 @@ export async function GET(_req: NextRequest, { params }: Params) {
   const merged = await db.anime.findMany({
     where: { mergedIntoId: Number(id) },
     select: MERGED_ANIME_SELECT,
-    orderBy: { seasonYear: "asc" },
+    orderBy: { mergeOrder: "asc" },
   });
   return NextResponse.json(merged);
 }
 
-// POST { anilistId } — merge a season into this primary
+// PATCH { orderedIds: number[] } — reorder merged seasons
+export async function PATCH(req: NextRequest, { params }: Params) {
+  const userId = await requireUserId();
+  const { id } = await params;
+  const primaryId = Number(id);
+  const { orderedIds } = await req.json() as { orderedIds: number[] };
+
+  if (!Array.isArray(orderedIds) || orderedIds.some((x) => typeof x !== "number")) {
+    return NextResponse.json({ error: "orderedIds must be number[]" }, { status: 400 });
+  }
+
+  const primaryEntry = await db.userEntry.findFirst({ where: { animeId: primaryId, userId } });
+  if (!primaryEntry) {
+    return NextResponse.json({ error: "Not in your library" }, { status: 403 });
+  }
+
+  await db.$transaction(
+    orderedIds.map((secId, i) =>
+      db.anime.updateMany({
+        where: { id: secId, mergedIntoId: primaryId },
+        data: { mergeOrder: i },
+      })
+    )
+  );
+
+  return NextResponse.json({ ok: true });
+}
+
+// POST { anilistId } or { animeId } — merge a season into this primary
 export async function POST(req: NextRequest, { params }: Params) {
   const userId = await requireUserId();
   const { id } = await params;
   const primaryId = Number(id);
-  const { anilistId } = await req.json();
+  const { anilistId, animeId } = await req.json();
 
-  if (!anilistId || typeof anilistId !== "number") {
-    return NextResponse.json({ error: "anilistId required" }, { status: 400 });
+  if ((!anilistId || typeof anilistId !== "number") && (!animeId || typeof animeId !== "number")) {
+    return NextResponse.json({ error: "anilistId or animeId required" }, { status: 400 });
   }
 
   // Verify caller has the primary in their library
@@ -36,7 +64,13 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   // Find or create the secondary Anime
-  let secondary = await db.anime.findUnique({ where: { anilistId } });
+  let secondary = animeId
+    ? await db.anime.findUnique({ where: { id: animeId } })
+    : await db.anime.findUnique({ where: { anilistId } });
+
+  if (!secondary && animeId) {
+    return NextResponse.json({ error: `Anime not found` }, { status: 404 });
+  }
 
   if (!secondary) {
     const data = await fetchAniListById(anilistId);
@@ -74,12 +108,15 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "This season is already merged into another anime" }, { status: 409 });
   }
 
+  // Assign mergeOrder = current count of merged seasons
+  const existingCount = await db.anime.count({ where: { mergedIntoId: primaryId } });
+
   // If secondary already has a UserEntry for this user, remove it, then set the merge link
   await db.$transaction([
     db.userEntry.deleteMany({ where: { animeId: secondary.id, userId } }),
     db.anime.update({
       where: { id: secondary.id },
-      data: { mergedIntoId: primaryId },
+      data: { mergedIntoId: primaryId, mergeOrder: existingCount },
     }),
   ]);
 

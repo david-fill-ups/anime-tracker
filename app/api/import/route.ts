@@ -7,7 +7,6 @@ import type { WatchStatus } from "@/app/generated/prisma";
 const VALID_STATUSES = new Set<string>([
   "WATCHING",
   "COMPLETED",
-  "ON_HOLD",
   "DROPPED",
   "PLAN_TO_WATCH",
   "RECOMMENDED",
@@ -87,6 +86,56 @@ function validateHeader(header: string[]): string | null {
   return null;
 }
 
+// Fetch or create an anime by AniList ID (without linking)
+async function fetchOrCreateAnime(anilistId: number, tmdbIdVal: number | null) {
+  let anime = await db.anime.findUnique({ where: { anilistId } });
+  if (!anime) {
+    const data = await fetchAniListById(anilistId);
+    if (!data) return null;
+
+    const studioCreates: { studioId: number; isMainStudio: boolean }[] = [];
+    for (const edge of data.studios.edges) {
+      const studio = await db.studio.upsert({
+        where: { anilistStudioId: edge.node.id },
+        update: { name: edge.node.name },
+        create: { name: edge.node.name, anilistStudioId: edge.node.id },
+      });
+      studioCreates.push({ studioId: studio.id, isMainStudio: edge.isMain });
+    }
+
+    anime = await db.anime.create({
+      data: {
+        anilistId: data.id,
+        source: "ANILIST",
+        titleRomaji: data.title.romaji,
+        titleEnglish: data.title.english ?? null,
+        titleNative: data.title.native ?? null,
+        coverImageUrl: data.coverImage.large,
+        synopsis: data.description ?? null,
+        genres: JSON.stringify(data.genres),
+        totalEpisodes: data.episodes ?? null,
+        durationMins: data.duration ?? null,
+        airingStatus: data.status,
+        displayFormat: mapDisplayFormat(data.format),
+        sourceMaterial: mapSourceMaterial(data.source),
+        season: data.season ?? null,
+        seasonYear: data.seasonYear ?? null,
+        meanScore: data.meanScore ?? null,
+        nextAiringEp: data.nextAiringEpisode?.episode ?? null,
+        nextAiringAt: data.nextAiringEpisode
+          ? new Date(data.nextAiringEpisode.airingAt * 1000)
+          : null,
+        lastSyncedAt: new Date(),
+        tmdbId: tmdbIdVal,
+        animeStudios: { create: studioCreates },
+      },
+    });
+  } else if (tmdbIdVal && !anime.tmdbId) {
+    await db.anime.update({ where: { id: anime.id }, data: { tmdbId: tmdbIdVal } });
+  }
+  return anime;
+}
+
 export async function POST(req: NextRequest) {
   const userId = await requireUserId();
 
@@ -150,22 +199,23 @@ export async function POST(req: NextRequest) {
       select: { id: true, anilistId: true },
     });
 
-    const existingEntries =
+    // Check which anime are already in this user's library (via LinkedAnime)
+    const existingLinked =
       existingAnime.length > 0
-        ? await db.userEntry.findMany({
-            where: { animeId: { in: existingAnime.map((a) => a.id) }, userId },
+        ? await db.linkedAnime.findMany({
+            where: { animeId: { in: existingAnime.map((a) => a.id) }, link: { userId } },
             select: { animeId: true },
           })
         : [];
 
-    const entryAnimeIdSet = new Set(existingEntries.map((e) => e.animeId));
+    const linkedAnimeIdSet = new Set(existingLinked.map((la) => la.animeId));
     const animeByAnilistId = new Map(existingAnime.map((a) => [a.anilistId!, a.id]));
 
     let existingCount = 0;
     let newCount = 0;
     for (const anilistId of validAnilistIds) {
       const animeId = animeByAnilistId.get(anilistId);
-      if (animeId !== undefined && entryAnimeIdSet.has(animeId)) {
+      if (animeId !== undefined && linkedAnimeIdSet.has(animeId)) {
         existingCount++;
       } else {
         newCount++;
@@ -207,55 +257,10 @@ export async function POST(req: NextRequest) {
 
       const tmdbIdVal = tmdbIdStr ? Number(tmdbIdStr) : null;
 
-      // Find or create the anime record
-      let anime = await db.anime.findUnique({ where: { anilistId } });
+      const anime = await fetchOrCreateAnime(anilistId, tmdbIdVal);
       if (!anime) {
-        const data = await fetchAniListById(anilistId);
-        if (!data) {
-          errors++;
-          continue;
-        }
-
-        // Upsert studios before creating the anime
-        const studioCreates: { studioId: number; isMainStudio: boolean }[] = [];
-        for (const edge of data.studios.edges) {
-          const studio = await db.studio.upsert({
-            where: { anilistStudioId: edge.node.id },
-            update: { name: edge.node.name },
-            create: { name: edge.node.name, anilistStudioId: edge.node.id },
-          });
-          studioCreates.push({ studioId: studio.id, isMainStudio: edge.isMain });
-        }
-
-        anime = await db.anime.create({
-          data: {
-            anilistId: data.id,
-            source: "ANILIST",
-            titleRomaji: data.title.romaji,
-            titleEnglish: data.title.english ?? null,
-            titleNative: data.title.native ?? null,
-            coverImageUrl: data.coverImage.large,
-            synopsis: data.description ?? null,
-            genres: JSON.stringify(data.genres),
-            totalEpisodes: data.episodes ?? null,
-            durationMins: data.duration ?? null,
-            airingStatus: data.status,
-            displayFormat: mapDisplayFormat(data.format),
-            sourceMaterial: mapSourceMaterial(data.source),
-            season: data.season ?? null,
-            seasonYear: data.seasonYear ?? null,
-            meanScore: data.meanScore ?? null,
-            nextAiringEp: data.nextAiringEpisode?.episode ?? null,
-            nextAiringAt: data.nextAiringEpisode
-              ? new Date(data.nextAiringEpisode.airingAt * 1000)
-              : null,
-            lastSyncedAt: new Date(),
-            tmdbId: tmdbIdVal,
-            animeStudios: { create: studioCreates },
-          },
-        });
-      } else if (tmdbIdVal && !anime.tmdbId) {
-        await db.anime.update({ where: { id: anime.id }, data: { tmdbId: tmdbIdVal } });
+        errors++;
+        continue;
       }
 
       // Find or create the recommender person
@@ -279,29 +284,49 @@ export async function POST(req: NextRequest) {
         completedAt: completedStr ? new Date(completedStr) : null,
       };
 
-      const existing = await db.userEntry.findUnique({
-        where: { animeId_userId: { animeId: anime.id, userId } },
+      // Find existing Link for this anime
+      const existingLink = await db.link.findFirst({
+        where: { userId, linkedAnime: { some: { animeId: anime.id } } },
+        select: { id: true, userEntry: { select: { id: true } } },
       });
 
-      if (existing) {
+      if (existingLink?.userEntry) {
         if (conflictMode === "skip") {
           skipped++;
         } else {
           await db.userEntry.update({
-            where: { animeId_userId: { animeId: anime.id, userId } },
+            where: { linkId: existingLink.id },
             data: entryData,
           });
           updated++;
         }
-      } else {
+      } else if (existingLink) {
+        // Link exists but no UserEntry — create one
         await db.userEntry.create({
-          data: { animeId: anime.id, userId, ...entryData },
+          data: { linkId: existingLink.id, userId, ...entryData },
+        });
+        imported++;
+      } else {
+        // No link — create Link + LinkedAnime + UserEntry
+        await db.link.create({
+          data: {
+            userId,
+            linkedAnime: { create: { animeId: anime.id, order: 0 } },
+            userEntry: { create: { userId, ...entryData } },
+          },
         });
         imported++;
       }
 
-      // Re-establish merge links for any linked AniList IDs
+      // Re-establish linked anime for any linked AniList IDs
       if (linkedIdsStr) {
+        // Find or create the link for the primary anime
+        const link = await db.link.findFirst({
+          where: { userId, linkedAnime: { some: { animeId: anime.id } } },
+          include: { linkedAnime: { select: { animeId: true, order: true } } },
+        });
+        if (!link) continue;
+
         const linkedIds = linkedIdsStr
           .split(";")
           .map((s) => Number(s.trim()))
@@ -309,52 +334,18 @@ export async function POST(req: NextRequest) {
 
         for (const linkedId of linkedIds) {
           try {
-            let linked = await db.anime.findUnique({ where: { anilistId: linkedId } });
-            if (!linked) {
-              const data = await fetchAniListById(linkedId);
-              if (!data) continue;
-              const studioCreates: { studioId: number; isMainStudio: boolean }[] = [];
-              for (const edge of data.studios.edges) {
-                const studio = await db.studio.upsert({
-                  where: { anilistStudioId: edge.node.id },
-                  update: { name: edge.node.name },
-                  create: { name: edge.node.name, anilistStudioId: edge.node.id },
-                });
-                studioCreates.push({ studioId: studio.id, isMainStudio: edge.isMain });
-              }
-              linked = await db.anime.create({
-                data: {
-                  anilistId: data.id,
-                  source: "ANILIST",
-                  titleRomaji: data.title.romaji,
-                  titleEnglish: data.title.english ?? null,
-                  titleNative: data.title.native ?? null,
-                  coverImageUrl: data.coverImage.large,
-                  synopsis: data.description ?? null,
-                  genres: JSON.stringify(data.genres),
-                  totalEpisodes: data.episodes ?? null,
-                  durationMins: data.duration ?? null,
-                  airingStatus: data.status,
-                  displayFormat: mapDisplayFormat(data.format),
-                  sourceMaterial: mapSourceMaterial(data.source),
-                  season: data.season ?? null,
-                  seasonYear: data.seasonYear ?? null,
-                  meanScore: data.meanScore ?? null,
-                  nextAiringEp: data.nextAiringEpisode?.episode ?? null,
-                  nextAiringAt: data.nextAiringEpisode
-                    ? new Date(data.nextAiringEpisode.airingAt * 1000)
-                    : null,
-                  lastSyncedAt: new Date(),
-                  mergedIntoId: anime.id,
-                  animeStudios: { create: studioCreates },
-                },
-              });
-            } else if (!linked.mergedIntoId) {
-              await db.anime.update({
-                where: { id: linked.id },
-                data: { mergedIntoId: anime.id },
-              });
-            }
+            const linkedAnime = await fetchOrCreateAnime(linkedId, null);
+            if (!linkedAnime) continue;
+
+            // Skip if already in this link
+            if (link.linkedAnime.some((la) => la.animeId === linkedAnime.id)) continue;
+
+            const nextOrder = link.linkedAnime.length;
+            await db.linkedAnime.create({
+              data: { linkId: link.id, animeId: linkedAnime.id, order: nextOrder },
+            });
+            // Update local array to track order
+            link.linkedAnime.push({ animeId: linkedAnime.id, order: nextOrder });
           } catch {
             // skip individual link failures — don't fail the whole row
           }

@@ -13,30 +13,47 @@ export async function GET(req: NextRequest) {
   const format = params.get("format");
   const search = params.get("search");
 
+  // Query via Links — each Link = one row in the export
+  // The "primary" display anime is linkedAnime[0] (order 0)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const where: Record<string, any> = {
-    userEntries: { some: { userId } },
-    mergedIntoId: null,
-  };
-  if (status) where.userEntries = { some: { userId, watchStatus: status as WatchStatus } };
-  if (franchise) where.franchiseEntries = { some: { franchiseId: Number(franchise) } };
-  if (format) where.displayFormat = format as DisplayFormat;
-  if (search) {
-    where.OR = [
-      { titleEnglish: { contains: search } },
-      { titleRomaji: { contains: search } },
-    ];
-  }
+  const userEntryWhere: Record<string, any> = {};
+  if (status) userEntryWhere.watchStatus = status as WatchStatus;
 
-  const animes = await db.anime.findMany({
-    where,
+  const links = await db.link.findMany({
+    where: {
+      userId,
+      userEntry: Object.keys(userEntryWhere).length > 0 ? { is: userEntryWhere } : { isNot: null },
+    },
     include: {
-      userEntries: { where: { userId }, include: { recommender: true }, take: 1 },
-      franchiseEntries: { include: { franchise: true }, orderBy: { order: "asc" } },
-      animeStudios: { include: { studio: true }, where: { isMainStudio: true } },
-      mergedAnimes: { select: { anilistId: true } },
+      userEntry: { include: { recommender: true } },
+      linkedAnime: {
+        include: {
+          anime: {
+            include: {
+              franchiseEntries: { include: { franchise: true }, orderBy: { order: "asc" } },
+              animeStudios: { include: { studio: true }, where: { isMainStudio: true } },
+            },
+          },
+        },
+        orderBy: { order: "asc" },
+      },
     },
     orderBy: { updatedAt: "desc" },
+  });
+
+  // Apply remaining filters (franchise, format, search) against the primary anime
+  const filtered = links.filter((link) => {
+    const primary = link.linkedAnime[0]?.anime;
+    if (!primary) return false;
+    if (format && primary.displayFormat !== (format as DisplayFormat)) return false;
+    if (franchise && !primary.franchiseEntries.some((fe) => fe.franchiseId === Number(franchise))) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const matchEn = primary.titleEnglish?.toLowerCase().includes(q) ?? false;
+      const matchRo = primary.titleRomaji.toLowerCase().includes(q);
+      if (!matchEn && !matchRo) return false;
+    }
+    return true;
   });
 
   const rows = [
@@ -61,29 +78,39 @@ export async function GET(req: NextRequest) {
       "TMDB ID",
       "Linked AniList IDs",
     ],
-    ...animes.map((a) => {
-      const e = a.userEntries[0]!;
-      const genres: string[] = JSON.parse(a.genres || "[]");
+    ...filtered.map((link) => {
+      const e = link.userEntry!;
+      const primary = link.linkedAnime[0]!.anime;
+      const genres: string[] = JSON.parse(primary.genres || "[]");
+      // All linked anime IDs (excluding the primary)
+      const linkedIds = link.linkedAnime
+        .slice(1)
+        .map((la) => la.anime.anilistId)
+        .filter(Boolean)
+        .join("; ");
+
       return [
-        a.anilistId != null ? String(a.anilistId) : "",
-        a.titleEnglish || a.titleRomaji,
+        primary.anilistId != null ? String(primary.anilistId) : "",
+        primary.titleEnglish || primary.titleRomaji,
         e.watchStatus,
         String(e.currentEpisode),
-        a.totalEpisodes ? String(a.totalEpisodes) : "",
+        link.linkedAnime.reduce((s, la) => s + (la.anime.totalEpisodes ?? 0), 0)
+          ? String(link.linkedAnime.reduce((s, la) => s + (la.anime.totalEpisodes ?? 0), 0))
+          : "",
         e.score != null ? String(e.score) : "",
-        a.meanScore != null ? String(a.meanScore) : "",
-        a.displayFormat,
-        a.franchiseEntries[0]?.franchise.name ?? "",
-        a.animeStudios[0]?.studio.name ?? "",
+        primary.meanScore != null ? String(primary.meanScore) : "",
+        primary.displayFormat,
+        primary.franchiseEntries[0]?.franchise.name ?? "",
+        primary.animeStudios[0]?.studio.name ?? "",
         genres.join("; "),
-        a.airingStatus,
-        a.season && a.seasonYear ? `${a.season} ${a.seasonYear}` : "",
+        primary.airingStatus,
+        primary.season && primary.seasonYear ? `${primary.season} ${primary.seasonYear}` : "",
         e.recommender?.name ?? "",
         e.startedAt ? e.startedAt.toISOString().split("T")[0] : "",
         e.completedAt ? e.completedAt.toISOString().split("T")[0] : "",
         (e.notes ?? "").replace(/[\n\r]/g, " "),
-        a.tmdbId != null ? String(a.tmdbId) : "",
-        a.mergedAnimes.map((m) => m.anilistId).filter(Boolean).join("; "),
+        primary.tmdbId != null ? String(primary.tmdbId) : "",
+        linkedIds,
       ];
     }),
   ];

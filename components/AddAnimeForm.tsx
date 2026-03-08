@@ -12,7 +12,6 @@ const WATCH_STATUSES = [
   { value: "PLAN_TO_WATCH", label: "Plan to Watch" },
   { value: "WATCHING", label: "Watching" },
   { value: "COMPLETED", label: "Completed" },
-  { value: "ON_HOLD", label: "On Hold" },
   { value: "DROPPED", label: "Dropped" },
   { value: "RECOMMENDED", label: "Recommended" },
 ];

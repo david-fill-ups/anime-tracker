@@ -2,8 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
 import { URLIdSchema, UpdateAnimeSchema, parseBody, wrapHandler } from "@/lib/validation";
+import { LINKED_ANIME_SELECT } from "@/lib/anime-utils";
 
 type Params = { params: Promise<{ id: string }> };
+
+// Resolves the user's Link and UserEntry for a given animeId
+async function getLinkAndEntry(animeId: number, userId: string) {
+  const link = await db.link.findFirst({
+    where: { userId, linkedAnime: { some: { animeId } } },
+    include: {
+      linkedAnime: {
+        include: { anime: { select: LINKED_ANIME_SELECT } },
+        orderBy: { order: "asc" },
+      },
+      userEntry: { include: { recommender: true, watchContextPerson: true } },
+    },
+  });
+  return link;
+}
 
 export async function GET(_req: NextRequest, { params }: Params) {
   return wrapHandler(async () => {
@@ -16,18 +32,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const anime = await db.anime.findUnique({
       where: { id: animeId },
       include: {
-        userEntries: {
-          where: { userId },
-          include: { recommender: true, watchContextPerson: true },
-          take: 1,
-        },
         franchiseEntries: { include: { franchise: true } },
         animeStudios: { include: { studio: true } },
       },
     });
     if (!anime) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    const { userEntries, ...rest } = anime;
-    return NextResponse.json({ ...rest, userEntry: userEntries[0] ?? null });
+
+    const link = await getLinkAndEntry(animeId, userId);
+    return NextResponse.json({ ...anime, link, userEntry: link?.userEntry ?? null });
   });
 }
 
@@ -71,19 +83,26 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (watchStatus === "COMPLETED" && completedAt === undefined) {
       entryData.completedAt = new Date();
     }
-    // Auto-set startedAt when starting to watch
-    if (watchStatus === "WATCHING" && startedAt === undefined) {
-      const existing = await db.userEntry.findFirst({ where: { animeId, userId } });
-      if (!existing?.startedAt) entryData.startedAt = new Date();
-    }
 
     if (Object.keys(entryData).length > 0) {
-      updates.push(
-        db.userEntry.update({
-          where: { animeId_userId: { animeId, userId } },
-          data: entryData,
-        })
-      );
+      // Auto-set startedAt when starting to watch
+      if (watchStatus === "WATCHING" && startedAt === undefined) {
+        const link = await db.link.findFirst({
+          where: { userId, linkedAnime: { some: { animeId } } },
+          select: { userEntry: { select: { startedAt: true, linkId: true } } },
+        });
+        if (!link?.userEntry?.startedAt) entryData.startedAt = new Date();
+      }
+
+      const link = await db.link.findFirst({
+        where: { userId, linkedAnime: { some: { animeId } } },
+        select: { id: true },
+      });
+      if (link) {
+        updates.push(
+          db.userEntry.update({ where: { linkId: link.id }, data: entryData })
+        );
+      }
     }
 
     await Promise.all(updates);
@@ -91,22 +110,18 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const anime = await db.anime.findUnique({
       where: { id: animeId },
       include: {
-        userEntries: {
-          where: { userId },
-          include: { recommender: true, watchContextPerson: true },
-          take: 1,
-        },
         franchiseEntries: { include: { franchise: true } },
         animeStudios: { include: { studio: true } },
       },
     });
     if (!anime) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    const { userEntries, ...rest } = anime;
-    return NextResponse.json({ ...rest, userEntry: userEntries[0] ?? null });
+
+    const link = await getLinkAndEntry(animeId, userId);
+    return NextResponse.json({ ...anime, link, userEntry: link?.userEntry ?? null });
   });
 }
 
-// Removes this anime from the user's library (deletes UserEntry only, not global Anime)
+// Removes this anime from the user's library (deletes UserEntry + Link if empty)
 export async function DELETE(_req: NextRequest, { params }: Params) {
   return wrapHandler(async () => {
     const userId = await requireUserId();
@@ -115,10 +130,18 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     if (!idParsed.success) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     const animeId = idParsed.data;
 
-    try {
-      await db.userEntry.delete({ where: { animeId_userId: { animeId, userId } } });
-    } catch {
-      // Entry may not exist
+    const link = await db.link.findFirst({
+      where: { userId, linkedAnime: { some: { animeId } } },
+      select: { id: true },
+    });
+
+    if (link) {
+      try {
+        // Delete the UserEntry — Link + LinkedAnime records persist (structure preserved for re-add)
+        await db.userEntry.delete({ where: { linkId: link.id } });
+      } catch {
+        // Entry may not exist
+      }
     }
     return NextResponse.json({ ok: true });
   });

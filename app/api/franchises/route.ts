@@ -14,7 +14,11 @@ export async function GET() {
           include: {
             anime: {
               include: {
-                userEntries: { where: { userId }, take: 1 },
+                linkedIn: {
+                  where: { link: { userId } },
+                  include: { link: { include: { userEntry: true } } },
+                  take: 1,
+                },
                 animeStudios: { include: { studio: true } },
               },
             },
@@ -31,8 +35,8 @@ export async function GET() {
         ...e,
         anime: {
           ...e.anime,
-          userEntry: e.anime.userEntries[0] ?? null,
-          userEntries: undefined,
+          userEntry: e.anime.linkedIn[0]?.link.userEntry ?? null,
+          linkedIn: undefined,
         },
       })),
     }));

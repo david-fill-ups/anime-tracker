@@ -7,11 +7,11 @@ import AnimeGrid from "@/components/AnimeGrid";
 import RecommendationsSection from "@/components/RecommendationsSection";
 import type { RecommendationItem } from "@/components/RecommendationsSection";
 import type { WatchStatus, AiringStatus } from "@/app/generated/prisma";
-import { effectiveTotalEpisodes, effectiveAiringStatus, MERGED_ANIME_SELECT } from "@/lib/anime-utils";
+import { effectiveTotalEpisodesFromLink, effectiveAiringStatusFromLink } from "@/lib/anime-utils";
 import Link from "next/link";
 
 // Statuses that mean "actively in your library" (used to find watched franchises)
-const LIBRARY_STATUSES: WatchStatus[] = ["WATCHING", "COMPLETED", "ON_HOLD", "DROPPED"];
+const LIBRARY_STATUSES: WatchStatus[] = ["WATCHING", "COMPLETED", "DROPPED"];
 
 // Statuses that belong to the queue (user has explicitly added these)
 const QUEUE_STATUSES: WatchStatus[] = ["PLAN_TO_WATCH", "RECOMMENDED"];
@@ -22,25 +22,33 @@ export default async function QueuePage() {
   const userId = session.user.id;
 
   // Plan to Watch: explicitly queued by the user
-  const rawPlanToWatch = await db.anime.findMany({
-    where: { userEntries: { some: { userId, watchStatus: { in: QUEUE_STATUSES } } }, mergedIntoId: null },
+  const rawLinks = await db.link.findMany({
+    where: { userId, userEntry: { is: { watchStatus: { in: QUEUE_STATUSES } } } },
     include: {
-      userEntries: { where: { userId }, include: { recommender: true, watchContextPerson: true }, take: 1 },
-      franchiseEntries: { include: { franchise: true } },
-      animeStudios: { include: { studio: true } },
-      mergedAnimes: { select: MERGED_ANIME_SELECT },
+      userEntry: { include: { recommender: true, watchContextPerson: true } },
+      linkedAnime: {
+        include: {
+          anime: {
+            include: {
+              franchiseEntries: { include: { franchise: true } },
+              animeStudios: { include: { studio: true } },
+            },
+          },
+        },
+        orderBy: { order: "asc" },
+      },
     },
+    orderBy: { updatedAt: "desc" },
   });
 
-  // Sort client-side by entry updatedAt (Prisma 7.4 doesn't support _max on relations)
-  const planToWatch = rawPlanToWatch
-    .map((a) => ({
-      ...a,
-      userEntry: a.userEntries[0] ?? null,
-      totalEpisodes: effectiveTotalEpisodes(a),
-      airingStatus: effectiveAiringStatus(a) as AiringStatus,
-    }))
-    .sort((a, b) => (b.userEntry?.updatedAt?.getTime() ?? 0) - (a.userEntry?.updatedAt?.getTime() ?? 0));
+  const planToWatch = rawLinks
+    .filter((l) => l.userEntry && l.linkedAnime.length > 0)
+    .map((l) => ({
+      ...l.linkedAnime[0].anime,
+      userEntry: l.userEntry,
+      totalEpisodes: effectiveTotalEpisodesFromLink(l.linkedAnime),
+      airingStatus: effectiveAiringStatusFromLink(l.linkedAnime) as AiringStatus,
+    }));
 
   // Recommendations: find franchises where you've watched at least one entry,
   // then surface siblings you haven't added to your library or queue yet.
@@ -49,7 +57,7 @@ export default async function QueuePage() {
       userId,
       entries: {
         some: {
-          anime: { userEntries: { some: { userId, watchStatus: { in: LIBRARY_STATUSES } } } },
+          anime: { linkedIn: { some: { link: { userId, userEntry: { is: { watchStatus: { in: LIBRARY_STATUSES } } } } } } },
         },
       },
     },
@@ -59,10 +67,13 @@ export default async function QueuePage() {
         include: {
           anime: {
             include: {
-              userEntries: { where: { userId }, take: 1 },
+              linkedIn: {
+                where: { link: { userId } },
+                include: { link: { include: { userEntry: true } } },
+                take: 1,
+              },
               franchiseEntries: { include: { franchise: true } },
               animeStudios: { include: { studio: true } },
-              mergedAnimes: { select: MERGED_ANIME_SELECT },
             },
           },
         },
@@ -78,17 +89,19 @@ export default async function QueuePage() {
   for (const franchise of watchedFranchises) {
     for (const entry of franchise.entries) {
       const rawAnime = entry.anime;
-      // Skip merged secondaries — they're represented by their primary
-      if (rawAnime.mergedIntoId !== null) { seenIds.add(rawAnime.id); continue; }
+      // Skip anime that are non-primary (order > 0) in this user's link
+      const userLinkedAnime = rawAnime.linkedIn[0];
+      if (userLinkedAnime && userLinkedAnime.order > 0) { seenIds.add(rawAnime.id); continue; }
       if (seenIds.has(rawAnime.id)) continue;
 
+      const userEntry = userLinkedAnime?.link.userEntry ?? null;
       const anime = {
         ...rawAnime,
-        userEntry: rawAnime.userEntries[0] ?? null,
-        totalEpisodes: effectiveTotalEpisodes(rawAnime),
-        airingStatus: effectiveAiringStatus(rawAnime) as AiringStatus,
+        userEntry,
+        totalEpisodes: rawAnime.totalEpisodes,
+        airingStatus: rawAnime.airingStatus as AiringStatus,
       };
-      const status = anime.userEntry?.watchStatus;
+      const status = userEntry?.watchStatus;
 
       // Skip if already in library or queue
       if (

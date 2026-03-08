@@ -221,13 +221,13 @@ function parseLastWatched(
     const currentEpisode = parseInt(epMatch[1]);
     return {
       currentEpisode,
-      watchStatus: hasRating ? "COMPLETED" : "ON_HOLD",
+      watchStatus: hasRating ? "COMPLETED" : "WATCHING",
     };
   }
 
   // "S1" alone — season data with no episode number
   if (lw.match(/^[Ss]\d+$/)) {
-    return { currentEpisode: 0, watchStatus: "ON_HOLD" };
+    return { currentEpisode: 0, watchStatus: "WATCHING" };
   }
 
   return { currentEpisode: 0, watchStatus: "PLAN_TO_WATCH" };

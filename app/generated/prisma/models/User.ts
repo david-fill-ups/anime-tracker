@@ -201,6 +201,7 @@ export type UserWhereInput = {
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   userEntries?: Prisma.UserEntryListRelationFilter
+  links?: Prisma.LinkListRelationFilter
   franchises?: Prisma.FranchiseListRelationFilter
   people?: Prisma.PersonListRelationFilter
 }
@@ -216,6 +217,7 @@ export type UserOrderByWithRelationInput = {
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   userEntries?: Prisma.UserEntryOrderByRelationAggregateInput
+  links?: Prisma.LinkOrderByRelationAggregateInput
   franchises?: Prisma.FranchiseOrderByRelationAggregateInput
   people?: Prisma.PersonOrderByRelationAggregateInput
 }
@@ -234,6 +236,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   userEntries?: Prisma.UserEntryListRelationFilter
+  links?: Prisma.LinkListRelationFilter
   franchises?: Prisma.FranchiseListRelationFilter
   people?: Prisma.PersonListRelationFilter
 }, "id" | "email">
@@ -275,6 +278,7 @@ export type UserCreateInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
   people?: Prisma.PersonCreateNestedManyWithoutUserInput
 }
@@ -290,6 +294,7 @@ export type UserUncheckedCreateInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
   people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
 }
@@ -305,6 +310,7 @@ export type UserUpdateInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUpdateManyWithoutUserNestedInput
 }
@@ -320,6 +326,7 @@ export type UserUncheckedUpdateInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -461,6 +468,20 @@ export type UserUpdateOneRequiredWithoutFranchisesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFranchisesInput, Prisma.UserUpdateWithoutFranchisesInput>, Prisma.UserUncheckedUpdateWithoutFranchisesInput>
 }
 
+export type UserCreateNestedOneWithoutLinksInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLinksInput, Prisma.UserUncheckedCreateWithoutLinksInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLinksInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutLinksNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLinksInput, Prisma.UserUncheckedCreateWithoutLinksInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLinksInput
+  upsert?: Prisma.UserUpsertWithoutLinksInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLinksInput, Prisma.UserUpdateWithoutLinksInput>, Prisma.UserUncheckedUpdateWithoutLinksInput>
+}
+
 export type UserCreateNestedOneWithoutUserEntriesInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutUserEntriesInput, Prisma.UserUncheckedCreateWithoutUserEntriesInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutUserEntriesInput
@@ -485,6 +506,7 @@ export type UserCreateWithoutAccountsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
   people?: Prisma.PersonCreateNestedManyWithoutUserInput
 }
@@ -499,6 +521,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
   people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
 }
@@ -529,6 +552,7 @@ export type UserUpdateWithoutAccountsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUpdateManyWithoutUserNestedInput
 }
@@ -543,6 +567,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -557,6 +582,7 @@ export type UserCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
   people?: Prisma.PersonCreateNestedManyWithoutUserInput
 }
@@ -571,6 +597,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
   people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
 }
@@ -601,6 +628,7 @@ export type UserUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUpdateManyWithoutUserNestedInput
 }
@@ -615,6 +643,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -630,6 +659,7 @@ export type UserCreateWithoutPeopleInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
 }
 
@@ -644,6 +674,7 @@ export type UserUncheckedCreateWithoutPeopleInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -674,6 +705,7 @@ export type UserUpdateWithoutPeopleInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
 }
 
@@ -688,6 +720,7 @@ export type UserUncheckedUpdateWithoutPeopleInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -702,6 +735,7 @@ export type UserCreateWithoutFranchisesInput = {
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   people?: Prisma.PersonCreateNestedManyWithoutUserInput
 }
 
@@ -716,6 +750,7 @@ export type UserUncheckedCreateWithoutFranchisesInput = {
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -746,6 +781,7 @@ export type UserUpdateWithoutFranchisesInput = {
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUpdateManyWithoutUserNestedInput
 }
 
@@ -760,6 +796,83 @@ export type UserUncheckedUpdateWithoutFranchisesInput = {
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
+  people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutLinksInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
+  franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
+  people?: Prisma.PersonCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutLinksInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
+  franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
+  people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutLinksInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLinksInput, Prisma.UserUncheckedCreateWithoutLinksInput>
+}
+
+export type UserUpsertWithoutLinksInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLinksInput, Prisma.UserUncheckedUpdateWithoutLinksInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLinksInput, Prisma.UserUncheckedCreateWithoutLinksInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLinksInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLinksInput, Prisma.UserUncheckedUpdateWithoutLinksInput>
+}
+
+export type UserUpdateWithoutLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
+  franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
+  people?: Prisma.PersonUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
+  franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -773,6 +886,7 @@ export type UserCreateWithoutUserEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
   people?: Prisma.PersonCreateNestedManyWithoutUserInput
 }
@@ -787,6 +901,7 @@ export type UserUncheckedCreateWithoutUserEntriesInput = {
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
   people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
 }
@@ -817,6 +932,7 @@ export type UserUpdateWithoutUserEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUpdateManyWithoutUserNestedInput
 }
@@ -831,6 +947,7 @@ export type UserUncheckedUpdateWithoutUserEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -844,6 +961,7 @@ export type UserCountOutputType = {
   accounts: number
   sessions: number
   userEntries: number
+  links: number
   franchises: number
   people: number
 }
@@ -852,6 +970,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   userEntries?: boolean | UserCountOutputTypeCountUserEntriesArgs
+  links?: boolean | UserCountOutputTypeCountLinksArgs
   franchises?: boolean | UserCountOutputTypeCountFranchisesArgs
   people?: boolean | UserCountOutputTypeCountPeopleArgs
 }
@@ -890,6 +1009,13 @@ export type UserCountOutputTypeCountUserEntriesArgs<ExtArgs extends runtime.Type
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LinkWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountFranchisesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FranchiseWhereInput
 }
@@ -913,6 +1039,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   userEntries?: boolean | Prisma.User$userEntriesArgs<ExtArgs>
+  links?: boolean | Prisma.User$linksArgs<ExtArgs>
   franchises?: boolean | Prisma.User$franchisesArgs<ExtArgs>
   people?: boolean | Prisma.User$peopleArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -953,6 +1080,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   userEntries?: boolean | Prisma.User$userEntriesArgs<ExtArgs>
+  links?: boolean | Prisma.User$linksArgs<ExtArgs>
   franchises?: boolean | Prisma.User$franchisesArgs<ExtArgs>
   people?: boolean | Prisma.User$peopleArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -966,6 +1094,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     accounts: Prisma.$AccountPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     userEntries: Prisma.$UserEntryPayload<ExtArgs>[]
+    links: Prisma.$LinkPayload<ExtArgs>[]
     franchises: Prisma.$FranchisePayload<ExtArgs>[]
     people: Prisma.$PersonPayload<ExtArgs>[]
   }
@@ -1374,6 +1503,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userEntries<T extends Prisma.User$userEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  links<T extends Prisma.User$linksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$linksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   franchises<T extends Prisma.User$franchisesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$franchisesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FranchisePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   people<T extends Prisma.User$peopleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$peopleArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PersonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1869,6 +1999,30 @@ export type User$userEntriesArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.UserEntryScalarFieldEnum | Prisma.UserEntryScalarFieldEnum[]
+}
+
+/**
+ * User.links
+ */
+export type User$linksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Link
+   */
+  select?: Prisma.LinkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Link
+   */
+  omit?: Prisma.LinkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LinkInclude<ExtArgs> | null
+  where?: Prisma.LinkWhereInput
+  orderBy?: Prisma.LinkOrderByWithRelationInput | Prisma.LinkOrderByWithRelationInput[]
+  cursor?: Prisma.LinkWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LinkScalarFieldEnum | Prisma.LinkScalarFieldEnum[]
 }
 
 /**

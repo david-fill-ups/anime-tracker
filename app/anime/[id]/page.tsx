@@ -19,8 +19,9 @@ import AnimeEditForm from "@/components/AnimeEditForm";
 import WhereToWatch from "@/components/WhereToWatch";
 import StreamingAutoRefresh from "@/components/StreamingAutoRefresh";
 import AnimeMetaEdit from "@/components/AnimeMetaEdit";
-import SeasonsMerge from "@/components/SeasonsMerge";
-import { effectiveTotalEpisodes, effectiveAiringStatus, MERGED_ANIME_SELECT } from "@/lib/anime-utils";
+import LinkManager from "@/components/LinkManager";
+import LinkDetailClient from "@/components/LinkDetailClient";
+import { effectiveTotalEpisodesFromLink, effectiveAiringStatusFromLink, LINKED_ANIME_SELECT } from "@/lib/anime-utils";
 import type { AiringStatus } from "@/app/generated/prisma";
 import { Suspense } from "react";
 import RelatedAnime from "@/components/RelatedAnime";
@@ -38,61 +39,161 @@ export default async function AnimeDetailPage({
   const rawAnime = await db.anime.findUnique({
     where: { id: Number(id) },
     include: {
-      userEntries: {
-        where: { userId },
-        include: { recommender: true, watchContextPerson: true },
-        take: 1,
-      },
       franchiseEntries: { include: { franchise: true }, orderBy: { order: "asc" } },
       animeStudios: { include: { studio: true } },
       streamingLinks: { orderBy: { service: "asc" } },
-      mergedAnimes: { select: MERGED_ANIME_SELECT, orderBy: { seasonYear: "asc" as const } },
     },
   });
 
   if (!rawAnime) notFound();
 
-  // Transform for component compatibility: userEntries[] -> userEntry, effective aggregated fields
-  const { userEntries, ...animeRest } = rawAnime;
-  const anime = {
-    ...animeRest,
-    userEntry: userEntries[0] ?? null,
-    totalEpisodes: effectiveTotalEpisodes(animeRest),
-    airingStatus: effectiveAiringStatus(animeRest) as AiringStatus,
-  };
+  // Find this anime's Link for this user
+  const link = await db.link.findFirst({
+    where: { userId, linkedAnime: { some: { animeId: rawAnime.id } } },
+    include: {
+      linkedAnime: {
+        include: { anime: { select: LINKED_ANIME_SELECT } },
+        orderBy: { order: "asc" },
+      },
+      userEntry: { include: { recommender: true, watchContextPerson: true } },
+    },
+  });
 
-  const entry = anime.userEntry;
-  const genres: string[] = JSON.parse(anime.genres || "[]");
-  const mainStudios = anime.animeStudios.filter((s) => s.isMainStudio);
-  const title = anime.titleEnglish || anime.titleRomaji;
+  const entry = link?.userEntry ?? null;
+  const isMultiLink = (link?.linkedAnime.length ?? 0) > 1;
+
+  const genres: string[] = JSON.parse(rawAnime.genres || "[]");
+  const mainStudios = rawAnime.animeStudios.filter((s) => s.isMainStudio);
+
+  // Effective totals across all linked anime
+  const totalEpisodes = link
+    ? effectiveTotalEpisodesFromLink(link.linkedAnime)
+    : rawAnime.totalEpisodes;
+  const airingStatus = link
+    ? (effectiveAiringStatusFromLink(link.linkedAnime) as AiringStatus)
+    : rawAnime.airingStatus;
+
+  const title = rawAnime.titleEnglish || rawAnime.titleRomaji;
 
   const [people, franchises] = await Promise.all([
     db.person.findMany({ where: { userId }, orderBy: { name: "asc" } }),
     db.franchise.findMany({ where: { userId }, orderBy: { name: "asc" } }),
   ]);
 
+  // Linked anime seasons for AnimeEditForm (single-link case)
+  const linkedAnimeSeasonsForForm = (link?.linkedAnime ?? []).map((la) => ({
+    order: la.order,
+    anime: {
+      id: la.anime.id,
+      titleRomaji: la.anime.titleRomaji,
+      titleEnglish: la.anime.titleEnglish,
+      totalEpisodes: la.anime.totalEpisodes,
+      totalSeasons: la.anime.totalSeasons,
+      episodesPerSeason: la.anime.episodesPerSeason,
+    },
+  }));
+
+  // ── Multi-link: delegate to client component for overview/detail toggle ──────
+  if (isMultiLink && link) {
+    const linkData = {
+      id: link.id,
+      name: link.name,
+      linkedAnime: link.linkedAnime.map((la) => ({
+        id: la.id,
+        order: la.order,
+        anime: {
+          id: la.anime.id,
+          titleRomaji: la.anime.titleRomaji,
+          titleEnglish: la.anime.titleEnglish,
+          coverImageUrl: la.anime.coverImageUrl,
+          synopsis: la.anime.synopsis,
+          totalEpisodes: la.anime.totalEpisodes,
+          totalSeasons: la.anime.totalSeasons,
+          episodesPerSeason: la.anime.episodesPerSeason,
+          meanScore: la.anime.meanScore,
+          airingStatus: la.anime.airingStatus,
+          season: la.anime.season,
+          seasonYear: la.anime.seasonYear,
+          displayFormat: la.anime.displayFormat,
+          anilistId: la.anime.anilistId,
+          // Only the page's own anime has tmdb/external/genre data loaded
+          tmdbId: la.anime.id === rawAnime.id ? rawAnime.tmdbId : null,
+          tmdbMediaType: la.anime.id === rawAnime.id ? rawAnime.tmdbMediaType : null,
+          externalUrl: la.anime.id === rawAnime.id ? rawAnime.externalUrl : null,
+          genres: la.anime.id === rawAnime.id ? rawAnime.genres : "[]",
+        },
+      })),
+      userEntry: link.userEntry,
+    };
+
+    return (
+      <div className="max-w-3xl space-y-8">
+        <LinkDetailClient
+          link={linkData}
+          primaryAnime={rawAnime}
+          people={people}
+          franchises={franchises}
+        />
+
+        {rawAnime.anilistId && (
+          <Suspense fallback={null}>
+            <RelatedAnime
+              anilistId={rawAnime.anilistId}
+              userId={userId}
+              franchiseIds={rawAnime.franchiseEntries.map((fe) => fe.franchise.id)}
+              linkId={link.id}
+              linkedAnilistIds={link.linkedAnime.map((la) => la.anime.anilistId)}
+              currentAnimeId={rawAnime.id}
+            />
+          </Suspense>
+        )}
+
+        <StreamingAutoRefresh animeId={rawAnime.id} source={rawAnime.source} streamingCheckedAt={rawAnime.streamingCheckedAt} lastSyncedAt={rawAnime.lastSyncedAt} />
+        <WhereToWatch animeId={rawAnime.id} initialLinks={rawAnime.streamingLinks} />
+
+        {rawAnime.streamingCheckedAt && (
+          <p className="text-xs text-slate-600" title={new Date(rawAnime.streamingCheckedAt).toLocaleString()}>
+            Last updated {formatRelativeDate(rawAnime.streamingCheckedAt)}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // ── Single-link or no-link: existing single-anime layout ────────────────────
+  const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+    FINISHED:         { label: "Finished",          className: "bg-green-900/50 text-green-400 border border-green-800" },
+    RELEASING:        { label: "Currently Airing",  className: "bg-blue-900/50 text-blue-400 border border-blue-800" },
+    HIATUS:           { label: "On Hiatus",         className: "bg-amber-900/50 text-amber-400 border border-amber-800" },
+    CANCELLED:        { label: "Cancelled",         className: "bg-red-900/50 text-red-400 border border-red-800" },
+    NOT_YET_RELEASED: { label: "Not Yet Released",  className: "bg-slate-700/50 text-slate-400 border border-slate-600" },
+  };
+
   return (
     <div className="max-w-3xl space-y-8">
       {/* Header */}
       <div className="flex gap-6">
         <div className="relative w-32 h-48 flex-shrink-0 rounded-lg overflow-hidden bg-slate-800">
-          {anime.coverImageUrl ? (
-            <Image src={anime.coverImageUrl} alt={title} fill className="object-cover" unoptimized />
+          {rawAnime.coverImageUrl ? (
+            <Image src={rawAnime.coverImageUrl} alt={title} fill className="object-cover" unoptimized />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs text-center px-2">No cover</div>
           )}
         </div>
         <div className="flex-1 space-y-2">
           <h2 className="text-2xl font-bold text-white">{title}</h2>
-          {anime.titleRomaji !== title && (
-            <p className="text-slate-400 text-sm">{anime.titleRomaji}</p>
+          {rawAnime.titleRomaji !== title && (
+            <p className="text-slate-400 text-sm">{rawAnime.titleRomaji}</p>
           )}
           <div className="flex flex-wrap gap-2 items-center">
             {entry && <StatusBadge status={entry.watchStatus} />}
-            <span className="text-xs text-slate-500">{anime.displayFormat}</span>
-            <span className="text-xs text-slate-500">{anime.airingStatus}</span>
-            {anime.season && anime.seasonYear && (
-              <span className="text-xs text-slate-500">{anime.season} {anime.seasonYear}</span>
+            <span className="text-xs text-slate-500">{rawAnime.displayFormat}</span>
+            {(() => {
+              const cfg = STATUS_CONFIG[airingStatus] ?? { label: airingStatus, className: "bg-slate-800 text-slate-400 border border-slate-700" };
+              return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${cfg.className}`}>{cfg.label}</span>;
+            })()}
+            {rawAnime.season && rawAnime.seasonYear && (
+              <span className="text-xs text-slate-500">{rawAnime.season} {rawAnime.seasonYear}</span>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
@@ -105,23 +206,23 @@ export default async function AnimeDetailPage({
               {mainStudios.map((s) => s.studio.name).join(", ")}
             </p>
           )}
-          {anime.meanScore && (
+          {rawAnime.meanScore && (
             <p className="text-sm text-slate-400">
-              Community score: <span className="text-white font-medium">{anime.meanScore}/100</span>
+              Community score: <span className="text-white font-medium">{rawAnime.meanScore}/100</span>
             </p>
           )}
-          {anime.totalEpisodes && (
+          {totalEpisodes && (
             <p className="text-sm text-slate-400">
-              {anime.totalSeasons && anime.totalSeasons > 1
-                ? `${anime.totalSeasons * anime.totalEpisodes} episodes (${anime.totalSeasons} seasons × ${anime.totalEpisodes} ep)`
-                : `${anime.totalEpisodes} episodes`}
-              {anime.durationMins && ` · ${anime.durationMins} min/ep`}
+              {rawAnime.totalSeasons && rawAnime.totalSeasons > 1
+                ? `${totalEpisodes} episodes (${rawAnime.totalSeasons} seasons)`
+                : `${totalEpisodes} episodes`}
+              {rawAnime.durationMins && ` · ${rawAnime.durationMins} min/ep`}
             </p>
           )}
-          {anime.franchiseEntries.length > 0 && (
+          {rawAnime.franchiseEntries.length > 0 && (
             <p className="text-sm text-slate-400">
               Franchise:{" "}
-              {anime.franchiseEntries.map((fe) => (
+              {rawAnime.franchiseEntries.map((fe) => (
                 <a key={fe.franchise.id} href={`/franchises/${fe.franchise.id}`} className="text-indigo-400 hover:text-indigo-300">
                   {fe.franchise.name}
                 </a>
@@ -132,69 +233,86 @@ export default async function AnimeDetailPage({
       </div>
 
       <div>
-        {anime.synopsis && (
+        {rawAnime.synopsis && (
           <>
             <h3 className="text-sm font-semibold text-slate-300 mb-2">Synopsis</h3>
-            <p className="text-sm text-slate-400 leading-relaxed line-clamp-6">{anime.synopsis}</p>
+            <p className="text-sm text-slate-400 leading-relaxed line-clamp-6">{rawAnime.synopsis}</p>
           </>
         )}
-        <AnimeMetaEdit anime={anime} />
+        <AnimeMetaEdit anime={rawAnime} />
       </div>
 
-      {(anime.anilistId || anime.tmdbId || anime.externalUrl) && (
+      {(rawAnime.anilistId || rawAnime.tmdbId || rawAnime.externalUrl) && (
         <div className="flex flex-wrap gap-4">
-          {anime.anilistId && (
-            <a
-              href={`https://anilist.co/anime/${anime.anilistId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
+          {rawAnime.anilistId && (
+            <a href={`https://anilist.co/anime/${rawAnime.anilistId}`} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
               View on AniList ↗
             </a>
           )}
-          {anime.tmdbId && (
-            <a
-              href={`https://www.themoviedb.org/${anime.tmdbMediaType ?? "tv"}/${anime.tmdbId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
+          {rawAnime.tmdbId && (
+            <a href={`https://www.themoviedb.org/${rawAnime.tmdbMediaType ?? "tv"}/${rawAnime.tmdbId}`} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
               View on TMDB ↗
             </a>
           )}
-          {anime.externalUrl && (
-            <a
-              href={anime.externalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-            >
+          {rawAnime.externalUrl && (
+            <a href={rawAnime.externalUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
               External Link ↗
             </a>
           )}
         </div>
       )}
 
-      <SeasonsMerge animeId={anime.id} mergedAnimes={anime.mergedAnimes} />
+      {/* Link management — always shown so user can add a linked anime */}
+      {link && (
+        <LinkManager
+          linkId={link.id}
+          linkedAnime={link.linkedAnime.map((la) => ({
+            id: la.id,
+            order: la.order,
+            anime: {
+              id: la.anime.id,
+              titleRomaji: la.anime.titleRomaji,
+              titleEnglish: la.anime.titleEnglish,
+              anilistId: la.anime.anilistId,
+              season: la.anime.season,
+              seasonYear: la.anime.seasonYear,
+              totalEpisodes: la.anime.totalEpisodes,
+              airingStatus: la.anime.airingStatus,
+            },
+          }))}
+        />
+      )}
 
-      {anime.anilistId && (
+      {rawAnime.anilistId && (
         <Suspense fallback={null}>
-          <RelatedAnime anilistId={anime.anilistId} userId={userId} />
+          <RelatedAnime
+            anilistId={rawAnime.anilistId}
+            userId={userId}
+            franchiseIds={rawAnime.franchiseEntries.map((fe) => fe.franchise.id)}
+            linkId={link?.id ?? null}
+            linkedAnilistIds={link?.linkedAnime.map((la) => la.anime.anilistId) ?? []}
+            currentAnimeId={rawAnime.id}
+          />
         </Suspense>
       )}
 
-      <StreamingAutoRefresh animeId={anime.id} source={anime.source} streamingCheckedAt={anime.streamingCheckedAt} lastSyncedAt={anime.lastSyncedAt} />
-      <WhereToWatch animeId={anime.id} initialLinks={anime.streamingLinks} />
+      <StreamingAutoRefresh animeId={rawAnime.id} source={rawAnime.source} streamingCheckedAt={rawAnime.streamingCheckedAt} lastSyncedAt={rawAnime.lastSyncedAt} />
+      <WhereToWatch animeId={rawAnime.id} initialLinks={rawAnime.streamingLinks} />
 
       <div>
         <h3 className="text-sm font-semibold text-slate-300 mb-4">Your Review</h3>
-        <AnimeEditForm anime={anime} entry={entry} people={people} franchises={franchises} />
+        <AnimeEditForm
+          anime={rawAnime}
+          entry={entry}
+          people={people}
+          franchises={franchises}
+          linkedAnime={linkedAnimeSeasonsForForm}
+        />
       </div>
 
-      {anime.streamingCheckedAt && (
-        <p className="text-xs text-slate-600" title={new Date(anime.streamingCheckedAt).toLocaleString()}>
-          Last updated {formatRelativeDate(anime.streamingCheckedAt)}
+      {rawAnime.streamingCheckedAt && (
+        <p className="text-xs text-slate-600" title={new Date(rawAnime.streamingCheckedAt).toLocaleString()}>
+          Last updated {formatRelativeDate(rawAnime.streamingCheckedAt)}
         </p>
       )}
     </div>
