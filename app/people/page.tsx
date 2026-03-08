@@ -13,7 +13,13 @@ export default async function PeoplePage() {
     where: { userId },
     include: {
       entries: {
-        include: { anime: true },
+        include: {
+          link: {
+            include: {
+              linkedAnime: { orderBy: { order: "asc" }, take: 1, include: { anime: true } },
+            },
+          },
+        },
       },
     },
     orderBy: { name: "asc" },
@@ -32,11 +38,14 @@ export default async function PeoplePage() {
       completedCount: completed.length,
       ratedCount: rated.length,
       avgScore,
-      recentRecommendations: person.entries.slice(0, 3).map((e) => ({
-        title: e.anime.titleEnglish || e.anime.titleRomaji,
-        status: e.watchStatus,
-        score: e.score,
-      })),
+      recentRecommendations: person.entries.slice(0, 3).map((e) => {
+        const anime = e.link.linkedAnime[0]?.anime;
+        return {
+          title: anime ? (anime.titleEnglish || anime.titleRomaji) : "(unknown)",
+          status: e.watchStatus,
+          score: e.score,
+        };
+      }),
     };
   });
 
