@@ -29,26 +29,29 @@ export default async function RootLayout({
     );
   }
 
-  const recentEntry = await db.userEntry.findFirst({
+  const recentLink = await db.link.findFirst({
     where: {
       userId: session.user.id,
-      watchStatus: "COMPLETED",
-      anime: { coverImageUrl: { not: null } },
+      userEntry: { is: { watchStatus: "COMPLETED" } },
+      linkedAnime: { some: { order: 0, anime: { coverImageUrl: { not: null } } } },
     },
-    orderBy: { completedAt: "desc" },
+    orderBy: { userEntry: { completedAt: "desc" } },
     select: {
-      score: true,
-      anime: {
-        select: { titleEnglish: true, titleRomaji: true, coverImageUrl: true },
+      userEntry: { select: { score: true } },
+      linkedAnime: {
+        where: { order: 0 },
+        take: 1,
+        select: { anime: { select: { titleEnglish: true, titleRomaji: true, coverImageUrl: true } } },
       },
     },
   });
 
-  const recentAnime = recentEntry
+  const recentAnimeData = recentLink?.linkedAnime[0]?.anime ?? null;
+  const recentAnime = recentAnimeData
     ? {
-        coverImageUrl: recentEntry.anime.coverImageUrl!,
-        title: recentEntry.anime.titleEnglish ?? recentEntry.anime.titleRomaji,
-        score: recentEntry.score ?? null,
+        coverImageUrl: recentAnimeData.coverImageUrl!,
+        title: recentAnimeData.titleEnglish ?? recentAnimeData.titleRomaji,
+        score: recentLink?.userEntry?.score ?? null,
       }
     : null;
 
