@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import type { AiringStatus, UserEntry, Person, Franchise, Anime } from "@/app/generated/prisma";
 import LinkOverview, { type LinkedAnimeCard } from "./LinkOverview";
-import LinkManager, { type LinkedAnimeSummary } from "./LinkManager";
 import AnimeEditForm from "./AnimeEditForm";
 import StatusBadge from "./StatusBadge";
 
@@ -76,22 +75,6 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
     anime: la.anime,
   }));
 
-  // Summary list for LinkManager
-  const summaries: LinkedAnimeSummary[] = sorted.map((la) => ({
-    id: la.id,
-    order: la.order,
-    anime: {
-      id: la.anime.id,
-      titleRomaji: la.anime.titleRomaji,
-      titleEnglish: la.anime.titleEnglish,
-      anilistId: la.anime.anilistId,
-      season: la.anime.season as import("@/app/generated/prisma").Season | null,
-      seasonYear: la.anime.seasonYear,
-      totalEpisodes: la.anime.totalEpisodes,
-      airingStatus: la.anime.airingStatus,
-    },
-  }));
-
   // Linked anime seasons for AnimeEditForm episode tracking
   const linkedAnimeSeasonsForForm = sorted.map((la) => ({
     order: la.order,
@@ -110,14 +93,6 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
     ? sorted.find((la) => la.anime.id === selectedAnimeId) ?? null
     : null;
 
-  // Use the primaryAnime's franchiseEntries for both overview and detail header when viewing the page's anime
-  const animeForForm = selectedLinked
-    ? {
-        ...primaryAnime,
-        id: selectedLinked.anime.id, // route PATCH calls use this id
-      }
-    : primaryAnime;
-
   return (
     <div className="space-y-8">
       {/* Back button in detail mode */}
@@ -132,23 +107,37 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
 
       {isOverview ? (
         /* ── OVERVIEW ── */
-        <div className="space-y-6">
-          <LinkOverview
-            linkId={link.id}
-            linkName={link.name}
-            linkedAnime={cards}
-            onSelectAnime={setSelectedAnimeId}
-          />
+        <>
+          <div className="space-y-6">
+            <LinkOverview
+              linkId={link.id}
+              linkName={link.name}
+              linkedAnime={cards}
+              onSelectAnime={setSelectedAnimeId}
+            />
 
-          {/* Summary stats */}
-          <div className="flex flex-wrap gap-4 text-sm text-slate-400">
-            {entry && <StatusBadge status={entry.watchStatus} />}
-            {totalEpisodes > 0 && (
-              <span>{totalEpisodes} total episodes</span>
-            )}
-            <span>{sorted.length} linked</span>
+            {/* Summary stats */}
+            <div className="flex flex-wrap gap-4 text-sm text-slate-400">
+              {entry && <StatusBadge status={entry.watchStatus} />}
+              {totalEpisodes > 0 && (
+                <span>{totalEpisodes} total episodes</span>
+              )}
+              <span>{sorted.length} linked</span>
+            </div>
           </div>
-        </div>
+
+          {/* Your Review (overview only, link-level) */}
+          <div>
+            <h3 className="text-sm font-semibold text-slate-300 mb-4">Your Review</h3>
+            <AnimeEditForm
+              anime={primaryAnime}
+              entry={entry}
+              people={people}
+              franchises={franchises}
+              linkedAnime={linkedAnimeSeasonsForForm}
+            />
+          </div>
+        </>
       ) : (
         /* ── DETAIL VIEW ── */
         selectedLinked && (
@@ -254,21 +243,6 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
           </div>
         )
       )}
-
-      {/* Link management (always visible) */}
-      <LinkManager linkId={link.id} linkedAnime={summaries} />
-
-      {/* Your Review (always visible, link-level) */}
-      <div>
-        <h3 className="text-sm font-semibold text-slate-300 mb-4">Your Review</h3>
-        <AnimeEditForm
-          anime={animeForForm}
-          entry={entry}
-          people={people}
-          franchises={franchises}
-          linkedAnime={linkedAnimeSeasonsForForm}
-        />
-      </div>
     </div>
   );
 }

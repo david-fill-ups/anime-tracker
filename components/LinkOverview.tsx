@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { AiringStatus } from "@/app/generated/prisma";
+import type { AiringStatus, Season } from "@/app/generated/prisma";
 
 export type LinkedAnimeCard = {
   id: number; // LinkedAnime.id
@@ -30,18 +30,64 @@ type LinkOverviewProps = {
 };
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  FINISHED:         { label: "Finished",         className: "text-green-400" },
-  RELEASING:        { label: "Airing",            className: "text-blue-400" },
-  HIATUS:           { label: "Hiatus",            className: "text-amber-400" },
-  CANCELLED:        { label: "Cancelled",         className: "text-red-400" },
-  NOT_YET_RELEASED: { label: "Upcoming",          className: "text-slate-400" },
+  FINISHED:         { label: "Finished",  className: "text-green-400" },
+  RELEASING:        { label: "Airing",    className: "text-blue-400" },
+  HIATUS:           { label: "Hiatus",    className: "text-amber-400" },
+  CANCELLED:        { label: "Cancelled", className: "text-red-400" },
+  NOT_YET_RELEASED: { label: "Upcoming",  className: "text-slate-400" },
 };
+
+type LibraryResult = {
+  source: "library";
+  id: number;
+  titleEnglish: string | null;
+  titleRomaji: string;
+  anilistId: number | null;
+  season: Season | null;
+  seasonYear: number | null;
+  totalEpisodes: number | null;
+  airingStatus: AiringStatus;
+};
+
+type AniListResult = {
+  source: "anilist";
+  anilistId: number;
+  titleEnglish: string | null;
+  titleRomaji: string;
+  season: string | null;
+  seasonYear: number | null;
+  episodes: number | null;
+  status: AiringStatus;
+};
+
+type SearchResult = LibraryResult | AniListResult;
+
+function resultTitle(r: SearchResult) {
+  return r.titleEnglish ?? r.titleRomaji;
+}
+
+function resultMeta(r: SearchResult) {
+  const year = r.seasonYear;
+  const season = r.season;
+  const eps = r.source === "library" ? r.totalEpisodes : r.episodes;
+  const yearStr = year ? ` · ${season ? season.charAt(0) + season.slice(1).toLowerCase() + " " : ""}${year}` : "";
+  const epsStr = eps ? ` · ${eps} eps` : "";
+  return yearStr + epsStr;
+}
 
 export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAnime }: LinkOverviewProps) {
   const router = useRouter();
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(linkName ?? "");
   const [savingName, setSavingName] = useState(false);
+
+  // Add-anime state
+  const [addOpen, setAddOpen] = useState(false);
+  const [addQuery, setAddQuery] = useState("");
+  const [addResults, setAddResults] = useState<SearchResult[]>([]);
+  const [addSearching, setAddSearching] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
   const sorted = [...linkedAnime].sort((a, b) => a.order - b.order);
   const displayName = linkName ?? (sorted[0]?.anime.titleEnglish ?? sorted[0]?.anime.titleRomaji ?? "");
@@ -63,6 +109,72 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
     }
   }
 
+  useEffect(() => {
+    if (addQuery.trim().length < 2) { setAddResults([]); return; }
+    const timer = setTimeout(() => doSearch(addQuery.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [addQuery]);
+
+  async function doSearch(q: string) {
+    setAddSearching(true);
+    try {
+      const [libRes, alRes] = await Promise.all([
+        fetch(`/api/anime/search?q=${encodeURIComponent(q)}&excludeLinkId=${linkId}`),
+        fetch(`/api/anilist/search?q=${encodeURIComponent(q)}`),
+      ]);
+      const [lib, al]: [
+        LibraryResult[],
+        { id: number; title: { english: string | null; romaji: string }; season: string | null; seasonYear: number | null; episodes: number | null; status: AiringStatus }[]
+      ] = await Promise.all([libRes.json(), alRes.json()]);
+
+      const libraryResults: LibraryResult[] = lib.map((r) => ({ ...r, source: "library" as const }));
+      const libAnilistIds = new Set(libraryResults.map((r) => r.anilistId).filter(Boolean));
+      const anilistResults: AniListResult[] = al
+        .filter((r) => !libAnilistIds.has(r.id))
+        .map((r) => ({
+          source: "anilist" as const,
+          anilistId: r.id,
+          titleEnglish: r.title.english ?? null,
+          titleRomaji: r.title.romaji,
+          season: r.season,
+          seasonYear: r.seasonYear,
+          episodes: r.episodes,
+          status: r.status,
+        }));
+      setAddResults([...libraryResults, ...anilistResults]);
+    } finally {
+      setAddSearching(false);
+    }
+  }
+
+  async function handleAddSelect(result: SearchResult) {
+    setAdding(true);
+    setAddError(null);
+    try {
+      const body = result.source === "library" ? { animeId: result.id } : { anilistId: result.anilistId };
+      const res = await fetch(`/api/links/${linkId}/anime`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const { error: msg } = await res.json();
+        setAddError(msg ?? "Failed to add");
+      } else {
+        setAddOpen(false);
+        setAddQuery("");
+        setAddResults([]);
+        router.refresh();
+      }
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  const showAddResults = addQuery.trim().length >= 2 && (addSearching || addResults.length > 0);
+  const libraryResults = addResults.filter((r): r is LibraryResult => r.source === "library");
+  const anilistResults = addResults.filter((r): r is AniListResult => r.source === "anilist");
+
   return (
     <div className="space-y-4">
       {/* Link name */}
@@ -81,16 +193,10 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
               placeholder="Link name (optional)…"
               className="flex-1 text-xl font-bold bg-transparent border-b border-slate-600 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500"
             />
-            <button
-              onClick={handleSaveName}
-              disabled={savingName}
-              className="text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-50"
-            >
+            <button onClick={handleSaveName} disabled={savingName} className="text-xs text-indigo-400 hover:text-indigo-300 disabled:opacity-50">
               {savingName ? "Saving…" : "Save"}
             </button>
-            <button onClick={() => setEditingName(false)} className="text-xs text-slate-500 hover:text-slate-300">
-              Cancel
-            </button>
+            <button onClick={() => setEditingName(false)} className="text-xs text-slate-500 hover:text-slate-300">Cancel</button>
           </>
         ) : (
           <>
@@ -113,9 +219,7 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
           const statusCfg = STATUS_CONFIG[la.anime.airingStatus] ?? { label: la.anime.airingStatus, className: "text-slate-400" };
           const seasonStr = la.anime.season && la.anime.seasonYear
             ? `${la.anime.season.charAt(0) + la.anime.season.slice(1).toLowerCase()} ${la.anime.seasonYear}`
-            : la.anime.seasonYear
-            ? String(la.anime.seasonYear)
-            : null;
+            : la.anime.seasonYear ? String(la.anime.seasonYear) : null;
 
           return (
             <button
@@ -123,45 +227,104 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
               onClick={() => onSelectAnime(la.anime.id)}
               className="flex flex-col bg-slate-800 rounded-xl overflow-hidden hover:bg-slate-700 transition-colors text-left w-36 flex-shrink-0 group"
             >
-              {/* Cover */}
               <div className="relative w-36 h-52 bg-slate-700">
                 {la.anime.coverImageUrl ? (
-                  <Image
-                    src={la.anime.coverImageUrl}
-                    alt={title}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
+                  <Image src={la.anime.coverImageUrl} alt={title} fill className="object-cover" unoptimized />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs text-center px-2">
-                    No cover
-                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs text-center px-2">No cover</div>
                 )}
               </div>
-
-              {/* Info */}
               <div className="p-2 space-y-1 flex-1">
-                <p className="text-xs font-medium text-white leading-tight line-clamp-2 group-hover:text-indigo-300 transition-colors">
-                  {title}
-                </p>
-                {seasonStr && (
-                  <p className="text-xs text-slate-500">{seasonStr}</p>
-                )}
+                <p className="text-xs font-medium text-white leading-tight line-clamp-2 group-hover:text-indigo-300 transition-colors">{title}</p>
+                {seasonStr && <p className="text-xs text-slate-500">{seasonStr}</p>}
                 <div className="flex items-center justify-between gap-1">
-                  {la.anime.totalEpisodes && (
-                    <span className="text-xs text-slate-400">{la.anime.totalEpisodes} eps</span>
-                  )}
-                  {la.anime.meanScore && (
-                    <span className="text-xs text-slate-400">{la.anime.meanScore}%</span>
-                  )}
+                  {la.anime.totalEpisodes && <span className="text-xs text-slate-400">{la.anime.totalEpisodes} eps</span>}
+                  {la.anime.meanScore && <span className="text-xs text-slate-400">{la.anime.meanScore}%</span>}
                 </div>
                 <p className={`text-xs ${statusCfg.className}`}>{statusCfg.label}</p>
               </div>
             </button>
           );
         })}
+
+        {/* Add card */}
+        <button
+          onClick={() => { setAddOpen((o) => !o); setAddQuery(""); setAddResults([]); setAddError(null); }}
+          className="flex flex-col bg-slate-800 border-2 border-dashed border-slate-700 rounded-xl hover:border-indigo-500 transition-colors w-36 flex-shrink-0 items-center justify-center"
+          style={{ minHeight: "264px" }}
+          title="Add linked anime"
+        >
+          <span className="text-3xl text-slate-600">+</span>
+          <span className="text-xs text-slate-600 mt-1">Add</span>
+        </button>
       </div>
+
+      {/* Inline add search */}
+      {addOpen && (
+        <div className="space-y-1">
+          <div className="flex gap-2">
+            <input
+              autoFocus
+              type="text"
+              value={addQuery}
+              onChange={(e) => setAddQuery(e.target.value)}
+              placeholder="Search to add a linked anime…"
+              className="flex-1 text-sm bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+            />
+            <button
+              onClick={() => { setAddOpen(false); setAddQuery(""); setAddResults([]); }}
+              className="text-sm text-slate-500 hover:text-slate-300 px-2"
+            >
+              ✕
+            </button>
+          </div>
+
+          {showAddResults && (
+            <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
+              {addSearching && addResults.length === 0 && <p className="text-xs text-slate-500 px-3 py-2">Searching…</p>}
+              {!addSearching && addResults.length === 0 && <p className="text-xs text-slate-500 px-3 py-2">No results found</p>}
+
+              {libraryResults.length > 0 && (
+                <>
+                  <p className="text-xs text-slate-500 px-3 pt-2 pb-1 font-medium uppercase tracking-wide">From your library</p>
+                  {libraryResults.map((r) => (
+                    <button
+                      key={`lib-${r.id}`}
+                      onClick={() => handleAddSelect(r)}
+                      disabled={adding}
+                      className="w-full text-left flex items-center justify-between gap-3 px-3 py-2 hover:bg-slate-700 transition-colors disabled:opacity-50"
+                    >
+                      <span className="text-sm text-slate-200 truncate">{resultTitle(r)}<span className="text-slate-500 text-xs">{resultMeta(r)}</span></span>
+                      <span className="text-xs text-emerald-500 flex-shrink-0">In library</span>
+                    </button>
+                  ))}
+                </>
+              )}
+
+              {anilistResults.length > 0 && (
+                <>
+                  <p className="text-xs text-slate-500 px-3 pt-2 pb-1 font-medium uppercase tracking-wide">From AniList</p>
+                  {anilistResults.map((r) => (
+                    <button
+                      key={`al-${r.anilistId}`}
+                      onClick={() => handleAddSelect(r)}
+                      disabled={adding}
+                      className="w-full text-left flex items-center justify-between gap-3 px-3 py-2 hover:bg-slate-700 transition-colors disabled:opacity-50"
+                    >
+                      <span className="text-sm text-slate-200 truncate">{resultTitle(r)}<span className="text-slate-500 text-xs">{resultMeta(r)}</span></span>
+                      <span className="text-xs text-indigo-400 flex-shrink-0">AniList</span>
+                    </button>
+                  ))}
+                </>
+              )}
+
+              {adding && <p className="text-xs text-slate-500 px-3 py-2">Adding…</p>}
+            </div>
+          )}
+
+          {addError && <p className="text-xs text-red-400">{addError}</p>}
+        </div>
+      )}
     </div>
   );
 }
