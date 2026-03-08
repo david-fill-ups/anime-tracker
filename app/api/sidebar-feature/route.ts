@@ -6,38 +6,41 @@ export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ anime: null });
 
-  const count = await db.userEntry.count({
+  const count = await db.link.count({
     where: {
       userId: session.user.id,
-      watchStatus: "COMPLETED",
-      anime: { coverImageUrl: { not: null } },
+      userEntry: { is: { watchStatus: "COMPLETED" } },
+      linkedAnime: { some: { order: 0, anime: { coverImageUrl: { not: null } } } },
     },
   });
 
   if (count === 0) return NextResponse.json({ anime: null });
 
   const skip = Math.floor(Math.random() * count);
-  const entry = await db.userEntry.findFirst({
+  const link = await db.link.findFirst({
     where: {
       userId: session.user.id,
-      watchStatus: "COMPLETED",
-      anime: { coverImageUrl: { not: null } },
+      userEntry: { is: { watchStatus: "COMPLETED" } },
+      linkedAnime: { some: { order: 0, anime: { coverImageUrl: { not: null } } } },
     },
     skip,
     select: {
-      score: true,
-      anime: {
-        select: { titleEnglish: true, titleRomaji: true, coverImageUrl: true },
+      userEntry: { select: { score: true } },
+      linkedAnime: {
+        where: { order: 0 },
+        take: 1,
+        select: { anime: { select: { titleEnglish: true, titleRomaji: true, coverImageUrl: true } } },
       },
     },
   });
 
+  const anime = link?.linkedAnime[0]?.anime ?? null;
   return NextResponse.json({
-    anime: entry
+    anime: anime
       ? {
-          coverImageUrl: entry.anime.coverImageUrl!,
-          title: entry.anime.titleEnglish ?? entry.anime.titleRomaji,
-          score: entry.score ?? null,
+          coverImageUrl: anime.coverImageUrl!,
+          title: anime.titleEnglish ?? anime.titleRomaji,
+          score: link?.userEntry?.score ?? null,
         }
       : null,
   });
