@@ -311,6 +311,48 @@ export async function fetchSeasonEpisodes(
 }
 
 // ---------------------------------------------------------------------------
+// Offset-based episode fetch — for multi-link anime where virtual season ≠ TMDB season
+// ---------------------------------------------------------------------------
+
+// Given a 0-based episode offset (total eps before the virtual season) and count,
+// walks TMDB season structures to find the right season and slice.
+export async function fetchEpisodesAtOffset(
+  tmdbId: number,
+  episodeOffset: number,
+  episodeCount: number,
+): Promise<Array<{ number: number; name: string }>> {
+  if (!process.env.TMDB_API_TOKEN) return [];
+
+  const details = await tmdbFetch<TmdbTvDetails>(`/tv/${tmdbId}`);
+  if (!details) return [];
+
+  const tmdbSeasons = (details.seasons ?? [])
+    .filter((s) => s.season_number > 0)
+    .sort((a, b) => a.season_number - b.season_number);
+
+  let cumulative = 0;
+  for (const tmdbSeason of tmdbSeasons) {
+    const seasonStart = cumulative;
+    const seasonEnd = cumulative + tmdbSeason.episode_count;
+
+    // Does this TMDB season contain the start of our episode range?
+    if (seasonEnd > episodeOffset && seasonStart <= episodeOffset) {
+      const episodes = await fetchSeasonEpisodes(tmdbId, tmdbSeason.season_number);
+      if (episodes.length === 0) return [];
+
+      const withinOffset = episodeOffset - seasonStart; // 0-based skip within this season
+      return episodes
+        .filter((e) => e.number > withinOffset && e.number <= withinOffset + episodeCount)
+        .map((e) => ({ number: e.number - withinOffset, name: e.name }));
+    }
+
+    cumulative = seasonEnd;
+  }
+
+  return [];
+}
+
+// ---------------------------------------------------------------------------
 // Main orchestration — called from API routes
 // ---------------------------------------------------------------------------
 

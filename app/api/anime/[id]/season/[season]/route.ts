@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
-import { fetchSeasonEpisodes, findTmdbEntry } from "@/lib/tmdb";
+import { fetchSeasonEpisodes, findTmdbEntry, fetchEpisodesAtOffset } from "@/lib/tmdb";
 import { URLIdSchema, wrapHandler } from "@/lib/validation";
 
 type Params = { params: Promise<{ id: string; season: string }> };
 
-export async function GET(_req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, { params }: Params) {
   return wrapHandler(async () => {
     await requireUserId();
     const { id, season } = await params;
@@ -16,6 +16,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Invalid params" }, { status: 400 });
     }
 
+    const episodeOffset = Number(req.nextUrl.searchParams.get("episodeOffset") ?? "-1");
+    const episodeCount = Number(req.nextUrl.searchParams.get("episodeCount") ?? "0");
+    const hasOffsetParams = episodeOffset >= 0 && episodeCount > 0;
+
     const anime = await db.anime.findUnique({
       where: { id: idParsed.data },
       select: { tmdbId: true, titleEnglish: true, titleRomaji: true },
@@ -24,28 +28,26 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ episodes: [] });
     }
 
-    console.log(`[season-route] anime=${idParsed.data} tmdbId=${anime.tmdbId} season=${seasonParsed.data} title="${anime.titleEnglish ?? anime.titleRomaji}"`);
     let episodes = await fetchSeasonEpisodes(anime.tmdbId, seasonParsed.data, idParsed.data);
-    console.log(`[season-route] primary fetch returned ${episodes.length} episodes`);
 
-    // If the stored tmdbId is a season-specific entry (only has one season), season N > 1
-    // will return empty. Fall back to a title search without year filter to find the
-    // series-level TMDB entry, which has all seasons.
+    // If direct fetch failed, try title search for a series-level TMDB entry
     if (episodes.length === 0 && seasonParsed.data > 1) {
       const title = anime.titleEnglish ?? anime.titleRomaji;
       if (title) {
         const match = await findTmdbEntry(title, "tv", null);
-        console.log(`[season-route] fallback search for "${title}" → tmdbId=${match?.tmdbId ?? "null"} (stored=${anime.tmdbId})`);
         if (match && match.tmdbId !== anime.tmdbId) {
           episodes = await fetchSeasonEpisodes(match.tmdbId, seasonParsed.data);
-          console.log(`[season-route] fallback fetch (season ${seasonParsed.data}) returned ${episodes.length} episodes`);
-          // Standalone TMDB season entries list episodes under season 1, not season N
           if (episodes.length === 0 && seasonParsed.data > 1) {
             episodes = await fetchSeasonEpisodes(match.tmdbId, 1);
-            console.log(`[season-route] fallback fetch (season 1) returned ${episodes.length} episodes`);
           }
         }
       }
+    }
+
+    // If still empty and the caller provided offset/count, walk TMDB season structure
+    // to find the right season and slice (handles multi-link anime where virtual season ≠ TMDB season)
+    if (episodes.length === 0 && hasOffsetParams) {
+      episodes = await fetchEpisodesAtOffset(anime.tmdbId, episodeOffset, episodeCount);
     }
 
     return NextResponse.json({ episodes });

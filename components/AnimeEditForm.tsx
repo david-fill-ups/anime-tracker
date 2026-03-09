@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const STAR_PATH =
@@ -157,8 +157,6 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
   const [verified, setVerified] = useState(entry?.verified ?? false);
   const [sourceSuggestions, setSourceSuggestions] = useState<string[]>([]);
   const [episodeNames, setEpisodeNames] = useState<Record<number, { number: number; name: string }[]>>({});
-  // Cache for season-1 episode list in multi-link mode (TMDB often packs all eps into season 1)
-  const s1EpisodesRef = useRef<{ number: number; name: string }[] | null>(null);
 
   useEffect(() => {
     fetch("/api/discovery-sources")
@@ -167,9 +165,8 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
   }, []);
 
   // Fetch episode names from TMDB for the current season.
-  // Multi-link strategy: TMDB often packs all anime cours into one season (e.g. Dan Da Dan has
-  // 24 eps in season 1, no season 2). We try the direct season fetch first; if empty we fall
-  // back to slicing the season-1 data by episode offset (sum of preceding seasons' ep counts).
+  // In multi-link mode, pass episodeOffset+episodeCount so the server can map the virtual
+  // season to the correct TMDB season (handles both "all-in-season-1" and multi-season cases).
   useEffect(() => {
     const season = Number(form.currentSeason);
     if (episodeNames[season] !== undefined) return;
@@ -177,28 +174,16 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
     const anchorId = isMultiLink ? (linkedSorted[0]?.anime.id ?? anime.id) : anime.id;
 
     const fetchEps = async (): Promise<{ number: number; name: string }[]> => {
-      const d = await fetch(`/api/anime/${anchorId}/season/${season}`).then((r) => r.json()) as { episodes?: { number: number; name: string }[] };
-      const direct = d.episodes ?? [];
-
-      // Direct fetch succeeded, or it's single-anime mode — done.
-      if (direct.length > 0 || !isMultiLink || season === 1) {
-        if (season === 1) s1EpisodesRef.current = direct;
-        return direct;
+      const params = new URLSearchParams();
+      if (isMultiLink) {
+        const offset = virtualEpsPerSeason.slice(0, season - 1).reduce((a, b) => a + b, 0);
+        const count = virtualEpsPerSeason[season - 1] ?? 0;
+        params.set("episodeOffset", String(offset));
+        params.set("episodeCount", String(count));
       }
-
-      // Season N > 1, direct fetch empty: TMDB packs all episodes into season 1.
-      // Fetch (or reuse cached) season-1 data and slice by offset.
-      let s1 = s1EpisodesRef.current;
-      if (!s1) {
-        const s1d = await fetch(`/api/anime/${anchorId}/season/1`).then((r) => r.json()) as { episodes?: { number: number; name: string }[] };
-        s1 = s1d.episodes ?? [];
-        s1EpisodesRef.current = s1;
-      }
-      const offset = virtualEpsPerSeason.slice(0, season - 1).reduce((a, b) => a + b, 0);
-      const count  = virtualEpsPerSeason[season - 1] ?? 0;
-      return s1
-        .filter((e: { number: number; name: string }) => e.number > offset && e.number <= offset + count)
-        .map((e: { number: number; name: string }) => ({ number: e.number - offset, name: e.name }));
+      const qs = params.toString();
+      const d = await fetch(`/api/anime/${anchorId}/season/${season}${qs ? `?${qs}` : ""}`).then((r) => r.json()) as { episodes?: { number: number; name: string }[] };
+      return d.episodes ?? [];
     };
 
     fetchEps()
