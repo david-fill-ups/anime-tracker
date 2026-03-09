@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { AiringStatus, Season } from "@/app/generated/prisma";
 
@@ -81,6 +81,20 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
   const [nameValue, setNameValue] = useState(linkName ?? "");
   const [savingName, setSavingName] = useState(false);
 
+  // Local ordered list for optimistic DnD reordering
+  const [localAnime, setLocalAnime] = useState(() => [...linkedAnime].sort((a, b) => a.order - b.order));
+  const draggingIdRef = useRef<number | null>(null);
+  const dragOverIdRef = useRef<number | null>(null);
+
+  // Sync from props when server data changes (after router.refresh())
+  const animeKey = linkedAnime.map((la) => `${la.id}:${la.order}`).join(",");
+  useEffect(() => {
+    setLocalAnime([...linkedAnime].sort((a, b) => a.order - b.order));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animeKey]);
+
+  const displayName = linkName ?? (localAnime[0]?.anime.titleEnglish ?? localAnime[0]?.anime.titleRomaji ?? "");
+
   // Add-anime state
   const [addOpen, setAddOpen] = useState(false);
   const [addQuery, setAddQuery] = useState("");
@@ -88,9 +102,6 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
   const [addSearching, setAddSearching] = useState(false);
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
-
-  const sorted = [...linkedAnime].sort((a, b) => a.order - b.order);
-  const displayName = linkName ?? (sorted[0]?.anime.titleEnglish ?? sorted[0]?.anime.titleRomaji ?? "");
 
   async function handleSaveName() {
     setSavingName(true);
@@ -171,6 +182,15 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
     }
   }
 
+  async function saveOrder(ordered: LinkedAnimeCard[]) {
+    await fetch(`/api/links/${linkId}/order`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderedAnimeIds: ordered.map((la) => la.anime.id) }),
+    });
+    router.refresh();
+  }
+
   const showAddResults = addQuery.trim().length >= 2 && (addSearching || addResults.length > 0);
   const libraryResults = addResults.filter((r): r is LibraryResult => r.source === "library");
   const anilistResults = addResults.filter((r): r is AniListResult => r.source === "anilist");
@@ -214,7 +234,7 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
 
       {/* Swimlane */}
       <div className="flex flex-wrap gap-4">
-        {sorted.map((la) => {
+        {localAnime.map((la) => {
           const title = la.anime.titleEnglish ?? la.anime.titleRomaji;
           const statusCfg = STATUS_CONFIG[la.anime.airingStatus] ?? { label: la.anime.airingStatus, className: "text-slate-400" };
           const seasonStr = la.anime.season && la.anime.seasonYear
@@ -224,8 +244,37 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
           return (
             <button
               key={la.id}
+              draggable
+              onDragStart={(e) => {
+                draggingIdRef.current = la.id;
+                e.dataTransfer.effectAllowed = "move";
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+                if (draggingIdRef.current === null || draggingIdRef.current === la.id) return;
+                if (dragOverIdRef.current === la.id) return;
+                dragOverIdRef.current = la.id;
+                setLocalAnime((prev) => {
+                  const from = prev.findIndex((x) => x.id === draggingIdRef.current);
+                  const to = prev.findIndex((x) => x.id === la.id);
+                  if (from === -1 || to === -1 || from === to) return prev;
+                  const next = [...prev];
+                  const [moved] = next.splice(from, 1);
+                  next.splice(to, 0, moved);
+                  return next;
+                });
+              }}
+              onDragEnd={() => {
+                draggingIdRef.current = null;
+                dragOverIdRef.current = null;
+                setLocalAnime((current) => {
+                  saveOrder(current);
+                  return current;
+                });
+              }}
               onClick={() => onSelectAnime(la.anime.id)}
-              className="flex flex-col bg-slate-800 rounded-xl overflow-hidden hover:bg-slate-700 transition-colors text-left w-36 flex-shrink-0 group"
+              className={`flex flex-col bg-slate-800 rounded-xl overflow-hidden hover:bg-slate-700 transition-colors text-left w-36 flex-shrink-0 group cursor-grab active:cursor-grabbing select-none ${draggingIdRef.current === la.id ? "opacity-40" : ""}`}
             >
               <div className="relative w-36 h-52 bg-slate-700">
                 {la.anime.coverImageUrl ? (

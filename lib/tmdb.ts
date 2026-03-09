@@ -261,11 +261,53 @@ interface TmdbSeasonDetails {
 
 export async function fetchSeasonEpisodes(
   tmdbId: number,
-  seasonNumber: number
+  seasonNumber: number,
+  animeId?: number
 ): Promise<Array<{ number: number; name: string }>> {
-  const data = await tmdbFetch<TmdbSeasonDetails>(`/tv/${tmdbId}/season/${seasonNumber}`);
-  if (!data) return [];
-  return data.episodes.map((ep) => ({ number: ep.episode_number, name: ep.name }));
+  const token = process.env.TMDB_API_TOKEN;
+  if (!token) return [];
+
+  const url = `${TMDB_BASE}/tv/${tmdbId}/season/${seasonNumber}`;
+  try {
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      console.warn(`[tmdb] ${res.status} ${res.statusText} for ${url}`);
+
+      // Self-correct stale totalSeasons when TMDB says the season doesn't exist
+      if (res.status === 404 && animeId && seasonNumber > 1) {
+        const anime = await db.anime.findUnique({
+          where: { id: animeId },
+          select: { totalSeasons: true, episodesPerSeason: true },
+        });
+        if (anime?.totalSeasons && anime.totalSeasons >= seasonNumber) {
+          const corrected = seasonNumber - 1;
+          const eps: number[] | null = anime.episodesPerSeason
+            ? JSON.parse(anime.episodesPerSeason)
+            : null;
+          await db.anime.update({
+            where: { id: animeId },
+            data: {
+              totalSeasons: corrected,
+              episodesPerSeason: eps ? JSON.stringify(eps.slice(0, corrected)) : null,
+            },
+          });
+          console.log(`[tmdb] Self-corrected totalSeasons=${corrected} for anime ${animeId} (season ${seasonNumber} returned 404)`);
+        }
+      }
+
+      return [];
+    }
+
+    const data = (await res.json()) as TmdbSeasonDetails;
+    return data.episodes.map((ep) => ({ number: ep.episode_number, name: ep.name }));
+  } catch (err) {
+    console.warn(`[tmdb] Network error fetching ${url}:`, err);
+    return [];
+  }
 }
 
 // ---------------------------------------------------------------------------

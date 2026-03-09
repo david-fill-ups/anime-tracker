@@ -24,7 +24,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       return NextResponse.json({ episodes: [] });
     }
 
-    const episodes = await fetchSeasonEpisodes(anime.tmdbId, seasonParsed.data);
+    const episodes = await fetchSeasonEpisodes(anime.tmdbId, seasonParsed.data, idParsed.data);
     return NextResponse.json({ episodes });
   });
 }
