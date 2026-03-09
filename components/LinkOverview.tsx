@@ -19,6 +19,7 @@ export type LinkedAnimeCard = {
     season: string | null;
     seasonYear: number | null;
     displayFormat: string;
+    anilistId: number | null;
   };
 };
 
@@ -139,9 +140,12 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
       ] = await Promise.all([libRes.json(), alRes.json()]);
 
       const libraryResults: LibraryResult[] = lib.map((r) => ({ ...r, source: "library" as const }));
+      // Exclude AniList results already linked (library search excludes them, so libAnilistIds
+      // won't contain them — use the linked anime prop directly instead).
+      const linkedAnilistIds = new Set(linkedAnime.map((la) => la.anime.anilistId).filter(Boolean));
       const libAnilistIds = new Set(libraryResults.map((r) => r.anilistId).filter(Boolean));
       const anilistResults: AniListResult[] = al
-        .filter((r) => !libAnilistIds.has(r.id))
+        .filter((r) => !libAnilistIds.has(r.id) && !linkedAnilistIds.has(r.id))
         .map((r) => ({
           source: "anilist" as const,
           anilistId: r.id,
