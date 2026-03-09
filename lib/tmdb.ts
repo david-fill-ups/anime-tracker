@@ -185,7 +185,7 @@ export async function refreshSeasonData(animeId: number): Promise<void> {
 // Search TMDB for a title, return { tmdbId, mediaType } or null
 // ---------------------------------------------------------------------------
 
-async function findTmdbEntry(
+export async function findTmdbEntry(
   title: string,
   mediaType: "tv" | "movie",
   seasonYear: number | null

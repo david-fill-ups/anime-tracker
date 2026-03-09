@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import type { AiringStatus, UserEntry, Person, Franchise, Anime } from "@/app/generated/prisma";
+import type { AiringStatus, UserEntry, Person, Franchise, Anime, StreamingLink } from "@/app/generated/prisma";
 import LinkOverview, { type LinkedAnimeCard } from "./LinkOverview";
 import AnimeEditForm from "./AnimeEditForm";
 import StatusBadge from "./StatusBadge";
+import WhereToWatch from "./WhereToWatch";
+import StreamingAutoRefresh from "./StreamingAutoRefresh";
 
 type LinkedAnimeDetail = {
   id: number; // LinkedAnime.id
@@ -48,6 +50,10 @@ type Props = {
   primaryAnime: PrimaryAnime; // The anime from the URL (may or may not be first in link)
   people: Person[];
   franchises: Franchise[];
+  streamingLinks: StreamingLink[];
+  streamingCheckedAt: Date | string | null;
+  source: string | null;
+  lastSyncedAt: Date | string | null;
 };
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
@@ -58,7 +64,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   NOT_YET_RELEASED: { label: "Not Yet Released",  className: "bg-slate-700/50 text-slate-400 border border-slate-600" },
 };
 
-export default function LinkDetailClient({ link, primaryAnime, people, franchises }: Props) {
+export default function LinkDetailClient({ link, primaryAnime, people, franchises, streamingLinks, streamingCheckedAt, source, lastSyncedAt }: Props) {
   const [selectedAnimeId, setSelectedAnimeId] = useState<number | null>(null);
 
   const sorted = [...link.linkedAnime].sort((a, b) => a.order - b.order);
@@ -85,6 +91,7 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
       totalEpisodes: la.anime.totalEpisodes,
       totalSeasons: la.anime.totalSeasons,
       episodesPerSeason: la.anime.episodesPerSeason,
+      tmdbId: la.anime.tmdbId,
     },
   }));
 
@@ -125,6 +132,10 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
               <span>{sorted.length} linked</span>
             </div>
           </div>
+
+          {/* Where to Watch */}
+          <StreamingAutoRefresh animeId={primaryAnime.id} source={source} streamingCheckedAt={streamingCheckedAt} lastSyncedAt={lastSyncedAt} />
+          <WhereToWatch animeId={primaryAnime.id} initialLinks={streamingLinks} />
 
           {/* Your Review (overview only, link-level) */}
           <div>

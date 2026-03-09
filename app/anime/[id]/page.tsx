@@ -133,6 +133,10 @@ export default async function AnimeDetailPage({
           primaryAnime={rawAnime}
           people={people}
           franchises={franchises}
+          streamingLinks={rawAnime.streamingLinks}
+          streamingCheckedAt={rawAnime.streamingCheckedAt}
+          source={rawAnime.source}
+          lastSyncedAt={rawAnime.lastSyncedAt}
         />
 
         {rawAnime.anilistId && (
@@ -146,15 +150,6 @@ export default async function AnimeDetailPage({
               currentAnimeId={rawAnime.id}
             />
           </Suspense>
-        )}
-
-        <StreamingAutoRefresh animeId={rawAnime.id} source={rawAnime.source} streamingCheckedAt={rawAnime.streamingCheckedAt} lastSyncedAt={rawAnime.lastSyncedAt} />
-        <WhereToWatch animeId={rawAnime.id} initialLinks={rawAnime.streamingLinks} />
-
-        {rawAnime.streamingCheckedAt && (
-          <p className="text-xs text-slate-600" title={new Date(rawAnime.streamingCheckedAt).toLocaleString()}>
-            Last updated {formatRelativeDate(rawAnime.streamingCheckedAt)}
-          </p>
         )}
       </div>
     );
