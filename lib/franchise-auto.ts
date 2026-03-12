@@ -22,18 +22,18 @@ const SEASON_OFFSET: Record<string, number> = {
   FALL: 9,
 };
 
-function computeOrder(seasonYear: number | null, season: string | null): number {
+export function computeOrder(seasonYear: number | null, season: string | null): number {
   if (!seasonYear) return 999999;
   return seasonYear * 100 + (SEASON_OFFSET[season ?? ""] ?? 0);
 }
 
-function getEntryType(format: AniListAnime["format"]): FranchiseEntryType {
+export function getEntryType(format: AniListAnime["format"]): FranchiseEntryType {
   if (format === "MOVIE") return "MOVIE";
   if (format === "OVA" || format === "SPECIAL") return "OVA";
   return "MAIN";
 }
 
-function entryTypeFromDisplayFormat(displayFormat: DisplayFormat): FranchiseEntryType {
+export function entryTypeFromDisplayFormat(displayFormat: DisplayFormat): FranchiseEntryType {
   if (displayFormat === "MOVIE") return "MOVIE";
   return "MAIN";
 }
