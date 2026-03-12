@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# temporary files
+/tmp/
+
 # production
 /build
 
