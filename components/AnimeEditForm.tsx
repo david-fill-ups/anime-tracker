@@ -140,7 +140,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
   const [externalUrl, setExternalUrl] = useState(anime.externalUrl ?? "");
 
   const [form, setForm] = useState({
-    watchStatus: entry?.watchStatus ?? "PLAN_TO_WATCH",
+    watchStatus: entry?.watchStatus ?? "RECOMMENDED",
     currentEpisode: String(initFlat),
     currentSeason: String(initSE.season),
     currentEpisodeInSeason: String(initSE.episode),
@@ -317,9 +317,10 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
           <label className="block text-xs text-slate-400 mb-1">Watch Status</label>
           <select
             value={form.watchStatus}
-            onChange={(e) => { set("watchStatus", e.target.value); save({ watchStatus: e.target.value as typeof form.watchStatus }); }}
+            onChange={(e) => { set("watchStatus", e.target.value); if (e.target.value !== "RECOMMENDED") save({ watchStatus: e.target.value as typeof form.watchStatus }); }}
             className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
           >
+            {!entry && <option value="RECOMMENDED">Recommended</option>}
             <option value="WATCHING">Watching</option>
             <option value="COMPLETED" disabled={!canBeCompleted}>
               {canBeCompleted ? "Completed" : "Completed (series not finished)"}

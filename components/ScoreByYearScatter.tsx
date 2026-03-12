@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 
-type DataPoint = { year: number; score: number; title: string };
+type DataPoint = { year: number; score: number; title: string; image: string | null };
 
 const PAD = { top: 10, right: 20, bottom: 30, left: 32 };
 const W = 560;
 const H = 180;
+const DOT_R = 10; // radius of mini-icon circles
 
 export function ScoreByYearScatter({ data }: { data: DataPoint[] }) {
   const [tooltip, setTooltip] = useState<{ x: number; y: number; title: string; score: number } | null>(null);
@@ -42,6 +43,16 @@ export function ScoreByYearScatter({ data }: { data: DataPoint[] }) {
         style={{ minWidth: 320 }}
         onMouseLeave={() => setTooltip(null)}
       >
+        <defs>
+          {data.map((d, i) =>
+            d.image ? (
+              <clipPath key={i} id={`clip-${i}`}>
+                <circle cx={xOf(d.year)} cy={yOf(d.score)} r={DOT_R} />
+              </clipPath>
+            ) : null
+          )}
+        </defs>
+
         {/* Y axis labels (1–5) */}
         {[1, 2, 3, 4, 5].map((s) => (
           <text
@@ -83,46 +94,70 @@ export function ScoreByYearScatter({ data }: { data: DataPoint[] }) {
           </text>
         ))}
 
-        {/* Dots */}
-        {data.map((d, i) => (
-          <circle
-            key={i}
-            cx={xOf(d.year)}
-            cy={yOf(d.score)}
-            r={4}
-            fill="#facc15"
-            fillOpacity={0.7}
-            className="cursor-pointer"
-            onMouseEnter={(e) => {
-              const rect = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect();
-              const svgX = xOf(d.year);
-              const svgY = yOf(d.score);
-              const scaleX = rect.width / W;
-              const scaleY = rect.height / H;
-              setTooltip({
-                x: svgX * scaleX,
-                y: svgY * scaleY,
-                title: d.title,
-                score: d.score,
-              });
-            }}
-          />
-        ))}
+        {/* Dots / mini-icons */}
+        {data.map((d, i) => {
+          const cx = xOf(d.year);
+          const cy = yOf(d.score);
+          return (
+            <g
+              key={i}
+              className="cursor-pointer"
+              onMouseEnter={(e) => {
+                const rect = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect();
+                const scaleX = rect.width / W;
+                const scaleY = rect.height / H;
+                setTooltip({
+                  x: cx * scaleX,
+                  y: cy * scaleY,
+                  title: d.title,
+                  score: d.score,
+                });
+              }}
+            >
+              {d.image ? (
+                <>
+                  {/* border ring */}
+                  <circle cx={cx} cy={cy} r={DOT_R + 1} fill="#facc15" fillOpacity={0.5} />
+                  <image
+                    href={d.image}
+                    x={cx - DOT_R}
+                    y={cy - DOT_R}
+                    width={DOT_R * 2}
+                    height={DOT_R * 2}
+                    clipPath={`url(#clip-${i})`}
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+                </>
+              ) : (
+                <circle cx={cx} cy={cy} r={DOT_R} fill="#facc15" fillOpacity={0.7} />
+              )}
+            </g>
+          );
+        })}
       </svg>
 
-      {/* Tooltip */}
+      {/* Tooltip — flips below when near top */}
       {tooltip && (
-        <div
-          className="pointer-events-none absolute z-10 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 shadow-lg max-w-[200px]"
-          style={{
-            left: tooltip.x + 8,
-            top: tooltip.y - 36,
-          }}
-        >
-          <p className="font-medium leading-tight">{tooltip.title}</p>
-          <p className="text-slate-400 mt-0.5">★ {tooltip.score} / 5</p>
-        </div>
+        <TooltipBox x={tooltip.x} y={tooltip.y} title={tooltip.title} score={tooltip.score} />
       )}
+    </div>
+  );
+}
+
+function TooltipBox({ x, y, title, score }: { x: number; y: number; title: string; score: number }) {
+  // If the dot is in the top ~20% of the rendered SVG area, show tooltip below
+  const nearTop = y < 30;
+  return (
+    <div
+      className="pointer-events-none absolute z-10 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 shadow-lg max-w-[200px]"
+      style={
+        nearTop
+          ? { left: x + 8, top: y + 16 }
+          : { left: x + 8, top: y - 48 }
+      }
+    >
+      <p className="font-medium leading-tight">{title}</p>
+      <p className="text-slate-400 mt-0.5">★ {score} / 5</p>
     </div>
   );
 }

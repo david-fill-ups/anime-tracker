@@ -128,6 +128,7 @@ export default async function DashboardPage() {
       year: e.anime.seasonYear!,
       score: e.score!,
       title: e.anime.titleEnglish || e.anime.titleRomaji || "Unknown",
+      image: e.anime.coverImageUrl ?? null,
     }));
 
   // Format breakdown — engaged anime only

@@ -28,6 +28,7 @@ function RecommendationCard({
   onAction: () => void;
 }) {
   const [loading, setLoading] = useState(false);
+  const [showChoice, setShowChoice] = useState(false);
   const { anime, franchise, franchiseOrder, isNewSeason, suggestedLinkId, suggestedLinkName } = item;
   const title = anime.titleEnglish || anime.titleRomaji;
   const genres: string[] = JSON.parse(anime.genres || "[]");
@@ -152,30 +153,40 @@ function RecommendationCard({
         )}
 
         <div className="flex flex-col gap-1.5 pt-1">
-          <div className="flex gap-2">
-            <button
-              onClick={suggestedLinkId ? addToLink : markInterested}
-              disabled={loading}
-              className="flex-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
-            >
-              {suggestedLinkId ? "Continue Series" : "Interested"}
-            </button>
-            <button
-              onClick={markNotInterested}
-              disabled={loading}
-              className="flex-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
-            >
-              Not Interested
-            </button>
-          </div>
-          {suggestedLinkId && (
-            <button
-              onClick={markInterested}
-              disabled={loading}
-              className="text-xs text-slate-500 hover:text-slate-300 transition-colors text-left disabled:opacity-50"
-            >
-              or add standalone
-            </button>
+          {showChoice ? (
+            <div className="flex gap-2">
+              <button
+                onClick={addToLink}
+                disabled={loading}
+                className="flex-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
+              >
+                Add to {suggestedLinkName}
+              </button>
+              <button
+                onClick={markInterested}
+                disabled={loading}
+                className="flex-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
+              >
+                Add standalone
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={() => suggestedLinkId ? setShowChoice(true) : markInterested()}
+                disabled={loading}
+                className="flex-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
+              >
+                Interested
+              </button>
+              <button
+                onClick={markNotInterested}
+                disabled={loading}
+                className="flex-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
+              >
+                Not Interested
+              </button>
+            </div>
           )}
         </div>
       </div>
