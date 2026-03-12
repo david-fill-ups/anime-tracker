@@ -90,6 +90,7 @@ export default async function AnimeDetailPage({
       totalEpisodes: la.anime.totalEpisodes,
       totalSeasons: la.anime.totalSeasons,
       episodesPerSeason: la.anime.episodesPerSeason,
+      tmdbId: la.anime.tmdbId,
     },
   }));
 
