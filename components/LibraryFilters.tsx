@@ -72,6 +72,10 @@ export default function LibraryFilters({
         const s = key.slice(7);
         const remaining = (params.get("studio") ?? "").split(",").filter((x) => x && x !== s);
         remaining.length === 0 ? params.delete("studio") : params.set("studio", remaining.join(","));
+      } else if (key.startsWith("status:")) {
+        const s = key.slice(7);
+        const remaining = (params.get("status") ?? "").split(",").filter((x) => x && x !== s);
+        remaining.length === 0 ? params.delete("status") : params.set("status", remaining.join(","));
       } else {
         params.delete(key);
       }
@@ -87,6 +91,7 @@ export default function LibraryFilters({
   const activeFranchise = searchParams.get("franchise") || "";
   const activeFormat = searchParams.get("format") || "";
   const activeContext = searchParams.get("context") || "";
+  const activeRecommender = searchParams.get("recommender") || "";
   const activeGenre = searchParams.get("genre") || "";
   const activeStudio = searchParams.get("studio") || "";
   const activeMinScore = searchParams.get("minScore") || "";
@@ -96,14 +101,30 @@ export default function LibraryFilters({
   const activeGenreList = activeGenre ? activeGenre.split(",").filter(Boolean) : [];
   const activeStudioList = activeStudio ? activeStudio.split(",").filter(Boolean) : [];
 
+  // Status chips: only when NOT_INTERESTED is selected or multiple statuses are active
+  // (single WATCHING/COMPLETED/DROPPED are already shown via the quick tabs above)
+  const QUICK_TAB_STATUSES = ["WATCHING", "COMPLETED", "DROPPED"];
+  const STATUS_LABELS: Record<string, string> = {
+    WATCHING: "Watching",
+    COMPLETED: "Completed",
+    DROPPED: "Dropped",
+    NOT_INTERESTED: "Not Interested",
+  };
+  const activeStatusRaw = searchParams.get("status") || "";
+  const activeStatusList = activeStatusRaw ? activeStatusRaw.split(",").filter(Boolean) : [];
+  const showStatusChips =
+    activeStatusList.length > 1 || activeStatusList.some((s) => !QUICK_TAB_STATUSES.includes(s));
+
   // Count active filters (those managed by the filters page)
   const activeFilterCount = [
     activeFranchise,
     activeFormat,
     activeContext,
+    activeRecommender,
     activeGenre,
     activeStudio,
     activeMinScore || activeMaxScore,
+    showStatusChips ? activeStatusRaw : "",
   ].filter(Boolean).length;
 
   // Resolve display names for chips
@@ -116,6 +137,9 @@ export default function LibraryFilters({
       : activeContext
       ? people.find((p) => String(p.id) === activeContext)?.name ?? null
       : null;
+  const recommenderName = activeRecommender
+    ? people.find((p) => String(p.id) === activeRecommender)?.name ?? null
+    : null;
   const formatLabel =
     activeFormat === "SERIES" ? "Series" : activeFormat === "MOVIE" ? "Movie" : null;
   const ratingLabel =
@@ -131,9 +155,13 @@ export default function LibraryFilters({
     ...(franchiseName ? [{ key: "franchise", label: `Franchise: ${franchiseName}` }] : []),
     ...(formatLabel ? [{ key: "format", label: `Format: ${formatLabel}` }] : []),
     ...(contextName ? [{ key: "context", label: `Watch Party: ${contextName}` }] : []),
+    ...(recommenderName ? [{ key: "recommender", label: `From: ${recommenderName}` }] : []),
     ...activeGenreList.map((g) => ({ key: `genre:${g}`, label: g })),
     ...activeStudioList.map((s) => ({ key: `studio:${s}`, label: s })),
     ...(ratingLabel ? [{ key: "rating", label: ratingLabel }] : []),
+    ...(showStatusChips
+      ? activeStatusList.map((s) => ({ key: `status:${s}`, label: STATUS_LABELS[s] ?? s }))
+      : []),
   ];
 
   const [searchValue, setSearchValue] = useState(activeSearch);

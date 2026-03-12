@@ -96,7 +96,20 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     // Assign order = current count
     const nextOrder = link.linkedAnime.length;
+
+    // Fetch userEntry before creating LinkedAnime so we can check current status
+    const userEntry = await db.userEntry.findUnique({ where: { linkId } });
+
     await db.linkedAnime.create({ data: { linkId, animeId: anime.id, order: nextOrder } });
+
+    // If the link was COMPLETED, adding a new season means they're now Watching again.
+    // currentEpisode is cumulative, so it's already positioned at the start of the new entry.
+    if (userEntry?.watchStatus === "COMPLETED") {
+      await db.userEntry.update({
+        where: { linkId },
+        data: { watchStatus: "WATCHING", completedAt: null },
+      });
+    }
 
     const updated = await db.link.findUnique({
       where: { id: linkId },

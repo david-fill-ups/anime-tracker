@@ -263,12 +263,19 @@ async function main() {
     const libraryStatuses = ["WATCHING", "COMPLETED", "DROPPED"];
     const entries = await db.userEntry.findMany({
       where: { userId: user.id, watchStatus: { in: libraryStatuses as any[] } },
-      include: { anime: true },
+      include: {
+        anime: true,
+        // New link-based entries don't have anime directly — resolve via link
+        link: { include: { linkedAnime: { include: { anime: true }, orderBy: { order: "asc" }, take: 1 } } },
+      },
     });
 
     console.log(`  Library entries: ${entries.length}`);
 
-    const animes = (entries as any[]).map(e => e.anime);
+    // Support both old (animeId) and new (linkId) entry styles
+    const animes = (entries as any[])
+      .map(e => e.anime ?? e.link?.linkedAnime?.[0]?.anime)
+      .filter(Boolean);
 
     // Split into those with/without AniList IDs
     const withId = animes.filter(a => a.anilistId);

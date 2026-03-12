@@ -15,9 +15,9 @@ export default function NavLinks() {
   }, [pathname]);
 
   const allLinks = [
-    { href: "/watchlist", label: "Watch List", match: "/watchlist" },
+    { href: "/watching", label: "Watching", match: "/watching" },
     { href: libraryUrl, label: "Library", match: "/library" },
-    { href: "/up-next", label: "Up Next", match: "/up-next" },
+    { href: "/backlog", label: "Backlog", match: "/backlog" },
     { href: "/franchises", label: "Franchises", match: "/franchises" },
     { href: "/people", label: "People", match: "/people" },
     { href: "/stats", label: "Dashboard", match: "/stats" },

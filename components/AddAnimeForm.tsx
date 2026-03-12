@@ -13,15 +13,18 @@ const WATCH_STATUSES = [
   { value: "WATCHING", label: "Watching" },
   { value: "COMPLETED", label: "Completed" },
   { value: "DROPPED", label: "Dropped" },
-  { value: "RECOMMENDED", label: "Recommended" },
 ];
 
 export default function AddAnimeForm({
   people,
   franchises,
+  returnTo = "/library",
+  defaultStatus,
 }: {
   people: Person[];
   franchises: Franchise[];
+  returnTo?: string;
+  defaultStatus?: string;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("search");
@@ -37,7 +40,7 @@ export default function AddAnimeForm({
   const [franchiseEntryType, setFranchiseEntryType] = useState("MAIN");
 
   // User entry fields
-  const [watchStatus, setWatchStatus] = useState("PLAN_TO_WATCH");
+  const [watchStatus, setWatchStatus] = useState(defaultStatus ?? "PLAN_TO_WATCH");
   const [watchContext, setWatchContext] = useState("");
   const [watchPartyWith, setWatchPartyWith] = useState("");
   const [discoveryType, setDiscoveryTypeState] = useState("");
@@ -132,7 +135,7 @@ export default function AddAnimeForm({
       });
     }
 
-    router.push("/library");
+    router.push(returnTo);
     router.refresh();
   }
 
@@ -299,19 +302,21 @@ export default function AddAnimeForm({
       <div className="space-y-3 border-t border-slate-800 pt-4">
         <h3 className="text-sm font-medium text-slate-300">Your Entry</h3>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-xs text-slate-400 mb-1">Status</label>
-            <select
-              value={watchStatus}
-              onChange={(e) => setWatchStatus(e.target.value)}
-              className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
-            >
-              {WATCH_STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
-          </div>
+        <div className={`grid gap-3 ${defaultStatus ? "grid-cols-1" : "grid-cols-2"}`}>
+          {!defaultStatus && (
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Status</label>
+              <select
+                value={watchStatus}
+                onChange={(e) => setWatchStatus(e.target.value)}
+                className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
+              >
+                {WATCH_STATUSES.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="block text-xs text-slate-400 mb-1">Watch Context</label>
             <select

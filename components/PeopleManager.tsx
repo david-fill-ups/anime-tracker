@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type PersonStats = {
   id: number;
@@ -10,7 +11,7 @@ type PersonStats = {
   completedCount: number;
   ratedCount: number;
   avgScore: number | null;
-  recentRecommendations: { title: string; status: string; score: number | null }[];
+  recentRecommendations: { animeId: number | null; title: string; status: string; score: number | null }[];
 };
 
 export default function PeopleManager({ people }: { people: PersonStats[] }) {
@@ -18,8 +19,6 @@ export default function PeopleManager({ people }: { people: PersonStats[] }) {
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editName, setEditName] = useState("");
 
   async function createPerson() {
     if (!newName.trim()) return;
@@ -32,22 +31,6 @@ export default function PeopleManager({ people }: { people: PersonStats[] }) {
     setCreating(false);
     setNewName("");
     setSubmitting(false);
-    router.refresh();
-  }
-
-  async function saveName(id: number) {
-    await fetch(`/api/people/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: editName }),
-    });
-    setEditingId(null);
-    router.refresh();
-  }
-
-  async function deletePerson(id: number) {
-    if (!confirm("Delete this person? Their recommendations will be unlinked.")) return;
-    await fetch(`/api/people/${id}`, { method: "DELETE" });
     router.refresh();
   }
 
@@ -88,50 +71,22 @@ export default function PeopleManager({ people }: { people: PersonStats[] }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {people.map((person) => (
           <div key={person.id} className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-            <div className="flex items-start justify-between mb-3">
-              {editingId === person.id ? (
-                <div className="flex gap-2 flex-1 mr-2">
-                  <input
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") saveName(person.id); if (e.key === "Escape") setEditingId(null); }}
-                    onBlur={() => saveName(person.id)}
-                    autoFocus
-                    className="flex-1 bg-slate-800 text-white border border-slate-700 rounded px-2 py-1 text-sm focus:outline-none focus:border-indigo-500"
-                  />
-                  <button onMouseDown={(e) => e.preventDefault()} onClick={() => setEditingId(null)} className="text-xs text-slate-400">Done</button>
-                </div>
-              ) : (
-                <h3 className="font-semibold text-white">{person.name}</h3>
-              )}
-              <div className="flex gap-2">
-                {editingId !== person.id && (
-                  <button
-                    onClick={() => { setEditingId(person.id); setEditName(person.name); }}
-                    className="text-xs text-slate-500 hover:text-slate-300"
-                  >
-                    Edit
-                  </button>
-                )}
-                <button
-                  onClick={() => deletePerson(person.id)}
-                  className="text-xs text-red-600 hover:text-red-400"
-                >
-                  Delete
-                </button>
-              </div>
+            <div className="mb-3">
+              <Link href={`/people/${person.id}`} className="font-semibold text-white hover:text-indigo-400 transition-colors">
+                {person.name}
+              </Link>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3 mb-3">
-              <div className="text-center">
-                <p className="text-lg font-bold text-white">{person.totalRecommendations}</p>
-                <p className="text-xs text-slate-500">Recommended</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-bold text-white">{person.completedCount}</p>
-                <p className="text-xs text-slate-500">Completed</p>
-              </div>
+              <Link href={`/backlog?recommender=${person.id}`} className="text-center group">
+                <p className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">{person.totalRecommendations}</p>
+                <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">Recommended</p>
+              </Link>
+              <Link href={`/library?recommender=${person.id}&status=COMPLETED`} className="text-center group">
+                <p className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">{person.completedCount}</p>
+                <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">Completed</p>
+              </Link>
               <div className="text-center">
                 <p className="text-lg font-bold text-yellow-400">
                   {person.avgScore != null ? person.avgScore : "—"}
@@ -145,7 +100,11 @@ export default function PeopleManager({ people }: { people: PersonStats[] }) {
               <div className="space-y-1 border-t border-slate-800 pt-3">
                 {person.recentRecommendations.map((r, i) => (
                   <div key={i} className="flex items-center justify-between text-xs">
-                    <span className="text-slate-400 truncate flex-1">{r.title}</span>
+                    {r.animeId != null ? (
+                      <Link href={`/anime/${r.animeId}`} className="text-slate-400 hover:text-indigo-400 truncate flex-1 transition-colors">{r.title}</Link>
+                    ) : (
+                      <span className="text-slate-400 truncate flex-1">{r.title}</span>
+                    )}
                     {r.score != null && (
                       <span className="text-yellow-400 ml-2">★ {r.score}</span>
                     )}

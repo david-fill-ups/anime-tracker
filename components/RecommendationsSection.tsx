@@ -15,6 +15,9 @@ export type RecommendationItem = {
   franchise: { id: number; name: string };
   franchiseOrder: number;
   isNotInterested: boolean;
+  isNewSeason: boolean;
+  suggestedLinkId: number | null;
+  suggestedLinkName: string | null;
 };
 
 function RecommendationCard({
@@ -25,10 +28,21 @@ function RecommendationCard({
   onAction: () => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const { anime, franchise, franchiseOrder } = item;
+  const { anime, franchise, franchiseOrder, isNewSeason, suggestedLinkId, suggestedLinkName } = item;
   const title = anime.titleEnglish || anime.titleRomaji;
   const genres: string[] = JSON.parse(anime.genres || "[]");
   const totalEntries = anime.franchiseEntries.length;
+
+  async function addToLink() {
+    setLoading(true);
+    await fetch(`/api/links/${suggestedLinkId}/anime`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ animeId: anime.id }),
+    });
+    setLoading(false);
+    onAction();
+  }
 
   async function markInterested() {
     setLoading(true);
@@ -101,6 +115,11 @@ function RecommendationCard({
             No cover
           </div>
         )}
+        {isNewSeason && (
+          <div className="absolute top-2 left-2 bg-indigo-600 text-white text-xs font-bold px-2 py-1 rounded">
+            New Season?
+          </div>
+        )}
         {anime.meanScore && (
           <div className="absolute top-2 right-2 bg-black/70 text-yellow-400 text-xs font-bold px-2 py-1 rounded">
             ★ {(anime.meanScore / 10).toFixed(1)}
@@ -132,21 +151,32 @@ function RecommendationCard({
           </div>
         )}
 
-        <div className="flex gap-2 pt-1">
-          <button
-            onClick={markInterested}
-            disabled={loading}
-            className="flex-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
-          >
-            Interested
-          </button>
-          <button
-            onClick={markNotInterested}
-            disabled={loading}
-            className="flex-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
-          >
-            Not Interested
-          </button>
+        <div className="flex flex-col gap-1.5 pt-1">
+          <div className="flex gap-2">
+            <button
+              onClick={suggestedLinkId ? addToLink : markInterested}
+              disabled={loading}
+              className="flex-1 text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
+            >
+              {suggestedLinkId ? "Continue Series" : "Interested"}
+            </button>
+            <button
+              onClick={markNotInterested}
+              disabled={loading}
+              className="flex-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white px-2 py-1.5 rounded-md font-medium transition-colors disabled:opacity-50"
+            >
+              Not Interested
+            </button>
+          </div>
+          {suggestedLinkId && (
+            <button
+              onClick={markInterested}
+              disabled={loading}
+              className="text-xs text-slate-500 hover:text-slate-300 transition-colors text-left disabled:opacity-50"
+            >
+              or add standalone
+            </button>
+          )}
         </div>
       </div>
     </div>

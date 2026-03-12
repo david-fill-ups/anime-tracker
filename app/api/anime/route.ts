@@ -138,5 +138,11 @@ async function upsertStudios(
     });
     creates.push({ studioId: studio.id, isMainStudio: edge.isMain });
   }
-  return creates;
+  // Deduplicate by studioId in case AniList returns the same studio multiple times
+  const seen = new Set<number>();
+  return creates.filter(c => {
+    if (seen.has(c.studioId)) return false;
+    seen.add(c.studioId);
+    return true;
+  });
 }

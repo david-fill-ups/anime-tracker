@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import Link from "next/link";
 import type { WatchStatus } from "@/app/generated/prisma";
 
@@ -145,10 +145,11 @@ function TagSelect({
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-const WATCH_STATUSES: { value: WatchStatus; label: string }[] = [
+const WATCH_STATUSES: { value: WatchStatus; label: string; muted?: boolean }[] = [
   { value: "WATCHING", label: "Watching" },
   { value: "COMPLETED", label: "Completed" },
   { value: "DROPPED", label: "Dropped" },
+  { value: "NOT_INTERESTED", label: "Not Interested", muted: true },
 ];
 
 export default function LibraryFiltersForm({
@@ -169,7 +170,9 @@ export default function LibraryFiltersForm({
   const [franchise, setFranchise] = useState(initialParams.franchise || "");
   const [format, setFormat] = useState(initialParams.format || "");
   const [context, setContext] = useState(initialParams.context || "");
-  const [watchStatus, setWatchStatus] = useState(initialParams.status || "");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(
+    initialParams.status ? initialParams.status.split(",").filter(Boolean) : []
+  );
   const [selectedGenres, setSelectedGenres] = useState<string[]>(
     initialParams.genre ? initialParams.genre.split(",").filter(Boolean) : []
   );
@@ -190,7 +193,7 @@ export default function LibraryFiltersForm({
     if (initialParams.search) params.set("search", initialParams.search);
     if (initialParams.verified) params.set("verified", initialParams.verified);
     // Apply filter values
-    if (watchStatus) params.set("status", watchStatus);
+    if (selectedStatuses.length > 0) params.set("status", selectedStatuses.join(","));
     if (franchise) params.set("franchise", franchise);
     if (format) params.set("format", format);
     if (context) params.set("context", context);
@@ -205,7 +208,7 @@ export default function LibraryFiltersForm({
     setFranchise("");
     setFormat("");
     setContext("");
-    setWatchStatus("");
+    setSelectedStatuses([]);
     setSelectedGenres([]);
     setSelectedStudios([]);
     setMinScore(0);
@@ -228,29 +231,37 @@ export default function LibraryFiltersForm({
         {/* Watch Status */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-slate-300">Watch Status</label>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap items-center">
             <button
-              onClick={() => setWatchStatus("")}
+              onClick={() => setSelectedStatuses([])}
               className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                watchStatus === ""
+                selectedStatuses.length === 0
                   ? "bg-indigo-600 text-white"
                   : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
               }`}
             >
               All
             </button>
-            {WATCH_STATUSES.map(({ value, label }) => (
-              <button
-                key={value}
-                onClick={() => setWatchStatus((prev) => (prev === value ? "" : value))}
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  watchStatus === value
-                    ? "bg-indigo-600 text-white"
-                    : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
-                }`}
-              >
-                {label}
-              </button>
+            {WATCH_STATUSES.map(({ value, label, muted }) => (
+              <Fragment key={value}>
+                {muted && <span className="text-slate-700 select-none">|</span>}
+                <button
+                  onClick={() =>
+                    setSelectedStatuses((prev) =>
+                      prev.includes(value) ? prev.filter((s) => s !== value) : [...prev, value]
+                    )
+                  }
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    selectedStatuses.includes(value)
+                      ? "bg-indigo-600 text-white"
+                      : muted
+                      ? "bg-slate-800 text-slate-500 hover:text-slate-300 hover:bg-slate-700"
+                      : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
+                  }`}
+                >
+                  {label}
+                </button>
+              </Fragment>
             ))}
           </div>
         </div>

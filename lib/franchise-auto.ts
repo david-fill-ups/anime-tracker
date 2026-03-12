@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { fetchAniListById, mapDisplayFormat, mapSourceMaterial } from "./anilist";
 import type { AniListAnime } from "./anilist";
 import type { FranchiseEntryType, DisplayFormat } from "@/app/generated/prisma";
 
@@ -48,6 +49,44 @@ async function findAvailableOrder(franchiseId: number, baseOrder: number): Promi
   return order;
 }
 
+// Create a bare Anime record from AniList data (no Link, no UserEntry).
+// Returns the DB id + fields needed for franchise ordering, or null on failure.
+async function ensureAnimeInDb(anilistData: AniListAnime) {
+  const existing = await db.anime.findUnique({ where: { anilistId: anilistData.id } });
+  if (existing) return existing;
+
+  try {
+    return await db.anime.create({
+      data: {
+        anilistId: anilistData.id,
+        source: "ANILIST",
+        titleRomaji: anilistData.title.romaji,
+        titleEnglish: anilistData.title.english ?? null,
+        titleNative: anilistData.title.native ?? null,
+        coverImageUrl: anilistData.coverImage.large,
+        synopsis: anilistData.description ?? null,
+        genres: JSON.stringify(anilistData.genres),
+        totalEpisodes: anilistData.episodes ?? null,
+        durationMins: anilistData.duration ?? null,
+        airingStatus: anilistData.status,
+        displayFormat: mapDisplayFormat(anilistData.format),
+        sourceMaterial: mapSourceMaterial(anilistData.source),
+        season: anilistData.season ?? null,
+        seasonYear: anilistData.seasonYear ?? null,
+        meanScore: anilistData.meanScore ?? null,
+        nextAiringEp: anilistData.nextAiringEpisode?.episode ?? null,
+        nextAiringAt: anilistData.nextAiringEpisode
+          ? new Date(anilistData.nextAiringEpisode.airingAt * 1000)
+          : null,
+        lastSyncedAt: new Date(),
+      },
+    });
+  } catch {
+    // Race condition — another request may have created it; try again
+    return db.anime.findUnique({ where: { anilistId: anilistData.id } });
+  }
+}
+
 async function renameFranchiseToEarliest(franchiseId: number): Promise<void> {
   const entries = await db.franchiseEntry.findMany({
     where: { franchiseId },
@@ -82,16 +121,36 @@ export async function autoPopulateFranchise(
 
   if (relatedAnilistIds.length === 0) return;
 
-  // Only consider related anime that are in the user's library
+  // Find related anime already in our global DB (not restricted to user's library)
   const relatedInDb = await db.anime.findMany({
-    where: {
-      anilistId: { in: relatedAnilistIds },
-      userEntries: { some: { userId } },
-    },
+    where: { anilistId: { in: relatedAnilistIds } },
     select: { id: true, anilistId: true, seasonYear: true, season: true, displayFormat: true },
   });
 
-  // No related anime in user's library — nothing to group
+  // For SEQUEL/PREQUEL relations not yet in the DB, fetch from AniList and create bare records.
+  // This lets the recommendation system surface seasons the user doesn't know about yet.
+  const relatedInDbAnilistIds = new Set(relatedInDb.map((a) => a.anilistId));
+  const missingSequelIds = anilistData.relations.edges
+    .filter(
+      (e) =>
+        e.node.type === "ANIME" &&
+        (e.relationType === "SEQUEL" || e.relationType === "PREQUEL") &&
+        !relatedInDbAnilistIds.has(e.node.id)
+    )
+    .map((e) => e.node.id);
+
+  for (const sequelAnilistId of missingSequelIds) {
+    try {
+      const sequelData = await fetchAniListById(sequelAnilistId);
+      if (!sequelData) continue;
+      const record = await ensureAnimeInDb(sequelData);
+      if (record) relatedInDb.push(record);
+    } catch {
+      // Don't fail franchise population if AniList is temporarily unavailable
+    }
+  }
+
+  // No related anime anywhere — nothing to group
   if (relatedInDb.length === 0) return;
 
   const relatedIds = relatedInDb.map((a) => a.id);
@@ -144,13 +203,20 @@ export async function autoPopulateFranchise(
       if (!alreadyIn) {
         const baseOrder = computeOrder(relatedAnime.seasonYear, relatedAnime.season);
         const order = await findAvailableOrder(targetFranchiseId, baseOrder);
-        await db.franchiseEntry.create({
-          data: {
+        await db.franchiseEntry.upsert({
+          where: {
+            franchiseId_animeId: {
+              franchiseId: targetFranchiseId,
+              animeId: relatedAnime.id,
+            },
+          },
+          create: {
             franchiseId: targetFranchiseId,
             animeId: relatedAnime.id,
             order,
             entryType: entryTypeFromDisplayFormat(relatedAnime.displayFormat),
           },
+          update: {},
         });
       }
     }

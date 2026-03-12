@@ -96,6 +96,30 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
 
   const displayName = linkName ?? (localAnime[0]?.anime.titleEnglish ?? localAnime[0]?.anime.titleRomaji ?? "");
 
+  // Remove-anime state
+  const [removingAnimeId, setRemovingAnimeId] = useState<number | null>(null);
+
+  async function handleRemoveAnime(animeId: number) {
+    if (!confirm("Remove this anime from your library completely?")) return;
+    const isOnlyAnime = localAnime.length <= 1;
+    setRemovingAnimeId(animeId);
+    try {
+      const res = await fetch(`/api/links/${linkId}/anime/${animeId}?deleteAnime=true`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error ?? "Failed to remove anime");
+        return;
+      }
+      if (isOnlyAnime) {
+        router.push("/");
+      } else {
+        router.refresh();
+      }
+    } finally {
+      setRemovingAnimeId(null);
+    }
+  }
+
   // Add-anime state
   const [addOpen, setAddOpen] = useState(false);
   const [addQuery, setAddQuery] = useState("");
@@ -246,40 +270,43 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
             : la.anime.seasonYear ? String(la.anime.seasonYear) : null;
 
           return (
-            <button
+            <div
               key={la.id}
-              draggable
-              onDragStart={(e) => {
-                draggingIdRef.current = la.id;
-                e.dataTransfer.effectAllowed = "move";
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-                if (draggingIdRef.current === null || draggingIdRef.current === la.id) return;
-                if (dragOverIdRef.current === la.id) return;
-                dragOverIdRef.current = la.id;
-                setLocalAnime((prev) => {
-                  const from = prev.findIndex((x) => x.id === draggingIdRef.current);
-                  const to = prev.findIndex((x) => x.id === la.id);
-                  if (from === -1 || to === -1 || from === to) return prev;
-                  const next = [...prev];
-                  const [moved] = next.splice(from, 1);
-                  next.splice(to, 0, moved);
-                  return next;
-                });
-              }}
-              onDragEnd={() => {
-                draggingIdRef.current = null;
-                dragOverIdRef.current = null;
-                setLocalAnime((current) => {
-                  saveOrder(current);
-                  return current;
-                });
-              }}
-              onClick={() => onSelectAnime(la.anime.id)}
-              className={`flex flex-col bg-slate-800 rounded-xl overflow-hidden hover:bg-slate-700 transition-colors text-left w-36 flex-shrink-0 group cursor-grab active:cursor-grabbing select-none ${draggingIdRef.current === la.id ? "opacity-40" : ""}`}
+              className="relative flex-shrink-0 group"
             >
+              <button
+                draggable
+                onDragStart={(e) => {
+                  draggingIdRef.current = la.id;
+                  e.dataTransfer.effectAllowed = "move";
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  if (draggingIdRef.current === null || draggingIdRef.current === la.id) return;
+                  if (dragOverIdRef.current === la.id) return;
+                  dragOverIdRef.current = la.id;
+                  setLocalAnime((prev) => {
+                    const from = prev.findIndex((x) => x.id === draggingIdRef.current);
+                    const to = prev.findIndex((x) => x.id === la.id);
+                    if (from === -1 || to === -1 || from === to) return prev;
+                    const next = [...prev];
+                    const [moved] = next.splice(from, 1);
+                    next.splice(to, 0, moved);
+                    return next;
+                  });
+                }}
+                onDragEnd={() => {
+                  draggingIdRef.current = null;
+                  dragOverIdRef.current = null;
+                  setLocalAnime((current) => {
+                    saveOrder(current);
+                    return current;
+                  });
+                }}
+                onClick={() => onSelectAnime(la.anime.id)}
+                className={`flex flex-col bg-slate-800 rounded-xl overflow-hidden hover:bg-slate-700 transition-colors text-left w-36 cursor-grab active:cursor-grabbing select-none ${removingAnimeId === la.anime.id ? "opacity-40" : ""}`}
+              >
               <div className="relative w-36 h-52 bg-slate-700">
                 {la.anime.coverImageUrl ? (
                   <Image src={la.anime.coverImageUrl} alt={title} fill className="object-cover" unoptimized />
@@ -297,6 +324,16 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
                 <p className={`text-xs ${statusCfg.className}`}>{statusCfg.label}</p>
               </div>
             </button>
+            {/* Remove button */}
+            <button
+              onClick={(e) => { e.stopPropagation(); handleRemoveAnime(la.anime.id); }}
+              disabled={removingAnimeId === la.anime.id}
+              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50"
+              title="Remove anime"
+            >
+              ✕
+            </button>
+          </div>
           );
         })}
 

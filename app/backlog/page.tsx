@@ -5,8 +5,9 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import AnimeGrid from "@/components/AnimeGrid";
 import RecommendationsSection from "@/components/RecommendationsSection";
+import UpNextFilters from "@/components/UpNextFilters";
 import type { RecommendationItem } from "@/components/RecommendationsSection";
-import type { WatchStatus, AiringStatus } from "@/app/generated/prisma";
+import type { WatchStatus, AiringStatus, StreamingService } from "@/app/generated/prisma";
 import { effectiveTotalEpisodesFromLink, effectiveAiringStatusFromLink } from "@/lib/anime-utils";
 import Link from "next/link";
 
@@ -14,12 +15,18 @@ import Link from "next/link";
 const LIBRARY_STATUSES: WatchStatus[] = ["WATCHING", "COMPLETED", "DROPPED"];
 
 // Statuses that belong to the queue (user has explicitly added these)
-const QUEUE_STATUSES: WatchStatus[] = ["PLAN_TO_WATCH", "RECOMMENDED"];
+const QUEUE_STATUSES: WatchStatus[] = ["PLAN_TO_WATCH"];
 
-export default async function QueuePage() {
+export default async function QueuePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ service?: string; airingStatus?: string; recommender?: string; quickBinge?: string }>;
+}) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   const userId = session.user.id;
+
+  const { service, airingStatus, recommender, quickBinge } = await searchParams;
 
   // Plan to Watch: explicitly queued by the user
   const rawLinks = await db.link.findMany({
@@ -32,6 +39,7 @@ export default async function QueuePage() {
             include: {
               franchiseEntries: { include: { franchise: true } },
               animeStudios: { include: { studio: true } },
+              streamingLinks: true,
             },
           },
         },
@@ -41,7 +49,7 @@ export default async function QueuePage() {
     orderBy: { updatedAt: "desc" },
   });
 
-  const planToWatch = rawLinks
+  const allPlanToWatch = rawLinks
     .filter((l) => l.userEntry && l.linkedAnime.length > 0)
     .map((l) => ({
       ...l.linkedAnime[0].anime,
@@ -74,6 +82,7 @@ export default async function QueuePage() {
               },
               franchiseEntries: { include: { franchise: true } },
               animeStudios: { include: { studio: true } },
+              streamingLinks: true,
             },
           },
         },
@@ -84,7 +93,7 @@ export default async function QueuePage() {
 
   // Collect recommendations — deduplicate by anime id
   const seenIds = new Set<number>();
-  const recommendations: RecommendationItem[] = [];
+  const allRecommendations: RecommendationItem[] = [];
 
   for (const franchise of watchedFranchises) {
     for (const entry of franchise.entries) {
@@ -112,29 +121,107 @@ export default async function QueuePage() {
         continue;
       }
 
+      // Detect "new season": user has no entry for this anime AND all earlier
+      // franchise entries are marked COMPLETED — meaning they may not know this exists.
+      const isNewSeason =
+        !userEntry &&
+        franchise.entries.some((e) => e.order < entry.order) &&
+        franchise.entries
+          .filter((e) => e.order < entry.order)
+          .every((e) => e.anime.linkedIn[0]?.link.userEntry?.watchStatus === "COMPLETED");
+
+      // Find the link to suggest attaching this anime to.
+      // Only suggest if all preceding franchise entries that have a user link are in the SAME link.
+      const precedingLinkedAnimes = franchise.entries
+        .filter((e) => e.order < entry.order && e.anime.linkedIn.length > 0)
+        .map((e) => e.anime.linkedIn[0]!);
+      const uniqueLinkIds = new Set(precedingLinkedAnimes.map((la) => la.linkId));
+      const suggestedLinkId = uniqueLinkIds.size === 1 ? precedingLinkedAnimes[0].linkId : null;
+      const suggestedLinkName = suggestedLinkId
+        ? (precedingLinkedAnimes[0].link.name ?? franchise.name)
+        : null;
+
       seenIds.add(anime.id);
       const isNotInterested = status === "NOT_INTERESTED";
-      if (!isNotInterested && recommendations.filter((r) => !r.isNotInterested).length >= 6) continue;
-      recommendations.push({
+      allRecommendations.push({
         anime,
         franchise: { id: franchise.id, name: franchise.name },
         franchiseOrder: entry.order,
         isNotInterested,
+        isNewSeason,
+        suggestedLinkId,
+        suggestedLinkName,
       });
     }
   }
 
+  // Sort: new-season items first, then regular, not-interested last
+  allRecommendations.sort((a, b) => {
+    if (a.isNotInterested !== b.isNotInterested) return a.isNotInterested ? 1 : -1;
+    if (a.isNewSeason !== b.isNewSeason) return a.isNewSeason ? -1 : 1;
+    return 0;
+  });
+
+  // Cap active (non-not-interested) recommendations at 6
+  let activeCount = 0;
+  const cappedRecommendations = allRecommendations.filter((r) => {
+    if (r.isNotInterested) return true;
+    if (activeCount < 6) { activeCount++; return true; }
+    return false;
+  });
+
+  // Derive available filter options from unfiltered data
+  const serviceSet = new Set<StreamingService>();
+  for (const a of allPlanToWatch) {
+    for (const l of a.streamingLinks) serviceSet.add(l.service);
+  }
+  for (const r of allRecommendations) {
+    for (const l of (r.anime as typeof allPlanToWatch[number]).streamingLinks ?? []) serviceSet.add(l.service);
+  }
+  const availableServices = Array.from(serviceSet);
+
+  const recommenderMap = new Map<number, string>();
+  for (const a of allPlanToWatch) {
+    if (a.userEntry?.recommender) {
+      recommenderMap.set(a.userEntry.recommender.id, a.userEntry.recommender.name);
+    }
+  }
+  const availableRecommenders = Array.from(recommenderMap.entries()).map(([id, name]) => ({ id, name }));
+
+  // Apply filters
+  const isQuickBinge = quickBinge === "1";
+
+  const planToWatch = allPlanToWatch.filter((a) => {
+    if (service && !a.streamingLinks.some((l) => l.service === service)) return false;
+    if (airingStatus && a.airingStatus !== airingStatus) return false;
+    if (recommender && String(a.userEntry?.recommenderId ?? "") !== recommender) return false;
+    if (isQuickBinge && (a.airingStatus !== "FINISHED" || (a.totalEpisodes ?? Infinity) > 15)) return false;
+    return true;
+  });
+
+  const recommendations = cappedRecommendations.filter((r) => {
+    const anime = r.anime as typeof allPlanToWatch[number];
+    if (service && !anime.streamingLinks?.some((l) => l.service === service)) return false;
+    if (airingStatus && anime.airingStatus !== airingStatus) return false;
+    if (isQuickBinge && (anime.airingStatus !== "FINISHED" || (anime.totalEpisodes ?? Infinity) > 15)) return false;
+    return true;
+  });
+
   return (
     <div className="space-y-10">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Up Next</h2>
+        <h2 className="text-2xl font-bold text-white">Backlog</h2>
         <Link
-          href="/library/add"
+          href="/library/add?returnTo=/backlog"
           className="text-sm text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 px-3 py-1.5 rounded-md transition-colors"
         >
           + Add Anime
         </Link>
       </div>
+
+      <Suspense>
+        <UpNextFilters services={availableServices} recommenders={availableRecommenders} />
+      </Suspense>
 
       {/* Recommendations — franchise siblings you haven't seen */}
       <Suspense>
@@ -153,7 +240,7 @@ export default async function QueuePage() {
         {planToWatch.length === 0 ? (
           <p className="text-slate-500 text-sm py-8 text-center">
             Nothing here yet — mark a recommendation as Interested or{" "}
-            <Link href="/library/add" className="text-indigo-400 hover:text-indigo-300">
+            <Link href="/library/add?returnTo=/backlog" className="text-indigo-400 hover:text-indigo-300">
               add an anime
             </Link>{" "}
             with Plan to Watch status.

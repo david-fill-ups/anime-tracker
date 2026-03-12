@@ -42,7 +42,7 @@ export default function FranchiseManager({
     const mainEntries = entries.filter((e) => e.entryType === "MAIN");
     for (const entry of mainEntries) {
       const status = entry.anime.userEntry?.watchStatus;
-      if (!status || status === "PLAN_TO_WATCH" || status === "RECOMMENDED") {
+      if (!status || status === "PLAN_TO_WATCH") {
         return entry;
       }
     }

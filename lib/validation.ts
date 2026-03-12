@@ -12,7 +12,6 @@ export const WatchStatusSchema = z.enum([
   "COMPLETED",
   "DROPPED",
   "PLAN_TO_WATCH",
-  "RECOMMENDED",
   "NOT_INTERESTED",
 ]);
 

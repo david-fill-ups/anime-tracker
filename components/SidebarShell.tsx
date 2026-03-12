@@ -79,6 +79,7 @@ export default function SidebarShell({ user }: { user: Session["user"] }) {
               disabled={shuffling}
               className="w-full flex items-center gap-2 p-2 rounded-lg bg-slate-900/60 backdrop-blur-sm hover:bg-slate-800/60 transition-colors text-left disabled:opacity-50"
               title="Click to shuffle"
+              suppressHydrationWarning
             >
               <img
                 src={anime.coverImageUrl}

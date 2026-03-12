@@ -4,6 +4,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { ScoreByYearScatter } from "@/components/ScoreByYearScatter";
 
 // Statuses that represent genuine watch engagement (excludes wishlist/recommendations)
 const ENGAGED_STATUSES = ["WATCHING", "COMPLETED", "DROPPED"] as const;
@@ -77,21 +78,57 @@ export default async function DashboardPage() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10);
 
-  // Studio scores — engaged + rated entries only
-  const studioScores: Record<string, { sum: number; count: number }> = {};
+  // Studio scores — hours-weighted avg (weight = episodes watched × duration)
+  const studioScores: Record<string, { weightedSum: number; totalWeight: number; count: number }> = {};
   for (const e of rated) {
     const studio = e.anime.animeStudios[0]?.studio.name;
     if (studio) {
-      if (!studioScores[studio]) studioScores[studio] = { sum: 0, count: 0 };
-      studioScores[studio].sum += e.score ?? 0;
+      const weight = e.currentEpisode * (e.anime.durationMins ?? 24);
+      if (!studioScores[studio]) studioScores[studio] = { weightedSum: 0, totalWeight: 0, count: 0 };
+      studioScores[studio].weightedSum += (e.score ?? 0) * weight;
+      studioScores[studio].totalWeight += weight;
       studioScores[studio].count += 1;
     }
   }
   const topStudios = Object.entries(studioScores)
-    .filter(([, v]) => v.count >= 2)
-    .map(([name, v]) => ({ name, avg: Math.round((v.sum / v.count) * 10) / 10, count: v.count }))
+    .filter(([, v]) => v.count >= 2 && v.totalWeight > 0)
+    .map(([name, v]) => ({ name, avg: Math.round((v.weightedSum / v.totalWeight) * 10) / 10, count: v.count }))
     .sort((a, b) => b.avg - a.avg)
     .slice(0, 10);
+
+  // Genre ratings — avg score per genre, engaged rated entries only
+  const genreScores: Record<string, { sum: number; count: number }> = {};
+  for (const e of rated) {
+    const genres: string[] = JSON.parse(e.anime.genres || "[]");
+    for (const g of genres) {
+      if (!genreScores[g]) genreScores[g] = { sum: 0, count: 0 };
+      genreScores[g].sum += e.score!;
+      genreScores[g].count += 1;
+    }
+  }
+  const genreRatings = Object.entries(genreScores)
+    .filter(([, v]) => v.count >= 2)
+    .map(([genre, v]) => ({ genre, avg: Math.round((v.sum / v.count) * 10) / 10, count: v.count }))
+    .sort((a, b) => b.avg - a.avg);
+
+  // Your taste vs community — normalize user score (1–5) to 0–100 for comparison
+  const scoredWithCommunity = rated.filter((e) => (e.anime.meanScore ?? 0) > 0);
+  const avgUserNorm = scoredWithCommunity.length
+    ? Math.round(scoredWithCommunity.reduce((s, e) => s + (e.score! / 5) * 100, 0) / scoredWithCommunity.length)
+    : null;
+  const avgCommunity = scoredWithCommunity.length
+    ? Math.round(scoredWithCommunity.reduce((s, e) => s + e.anime.meanScore!, 0) / scoredWithCommunity.length)
+    : null;
+  const scoreDelta = avgUserNorm != null && avgCommunity != null ? avgUserNorm - avgCommunity : null;
+
+  // Score by release year — scatter data (nulls filtered out)
+  const scatterData = rated
+    .filter((e) => e.anime.seasonYear != null)
+    .map((e) => ({
+      year: e.anime.seasonYear!,
+      score: e.score!,
+      title: e.anime.titleEnglish || e.anime.titleRomaji || "Unknown",
+    }));
 
   // Format breakdown — engaged anime only
   const formatCounts: Record<string, number> = {};
@@ -102,7 +139,6 @@ export default async function DashboardPage() {
     COMPLETED: "Completed",
     DROPPED: "Dropped",
     PLAN_TO_WATCH: "Plan to Watch",
-    RECOMMENDED: "Recommended",
   };
 
   const STATUS_COLORS: Record<string, string> = {
@@ -110,7 +146,6 @@ export default async function DashboardPage() {
     COMPLETED: "bg-green-500",
     DROPPED: "bg-red-500",
     PLAN_TO_WATCH: "bg-purple-500",
-    RECOMMENDED: "bg-orange-500",
   };
 
   return (
@@ -123,7 +158,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Total Watched" value={String(engagedAnimes.length)} href="/library" />
         <StatCard label="Completed" value={String(statusCounts["COMPLETED"] ?? 0)} href="/library?status=COMPLETED" />
-        <StatCard label="Hours Watched" value={String(totalHours)} href="/library?status=COMPLETED" />
+        <StatCard label="Hours Watched" value={formatWatchTime(totalMinutes)} title={`${totalHours.toLocaleString()} hours watched`} href="/library" />
         <StatCard
           label="Avg Score"
           value={avgScore != null ? `${avgScore} / 5` : "—"}
@@ -182,7 +217,7 @@ export default async function DashboardPage() {
       {/* Studio scores */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
         <h3 className="text-sm font-semibold text-slate-300 mb-1">Studio Ratings</h3>
-        <p className="text-xs text-slate-500 mb-4">Studios with ≥2 rated entries</p>
+        <p className="text-xs text-slate-500 mb-4">Hours-weighted avg · ≥2 rated entries</p>
         {topStudios.length === 0 ? (
           <p className="text-slate-500 text-sm">Rate more anime to see studio comparisons.</p>
         ) : (
@@ -200,6 +235,67 @@ export default async function DashboardPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Genre ratings */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-slate-300 mb-1">Genre Ratings</h3>
+        <p className="text-xs text-slate-500 mb-4">Avg score · ≥2 rated entries</p>
+        {genreRatings.length === 0 ? (
+          <p className="text-slate-500 text-sm">Rate more anime to see genre comparisons.</p>
+        ) : (
+          <div className="space-y-2">
+            {genreRatings.map((g) => (
+              <Link
+                key={g.genre}
+                href={`/library?genre=${encodeURIComponent(g.genre)}`}
+                className="flex items-center gap-3 rounded-lg px-2 py-1 -mx-2 hover:bg-slate-800/60 transition-colors"
+              >
+                <span className="text-sm text-slate-300 flex-1">{g.genre}</span>
+                <span className="text-xs text-slate-500">{g.count} anime</span>
+                <span className="text-sm font-medium text-yellow-400">★ {g.avg}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Your taste vs community */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-slate-300 mb-4">Your Taste vs Community</h3>
+        {avgUserNorm == null ? (
+          <p className="text-slate-500 text-sm">Rate more anime with AniList data to see this comparison.</p>
+        ) : (
+          <>
+            <div className="flex gap-6 mb-3">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-white">{avgUserNorm}</p>
+                <p className="text-xs text-slate-400 mt-1">You</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-white">{avgCommunity}</p>
+                <p className="text-xs text-slate-400 mt-1">Community</p>
+              </div>
+            </div>
+            {scoreDelta != null && (
+              <p className="text-xs text-slate-400">
+                {scoreDelta === 0
+                  ? "Right in line with the community average"
+                  : scoreDelta > 0
+                  ? `You rate +${scoreDelta} pts above community average`
+                  : `You rate ${scoreDelta} pts below community average`}
+                {" "}· out of 100
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Score by release year */}
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-slate-300 mb-1">Score by Release Year</h3>
+        <p className="text-xs text-slate-500 mb-4">Based on anime start year · {scatterData.length} rated</p>
+        <ScoreByYearScatter data={scatterData} />
       </div>
 
       {/* Format */}
@@ -254,10 +350,20 @@ function Stars({ score }: { score: number }) {
   );
 }
 
-function StatCard({ label, value, href, subtitle }: { label: string; value: string; href: string; subtitle?: React.ReactNode }) {
+function formatWatchTime(totalMinutes: number): string {
+  const hours = totalMinutes / 60;
+  const days = hours / 24;
+  if (days >= 365) return `${(days / 365).toFixed(1)} yrs`;
+  if (days >= 30)  return `${(days / 30).toFixed(1)} mo`;
+  if (days >= 1)   return `${Math.round(days)} days`;
+  return `${Math.round(hours)} hrs`;
+}
+
+function StatCard({ label, value, href, subtitle, title }: { label: string; value: string; href: string; subtitle?: React.ReactNode; title?: string }) {
   return (
     <Link
       href={href}
+      title={title}
       className="bg-slate-900 border border-slate-800 rounded-xl p-5 text-center hover:border-slate-600 hover:bg-slate-800/50 transition-colors block"
     >
       <p className="text-2xl font-bold text-white">{value}</p>

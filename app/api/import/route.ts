@@ -9,7 +9,6 @@ const VALID_STATUSES = new Set<string>([
   "COMPLETED",
   "DROPPED",
   "PLAN_TO_WATCH",
-  "RECOMMENDED",
   "NOT_INTERESTED",
 ]);
 

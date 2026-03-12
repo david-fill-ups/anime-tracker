@@ -175,7 +175,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
 
     const fetchEps = async (): Promise<{ number: number; name: string }[]> => {
       const params = new URLSearchParams();
-      if (isMultiLink) {
+      if (isMultiLink || virtualTotalSeasons > 1) {
         const offset = virtualEpsPerSeason.slice(0, season - 1).reduce((a, b) => a + b, 0);
         const count = virtualEpsPerSeason[season - 1] ?? 0;
         params.set("episodeOffset", String(offset));
@@ -326,7 +326,6 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
             </option>
             <option value="DROPPED">Dropped</option>
             <option value="PLAN_TO_WATCH">Plan to Watch</option>
-            <option value="RECOMMENDED">Recommended</option>
           </select>
         </div>
 

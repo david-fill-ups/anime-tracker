@@ -139,7 +139,7 @@ export default async function WatchListPage() {
       <CatchUpAutoRefresh staleIds={staleIds} />
 
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">Watch List</h2>
+        <h2 className="text-2xl font-bold text-white">Watching</h2>
         {staleIds.length > 0 && (
           <span className="text-xs text-slate-500">
             Syncing {staleIds.length} show{staleIds.length !== 1 ? "s" : ""}…

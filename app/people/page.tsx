@@ -41,6 +41,7 @@ export default async function PeoplePage() {
       recentRecommendations: person.entries.slice(0, 3).map((e) => {
         const anime = e.link?.linkedAnime[0]?.anime;
         return {
+          animeId: anime?.id ?? null,
           title: anime ? (anime.titleEnglish || anime.titleRomaji) : "(unknown)",
           status: e.watchStatus,
           score: e.score,

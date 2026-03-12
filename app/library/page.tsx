@@ -12,6 +12,8 @@ import LibraryRefreshFooter from "@/components/LibraryRefreshFooter";
 
 // Statuses that belong to the Library (watched / watching)
 const LIBRARY_STATUSES: WatchStatus[] = ["WATCHING", "COMPLETED", "DROPPED"];
+// All statuses that can be explicitly filtered via the filters page
+const ALL_FILTERABLE_STATUSES: WatchStatus[] = [...LIBRARY_STATUSES, "NOT_INTERESTED"];
 
 export default async function LibraryPage({
   searchParams,
@@ -23,21 +25,31 @@ export default async function LibraryPage({
   const userId = session.user.id;
 
   const params = await searchParams;
-  const { status, search, franchise, format, context, sort = "updatedAt", genre, studio, verified, minScore, maxScore } = params; // TODO[TEMP]: verified
+  const { status, search, franchise, format, context, recommender, sort = "updatedAt", genre, studio, verified, minScore, maxScore } = params; // TODO[TEMP]: verified
 
   // Build the userEntry filter (always scoped to this user)
   const userEntryFilter: Record<string, unknown> = {};
 
-  if (status && LIBRARY_STATUSES.includes(status as WatchStatus)) {
-    userEntryFilter.watchStatus = status as WatchStatus;
-  } else {
+  const statusList = status
+    ? (status.split(",").filter((s) => ALL_FILTERABLE_STATUSES.includes(s as WatchStatus)) as WatchStatus[])
+    : [];
+
+  if (statusList.length === 0) {
     userEntryFilter.watchStatus = { in: LIBRARY_STATUSES };
+  } else if (statusList.length === 1) {
+    userEntryFilter.watchStatus = statusList[0];
+  } else {
+    userEntryFilter.watchStatus = { in: statusList };
   }
 
   if (context === "NONE") {
     userEntryFilter.watchContextPersonId = null;
   } else if (context) {
     userEntryFilter.watchContextPersonId = Number(context);
+  }
+
+  if (recommender) {
+    userEntryFilter.recommenderId = Number(recommender);
   }
 
   if (minScore || maxScore) {
@@ -139,7 +151,7 @@ export default async function LibraryPage({
     db.userEntry.groupBy({
       by: ["watchStatus"],
       _count: { watchStatus: true },
-      where: { watchStatus: { in: LIBRARY_STATUSES }, userId },
+      where: { watchStatus: { in: ALL_FILTERABLE_STATUSES }, userId },
     }),
     db.anime.findFirst({
       where: {

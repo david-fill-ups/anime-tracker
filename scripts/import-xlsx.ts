@@ -105,9 +105,9 @@ async function main() {
 
   console.log(`\nActive/Completed: ${activeOk} imported, ${activeFail} failed`);
 
-  // ── 3. Watch List tab ────────────────────────────────────────────────────
+  // ── 3. Watching tab ──────────────────────────────────────────────────────
   const wlRows = (
-    XLSX.utils.sheet_to_json(wb.Sheets["Watch List"], {
+    XLSX.utils.sheet_to_json(wb.Sheets["Watching"], {
       header: 1,
       defval: "",
     }) as string[][]
@@ -137,12 +137,12 @@ async function main() {
       });
       wlOk++;
     } catch (e) {
-      console.error(`  FAIL [watchlist] "${title}": ${(e as Error).message}`);
+      console.error(`  FAIL [watching] "${title}": ${(e as Error).message}`);
       wlFail++;
     }
   }
 
-  console.log(`Watch List: ${wlOk} imported, ${wlFail} failed`);
+  console.log(`Watching: ${wlOk} imported, ${wlFail} failed`);
   await db.$disconnect();
 }
 
