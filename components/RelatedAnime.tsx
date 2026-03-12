@@ -20,14 +20,12 @@ export default async function RelatedAnime({
   franchiseIds,
   linkId,
   linkedAnilistIds,
-  currentAnimeId,
 }: {
   anilistId: number;
   userId: string;
   franchiseIds?: number[];
   linkId?: number | null;
   linkedAnilistIds?: (number | null)[];
-  currentAnimeId?: number;
 }) {
   const [anilistData, userAnimes, franchiseMembers] = await Promise.all([
     fetchAniListById(anilistId),

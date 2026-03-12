@@ -10,8 +10,8 @@ export async function GET() {
       where: { userId },
       include: {
         entries: {
-          include: { anime: true },
           where: { watchStatus: "COMPLETED", userId },
+          select: { score: true },
         },
       },
       orderBy: { name: "asc" },

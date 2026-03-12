@@ -210,15 +210,8 @@ model Anime {
   createdAt          DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  // DEPRECATED: replaced by LinkedAnime — kept during migration, remove after
-  mergedIntoId     Int?
-  mergeOrder       Int              @default(0)
-  mergedInto       Anime?           @relation("AnimeMerge", fields: [mergedIntoId], references: [id])
-  mergedAnimes     Anime[]          @relation("AnimeMerge")
-
   franchiseEntries FranchiseEntry[]
   animeStudios     AnimeStudio[]
-  userEntries      UserEntry[]
   streamingLinks   StreamingLink[]
   linkedIn         LinkedAnime[]
 }
@@ -257,9 +250,6 @@ model StreamingLink {
 
 model UserEntry {
   id             Int          @id @default(autoincrement())
-  // DEPRECATED: animeId kept during migration — will be removed after migrate-links script runs
-  anime          Anime?       @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  animeId        Int?
   link           Link?        @relation(fields: [linkId], references: [id], onDelete: Cascade)
   linkId         Int?         @unique
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -279,6 +269,4 @@ model UserEntry {
   verified       Boolean      @default(false) // TODO[TEMP]: remove after data review
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-
-  @@unique([animeId, userId])
 }

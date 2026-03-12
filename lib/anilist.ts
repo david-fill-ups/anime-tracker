@@ -1,4 +1,5 @@
 import { GraphQLClient, gql } from "graphql-request";
+import { db } from "./db";
 
 const client = new GraphQLClient("https://graphql.anilist.co");
 
@@ -156,6 +157,60 @@ export function mapDisplayFormat(
   format: AniListAnime["format"]
 ): "SERIES" | "MOVIE" {
   return format === "MOVIE" ? "MOVIE" : "SERIES";
+}
+
+// Map an AniListAnime to Prisma Anime create/update data fields.
+// Pass extra fields (e.g. tmdbId) via the second argument.
+export function mapAniListToAnimeData(
+  data: AniListAnime,
+  extra?: { tmdbId?: number | null }
+) {
+  return {
+    anilistId: data.id,
+    source: "ANILIST" as const,
+    titleRomaji: data.title.romaji,
+    titleEnglish: data.title.english ?? null,
+    titleNative: data.title.native ?? null,
+    coverImageUrl: data.coverImage.large,
+    synopsis: data.description ?? null,
+    genres: JSON.stringify(data.genres),
+    totalEpisodes: data.episodes ?? null,
+    durationMins: data.duration ?? null,
+    airingStatus: data.status,
+    displayFormat: mapDisplayFormat(data.format),
+    sourceMaterial: mapSourceMaterial(data.source),
+    season: data.season ?? null,
+    seasonYear: data.seasonYear ?? null,
+    meanScore: data.meanScore ?? null,
+    nextAiringEp: data.nextAiringEpisode?.episode ?? null,
+    nextAiringAt: data.nextAiringEpisode
+      ? new Date(data.nextAiringEpisode.airingAt * 1000)
+      : null,
+    lastSyncedAt: new Date(),
+    ...(extra?.tmdbId != null ? { tmdbId: extra.tmdbId } : {}),
+  };
+}
+
+// Upsert AniList studio edges and return Prisma AnimeStudio create data.
+export async function upsertStudios(
+  edges: { isMain: boolean; node: { id: number; name: string } }[]
+): Promise<{ studioId: number; isMainStudio: boolean }[]> {
+  const creates: { studioId: number; isMainStudio: boolean }[] = [];
+  for (const edge of edges) {
+    const studio = await db.studio.upsert({
+      where: { anilistStudioId: edge.node.id },
+      update: { name: edge.node.name },
+      create: { name: edge.node.name, anilistStudioId: edge.node.id },
+    });
+    creates.push({ studioId: studio.id, isMainStudio: edge.isMain });
+  }
+  // Deduplicate by studioId in case AniList returns the same studio multiple times
+  const seen = new Set<number>();
+  return creates.filter((c) => {
+    if (seen.has(c.studioId)) return false;
+    seen.add(c.studioId);
+    return true;
+  });
 }
 
 // Map AniList source to our SourceMaterial

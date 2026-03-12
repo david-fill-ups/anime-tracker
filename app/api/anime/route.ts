@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
-import { fetchAniListById, mapDisplayFormat, mapSourceMaterial } from "@/lib/anilist";
+import { fetchAniListById, mapAniListToAnimeData, upsertStudios } from "@/lib/anilist";
 import { refreshStreamingForAnime } from "@/lib/tmdb";
 import { autoPopulateFranchise } from "@/lib/franchise-auto";
 import { CreateAnimeSchema, parseBody, wrapHandler } from "@/lib/validation";
@@ -24,27 +24,7 @@ export async function POST(req: NextRequest) {
 
     const anime = existing ?? await db.anime.create({
       data: {
-        anilistId: data.id,
-        source: "ANILIST",
-        titleRomaji: data.title.romaji,
-        titleEnglish: data.title.english ?? null,
-        titleNative: data.title.native ?? null,
-        coverImageUrl: data.coverImage.large,
-        synopsis: data.description ?? null,
-        genres: JSON.stringify(data.genres),
-        totalEpisodes: data.episodes ?? null,
-        durationMins: data.duration ?? null,
-        airingStatus: data.status,
-        displayFormat: mapDisplayFormat(data.format),
-        sourceMaterial: mapSourceMaterial(data.source),
-        season: data.season ?? null,
-        seasonYear: data.seasonYear ?? null,
-        meanScore: data.meanScore ?? null,
-        nextAiringEp: data.nextAiringEpisode?.episode ?? null,
-        nextAiringAt: data.nextAiringEpisode
-          ? new Date(data.nextAiringEpisode.airingAt * 1000)
-          : null,
-        lastSyncedAt: new Date(),
+        ...mapAniListToAnimeData(data),
         animeStudios: {
           create: await upsertStudios(data.studios.edges),
         },
@@ -126,23 +106,3 @@ export async function POST(req: NextRequest) {
   });
 }
 
-async function upsertStudios(
-  edges: { isMain: boolean; node: { id: number; name: string } }[]
-) {
-  const creates = [];
-  for (const edge of edges) {
-    const studio = await db.studio.upsert({
-      where: { anilistStudioId: edge.node.id },
-      update: { name: edge.node.name },
-      create: { name: edge.node.name, anilistStudioId: edge.node.id },
-    });
-    creates.push({ studioId: studio.id, isMainStudio: edge.isMain });
-  }
-  // Deduplicate by studioId in case AniList returns the same studio multiple times
-  const seen = new Set<number>();
-  return creates.filter(c => {
-    if (seen.has(c.studioId)) return false;
-    seen.add(c.studioId);
-    return true;
-  });
-}

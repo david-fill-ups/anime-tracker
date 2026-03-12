@@ -85,19 +85,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     if (Object.keys(entryData).length > 0) {
-      // Auto-set startedAt when starting to watch
-      if (watchStatus === "WATCHING" && startedAt === undefined) {
-        const link = await db.link.findFirst({
-          where: { userId, linkedAnime: { some: { animeId } } },
-          select: { userEntry: { select: { startedAt: true, linkId: true } } },
-        });
-        if (!link?.userEntry?.startedAt) entryData.startedAt = new Date();
-      }
-
       const link = await db.link.findFirst({
         where: { userId, linkedAnime: { some: { animeId } } },
-        select: { id: true },
+        select: { id: true, userEntry: { select: { startedAt: true } } },
       });
+      // Auto-set startedAt when starting to watch
+      if (watchStatus === "WATCHING" && startedAt === undefined && !link?.userEntry?.startedAt) {
+        entryData.startedAt = new Date();
+      }
       if (link) {
         updates.push(
           db.userEntry.update({ where: { linkId: link.id }, data: entryData })

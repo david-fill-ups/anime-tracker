@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
-import { fetchAniListById, mapDisplayFormat, mapSourceMaterial } from "@/lib/anilist";
+import { fetchAniListById, mapAniListToAnimeData, upsertStudios } from "@/lib/anilist";
 import type { WatchStatus } from "@/app/generated/prisma";
 
 const VALID_STATUSES = new Set<string>([
@@ -92,41 +92,10 @@ async function fetchOrCreateAnime(anilistId: number, tmdbIdVal: number | null) {
     const data = await fetchAniListById(anilistId);
     if (!data) return null;
 
-    const studioCreates: { studioId: number; isMainStudio: boolean }[] = [];
-    for (const edge of data.studios.edges) {
-      const studio = await db.studio.upsert({
-        where: { anilistStudioId: edge.node.id },
-        update: { name: edge.node.name },
-        create: { name: edge.node.name, anilistStudioId: edge.node.id },
-      });
-      studioCreates.push({ studioId: studio.id, isMainStudio: edge.isMain });
-    }
-
     anime = await db.anime.create({
       data: {
-        anilistId: data.id,
-        source: "ANILIST",
-        titleRomaji: data.title.romaji,
-        titleEnglish: data.title.english ?? null,
-        titleNative: data.title.native ?? null,
-        coverImageUrl: data.coverImage.large,
-        synopsis: data.description ?? null,
-        genres: JSON.stringify(data.genres),
-        totalEpisodes: data.episodes ?? null,
-        durationMins: data.duration ?? null,
-        airingStatus: data.status,
-        displayFormat: mapDisplayFormat(data.format),
-        sourceMaterial: mapSourceMaterial(data.source),
-        season: data.season ?? null,
-        seasonYear: data.seasonYear ?? null,
-        meanScore: data.meanScore ?? null,
-        nextAiringEp: data.nextAiringEpisode?.episode ?? null,
-        nextAiringAt: data.nextAiringEpisode
-          ? new Date(data.nextAiringEpisode.airingAt * 1000)
-          : null,
-        lastSyncedAt: new Date(),
-        tmdbId: tmdbIdVal,
-        animeStudios: { create: studioCreates },
+        ...mapAniListToAnimeData(data, { tmdbId: tmdbIdVal }),
+        animeStudios: { create: await upsertStudios(data.studios.edges) },
       },
     });
   } else if (tmdbIdVal && !anime.tmdbId) {

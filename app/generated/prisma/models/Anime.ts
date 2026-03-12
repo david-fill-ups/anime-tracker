@@ -36,8 +36,6 @@ export type AnimeAvgAggregateOutputType = {
   meanScore: number | null
   nextAiringEp: number | null
   tmdbId: number | null
-  mergedIntoId: number | null
-  mergeOrder: number | null
 }
 
 export type AnimeSumAggregateOutputType = {
@@ -50,8 +48,6 @@ export type AnimeSumAggregateOutputType = {
   meanScore: number | null
   nextAiringEp: number | null
   tmdbId: number | null
-  mergedIntoId: number | null
-  mergeOrder: number | null
 }
 
 export type AnimeMinAggregateOutputType = {
@@ -83,8 +79,6 @@ export type AnimeMinAggregateOutputType = {
   streamingCheckedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
-  mergedIntoId: number | null
-  mergeOrder: number | null
 }
 
 export type AnimeMaxAggregateOutputType = {
@@ -116,8 +110,6 @@ export type AnimeMaxAggregateOutputType = {
   streamingCheckedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
-  mergedIntoId: number | null
-  mergeOrder: number | null
 }
 
 export type AnimeCountAggregateOutputType = {
@@ -149,8 +141,6 @@ export type AnimeCountAggregateOutputType = {
   streamingCheckedAt: number
   createdAt: number
   updatedAt: number
-  mergedIntoId: number
-  mergeOrder: number
   _all: number
 }
 
@@ -165,8 +155,6 @@ export type AnimeAvgAggregateInputType = {
   meanScore?: true
   nextAiringEp?: true
   tmdbId?: true
-  mergedIntoId?: true
-  mergeOrder?: true
 }
 
 export type AnimeSumAggregateInputType = {
@@ -179,8 +167,6 @@ export type AnimeSumAggregateInputType = {
   meanScore?: true
   nextAiringEp?: true
   tmdbId?: true
-  mergedIntoId?: true
-  mergeOrder?: true
 }
 
 export type AnimeMinAggregateInputType = {
@@ -212,8 +198,6 @@ export type AnimeMinAggregateInputType = {
   streamingCheckedAt?: true
   createdAt?: true
   updatedAt?: true
-  mergedIntoId?: true
-  mergeOrder?: true
 }
 
 export type AnimeMaxAggregateInputType = {
@@ -245,8 +229,6 @@ export type AnimeMaxAggregateInputType = {
   streamingCheckedAt?: true
   createdAt?: true
   updatedAt?: true
-  mergedIntoId?: true
-  mergeOrder?: true
 }
 
 export type AnimeCountAggregateInputType = {
@@ -278,8 +260,6 @@ export type AnimeCountAggregateInputType = {
   streamingCheckedAt?: true
   createdAt?: true
   updatedAt?: true
-  mergedIntoId?: true
-  mergeOrder?: true
   _all?: true
 }
 
@@ -398,8 +378,6 @@ export type AnimeGroupByOutputType = {
   streamingCheckedAt: Date | null
   createdAt: Date
   updatedAt: Date
-  mergedIntoId: number | null
-  mergeOrder: number
   _count: AnimeCountAggregateOutputType | null
   _avg: AnimeAvgAggregateOutputType | null
   _sum: AnimeSumAggregateOutputType | null
@@ -454,13 +432,8 @@ export type AnimeWhereInput = {
   streamingCheckedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
-  mergedIntoId?: Prisma.IntNullableFilter<"Anime"> | number | null
-  mergeOrder?: Prisma.IntFilter<"Anime"> | number
-  mergedInto?: Prisma.XOR<Prisma.AnimeNullableScalarRelationFilter, Prisma.AnimeWhereInput> | null
-  mergedAnimes?: Prisma.AnimeListRelationFilter
   franchiseEntries?: Prisma.FranchiseEntryListRelationFilter
   animeStudios?: Prisma.AnimeStudioListRelationFilter
-  userEntries?: Prisma.UserEntryListRelationFilter
   streamingLinks?: Prisma.StreamingLinkListRelationFilter
   linkedIn?: Prisma.LinkedAnimeListRelationFilter
 }
@@ -494,13 +467,8 @@ export type AnimeOrderByWithRelationInput = {
   streamingCheckedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  mergedIntoId?: Prisma.SortOrderInput | Prisma.SortOrder
-  mergeOrder?: Prisma.SortOrder
-  mergedInto?: Prisma.AnimeOrderByWithRelationInput
-  mergedAnimes?: Prisma.AnimeOrderByRelationAggregateInput
   franchiseEntries?: Prisma.FranchiseEntryOrderByRelationAggregateInput
   animeStudios?: Prisma.AnimeStudioOrderByRelationAggregateInput
-  userEntries?: Prisma.UserEntryOrderByRelationAggregateInput
   streamingLinks?: Prisma.StreamingLinkOrderByRelationAggregateInput
   linkedIn?: Prisma.LinkedAnimeOrderByRelationAggregateInput
 }
@@ -537,13 +505,8 @@ export type AnimeWhereUniqueInput = Prisma.AtLeast<{
   streamingCheckedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
-  mergedIntoId?: Prisma.IntNullableFilter<"Anime"> | number | null
-  mergeOrder?: Prisma.IntFilter<"Anime"> | number
-  mergedInto?: Prisma.XOR<Prisma.AnimeNullableScalarRelationFilter, Prisma.AnimeWhereInput> | null
-  mergedAnimes?: Prisma.AnimeListRelationFilter
   franchiseEntries?: Prisma.FranchiseEntryListRelationFilter
   animeStudios?: Prisma.AnimeStudioListRelationFilter
-  userEntries?: Prisma.UserEntryListRelationFilter
   streamingLinks?: Prisma.StreamingLinkListRelationFilter
   linkedIn?: Prisma.LinkedAnimeListRelationFilter
 }, "id" | "anilistId">
@@ -577,8 +540,6 @@ export type AnimeOrderByWithAggregationInput = {
   streamingCheckedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  mergedIntoId?: Prisma.SortOrderInput | Prisma.SortOrder
-  mergeOrder?: Prisma.SortOrder
   _count?: Prisma.AnimeCountOrderByAggregateInput
   _avg?: Prisma.AnimeAvgOrderByAggregateInput
   _max?: Prisma.AnimeMaxOrderByAggregateInput
@@ -618,8 +579,6 @@ export type AnimeScalarWhereWithAggregatesInput = {
   streamingCheckedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Anime"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Anime"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Anime"> | Date | string
-  mergedIntoId?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
-  mergeOrder?: Prisma.IntWithAggregatesFilter<"Anime"> | number
 }
 
 export type AnimeCreateInput = {
@@ -650,12 +609,8 @@ export type AnimeCreateInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergeOrder?: number
-  mergedInto?: Prisma.AnimeCreateNestedOneWithoutMergedAnimesInput
-  mergedAnimes?: Prisma.AnimeCreateNestedManyWithoutMergedIntoInput
   franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
   animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
 }
@@ -689,12 +644,8 @@ export type AnimeUncheckedCreateInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergedIntoId?: number | null
-  mergeOrder?: number
-  mergedAnimes?: Prisma.AnimeUncheckedCreateNestedManyWithoutMergedIntoInput
   franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
   animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
 }
@@ -727,12 +678,8 @@ export type AnimeUpdateInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedInto?: Prisma.AnimeUpdateOneWithoutMergedAnimesNestedInput
-  mergedAnimes?: Prisma.AnimeUpdateManyWithoutMergedIntoNestedInput
   franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
   animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
 }
@@ -766,12 +713,8 @@ export type AnimeUncheckedUpdateInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergedIntoId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedAnimes?: Prisma.AnimeUncheckedUpdateManyWithoutMergedIntoNestedInput
   franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
   animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
 }
@@ -805,8 +748,6 @@ export type AnimeCreateManyInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergedIntoId?: number | null
-  mergeOrder?: number
 }
 
 export type AnimeUpdateManyMutationInput = {
@@ -837,7 +778,6 @@ export type AnimeUpdateManyMutationInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type AnimeUncheckedUpdateManyInput = {
@@ -869,28 +809,11 @@ export type AnimeUncheckedUpdateManyInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergedIntoId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type AnimeScalarRelationFilter = {
   is?: Prisma.AnimeWhereInput
   isNot?: Prisma.AnimeWhereInput
-}
-
-export type AnimeNullableScalarRelationFilter = {
-  is?: Prisma.AnimeWhereInput | null
-  isNot?: Prisma.AnimeWhereInput | null
-}
-
-export type AnimeListRelationFilter = {
-  every?: Prisma.AnimeWhereInput
-  some?: Prisma.AnimeWhereInput
-  none?: Prisma.AnimeWhereInput
-}
-
-export type AnimeOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
 }
 
 export type AnimeCountOrderByAggregateInput = {
@@ -922,8 +845,6 @@ export type AnimeCountOrderByAggregateInput = {
   streamingCheckedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  mergedIntoId?: Prisma.SortOrder
-  mergeOrder?: Prisma.SortOrder
 }
 
 export type AnimeAvgOrderByAggregateInput = {
@@ -936,8 +857,6 @@ export type AnimeAvgOrderByAggregateInput = {
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
-  mergedIntoId?: Prisma.SortOrder
-  mergeOrder?: Prisma.SortOrder
 }
 
 export type AnimeMaxOrderByAggregateInput = {
@@ -969,8 +888,6 @@ export type AnimeMaxOrderByAggregateInput = {
   streamingCheckedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  mergedIntoId?: Prisma.SortOrder
-  mergeOrder?: Prisma.SortOrder
 }
 
 export type AnimeMinOrderByAggregateInput = {
@@ -1002,8 +919,6 @@ export type AnimeMinOrderByAggregateInput = {
   streamingCheckedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  mergedIntoId?: Prisma.SortOrder
-  mergeOrder?: Prisma.SortOrder
 }
 
 export type AnimeSumOrderByAggregateInput = {
@@ -1016,8 +931,6 @@ export type AnimeSumOrderByAggregateInput = {
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
-  mergedIntoId?: Prisma.SortOrder
-  mergeOrder?: Prisma.SortOrder
 }
 
 export type AnimeCreateNestedOneWithoutFranchiseEntriesInput = {
@@ -1048,26 +961,6 @@ export type AnimeUpdateOneRequiredWithoutAnimeStudiosNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AnimeUpdateToOneWithWhereWithoutAnimeStudiosInput, Prisma.AnimeUpdateWithoutAnimeStudiosInput>, Prisma.AnimeUncheckedUpdateWithoutAnimeStudiosInput>
 }
 
-export type AnimeCreateNestedOneWithoutMergedAnimesInput = {
-  create?: Prisma.XOR<Prisma.AnimeCreateWithoutMergedAnimesInput, Prisma.AnimeUncheckedCreateWithoutMergedAnimesInput>
-  connectOrCreate?: Prisma.AnimeCreateOrConnectWithoutMergedAnimesInput
-  connect?: Prisma.AnimeWhereUniqueInput
-}
-
-export type AnimeCreateNestedManyWithoutMergedIntoInput = {
-  create?: Prisma.XOR<Prisma.AnimeCreateWithoutMergedIntoInput, Prisma.AnimeUncheckedCreateWithoutMergedIntoInput> | Prisma.AnimeCreateWithoutMergedIntoInput[] | Prisma.AnimeUncheckedCreateWithoutMergedIntoInput[]
-  connectOrCreate?: Prisma.AnimeCreateOrConnectWithoutMergedIntoInput | Prisma.AnimeCreateOrConnectWithoutMergedIntoInput[]
-  createMany?: Prisma.AnimeCreateManyMergedIntoInputEnvelope
-  connect?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-}
-
-export type AnimeUncheckedCreateNestedManyWithoutMergedIntoInput = {
-  create?: Prisma.XOR<Prisma.AnimeCreateWithoutMergedIntoInput, Prisma.AnimeUncheckedCreateWithoutMergedIntoInput> | Prisma.AnimeCreateWithoutMergedIntoInput[] | Prisma.AnimeUncheckedCreateWithoutMergedIntoInput[]
-  connectOrCreate?: Prisma.AnimeCreateOrConnectWithoutMergedIntoInput | Prisma.AnimeCreateOrConnectWithoutMergedIntoInput[]
-  createMany?: Prisma.AnimeCreateManyMergedIntoInputEnvelope
-  connect?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-}
-
 export type EnumAnimeSourceFieldUpdateOperationsInput = {
   set?: $Enums.AnimeSource
 }
@@ -1086,44 +979,6 @@ export type NullableEnumSourceMaterialFieldUpdateOperationsInput = {
 
 export type NullableEnumSeasonFieldUpdateOperationsInput = {
   set?: $Enums.Season | null
-}
-
-export type AnimeUpdateOneWithoutMergedAnimesNestedInput = {
-  create?: Prisma.XOR<Prisma.AnimeCreateWithoutMergedAnimesInput, Prisma.AnimeUncheckedCreateWithoutMergedAnimesInput>
-  connectOrCreate?: Prisma.AnimeCreateOrConnectWithoutMergedAnimesInput
-  upsert?: Prisma.AnimeUpsertWithoutMergedAnimesInput
-  disconnect?: Prisma.AnimeWhereInput | boolean
-  delete?: Prisma.AnimeWhereInput | boolean
-  connect?: Prisma.AnimeWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AnimeUpdateToOneWithWhereWithoutMergedAnimesInput, Prisma.AnimeUpdateWithoutMergedAnimesInput>, Prisma.AnimeUncheckedUpdateWithoutMergedAnimesInput>
-}
-
-export type AnimeUpdateManyWithoutMergedIntoNestedInput = {
-  create?: Prisma.XOR<Prisma.AnimeCreateWithoutMergedIntoInput, Prisma.AnimeUncheckedCreateWithoutMergedIntoInput> | Prisma.AnimeCreateWithoutMergedIntoInput[] | Prisma.AnimeUncheckedCreateWithoutMergedIntoInput[]
-  connectOrCreate?: Prisma.AnimeCreateOrConnectWithoutMergedIntoInput | Prisma.AnimeCreateOrConnectWithoutMergedIntoInput[]
-  upsert?: Prisma.AnimeUpsertWithWhereUniqueWithoutMergedIntoInput | Prisma.AnimeUpsertWithWhereUniqueWithoutMergedIntoInput[]
-  createMany?: Prisma.AnimeCreateManyMergedIntoInputEnvelope
-  set?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-  disconnect?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-  delete?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-  connect?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-  update?: Prisma.AnimeUpdateWithWhereUniqueWithoutMergedIntoInput | Prisma.AnimeUpdateWithWhereUniqueWithoutMergedIntoInput[]
-  updateMany?: Prisma.AnimeUpdateManyWithWhereWithoutMergedIntoInput | Prisma.AnimeUpdateManyWithWhereWithoutMergedIntoInput[]
-  deleteMany?: Prisma.AnimeScalarWhereInput | Prisma.AnimeScalarWhereInput[]
-}
-
-export type AnimeUncheckedUpdateManyWithoutMergedIntoNestedInput = {
-  create?: Prisma.XOR<Prisma.AnimeCreateWithoutMergedIntoInput, Prisma.AnimeUncheckedCreateWithoutMergedIntoInput> | Prisma.AnimeCreateWithoutMergedIntoInput[] | Prisma.AnimeUncheckedCreateWithoutMergedIntoInput[]
-  connectOrCreate?: Prisma.AnimeCreateOrConnectWithoutMergedIntoInput | Prisma.AnimeCreateOrConnectWithoutMergedIntoInput[]
-  upsert?: Prisma.AnimeUpsertWithWhereUniqueWithoutMergedIntoInput | Prisma.AnimeUpsertWithWhereUniqueWithoutMergedIntoInput[]
-  createMany?: Prisma.AnimeCreateManyMergedIntoInputEnvelope
-  set?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-  disconnect?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-  delete?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-  connect?: Prisma.AnimeWhereUniqueInput | Prisma.AnimeWhereUniqueInput[]
-  update?: Prisma.AnimeUpdateWithWhereUniqueWithoutMergedIntoInput | Prisma.AnimeUpdateWithWhereUniqueWithoutMergedIntoInput[]
-  updateMany?: Prisma.AnimeUpdateManyWithWhereWithoutMergedIntoInput | Prisma.AnimeUpdateManyWithWhereWithoutMergedIntoInput[]
-  deleteMany?: Prisma.AnimeScalarWhereInput | Prisma.AnimeScalarWhereInput[]
 }
 
 export type AnimeCreateNestedOneWithoutLinkedInInput = {
@@ -1154,22 +1009,6 @@ export type AnimeUpdateOneRequiredWithoutStreamingLinksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AnimeUpdateToOneWithWhereWithoutStreamingLinksInput, Prisma.AnimeUpdateWithoutStreamingLinksInput>, Prisma.AnimeUncheckedUpdateWithoutStreamingLinksInput>
 }
 
-export type AnimeCreateNestedOneWithoutUserEntriesInput = {
-  create?: Prisma.XOR<Prisma.AnimeCreateWithoutUserEntriesInput, Prisma.AnimeUncheckedCreateWithoutUserEntriesInput>
-  connectOrCreate?: Prisma.AnimeCreateOrConnectWithoutUserEntriesInput
-  connect?: Prisma.AnimeWhereUniqueInput
-}
-
-export type AnimeUpdateOneWithoutUserEntriesNestedInput = {
-  create?: Prisma.XOR<Prisma.AnimeCreateWithoutUserEntriesInput, Prisma.AnimeUncheckedCreateWithoutUserEntriesInput>
-  connectOrCreate?: Prisma.AnimeCreateOrConnectWithoutUserEntriesInput
-  upsert?: Prisma.AnimeUpsertWithoutUserEntriesInput
-  disconnect?: Prisma.AnimeWhereInput | boolean
-  delete?: Prisma.AnimeWhereInput | boolean
-  connect?: Prisma.AnimeWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AnimeUpdateToOneWithWhereWithoutUserEntriesInput, Prisma.AnimeUpdateWithoutUserEntriesInput>, Prisma.AnimeUncheckedUpdateWithoutUserEntriesInput>
-}
-
 export type AnimeCreateWithoutFranchiseEntriesInput = {
   anilistId?: number | null
   source?: $Enums.AnimeSource
@@ -1198,11 +1037,7 @@ export type AnimeCreateWithoutFranchiseEntriesInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergeOrder?: number
-  mergedInto?: Prisma.AnimeCreateNestedOneWithoutMergedAnimesInput
-  mergedAnimes?: Prisma.AnimeCreateNestedManyWithoutMergedIntoInput
   animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
 }
@@ -1236,11 +1071,7 @@ export type AnimeUncheckedCreateWithoutFranchiseEntriesInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergedIntoId?: number | null
-  mergeOrder?: number
-  mergedAnimes?: Prisma.AnimeUncheckedCreateNestedManyWithoutMergedIntoInput
   animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
 }
@@ -1289,11 +1120,7 @@ export type AnimeUpdateWithoutFranchiseEntriesInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedInto?: Prisma.AnimeUpdateOneWithoutMergedAnimesNestedInput
-  mergedAnimes?: Prisma.AnimeUpdateManyWithoutMergedIntoNestedInput
   animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
 }
@@ -1327,11 +1154,7 @@ export type AnimeUncheckedUpdateWithoutFranchiseEntriesInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergedIntoId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedAnimes?: Prisma.AnimeUncheckedUpdateManyWithoutMergedIntoNestedInput
   animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
 }
@@ -1364,11 +1187,7 @@ export type AnimeCreateWithoutAnimeStudiosInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergeOrder?: number
-  mergedInto?: Prisma.AnimeCreateNestedOneWithoutMergedAnimesInput
-  mergedAnimes?: Prisma.AnimeCreateNestedManyWithoutMergedIntoInput
   franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
 }
@@ -1402,11 +1221,7 @@ export type AnimeUncheckedCreateWithoutAnimeStudiosInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergedIntoId?: number | null
-  mergeOrder?: number
-  mergedAnimes?: Prisma.AnimeUncheckedCreateNestedManyWithoutMergedIntoInput
   franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
 }
@@ -1455,11 +1270,7 @@ export type AnimeUpdateWithoutAnimeStudiosInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedInto?: Prisma.AnimeUpdateOneWithoutMergedAnimesNestedInput
-  mergedAnimes?: Prisma.AnimeUpdateManyWithoutMergedIntoNestedInput
   franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
 }
@@ -1493,316 +1304,9 @@ export type AnimeUncheckedUpdateWithoutAnimeStudiosInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergedIntoId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedAnimes?: Prisma.AnimeUncheckedUpdateManyWithoutMergedIntoNestedInput
   franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
-}
-
-export type AnimeCreateWithoutMergedAnimesInput = {
-  anilistId?: number | null
-  source?: $Enums.AnimeSource
-  titleEnglish?: string | null
-  titleRomaji: string
-  titleNative?: string | null
-  coverImageUrl?: string | null
-  synopsis?: string | null
-  genres?: string
-  totalEpisodes?: number | null
-  totalSeasons?: number | null
-  episodesPerSeason?: string | null
-  durationMins?: number | null
-  airingStatus?: $Enums.AiringStatus
-  displayFormat?: $Enums.DisplayFormat
-  sourceMaterial?: $Enums.SourceMaterial | null
-  season?: $Enums.Season | null
-  seasonYear?: number | null
-  meanScore?: number | null
-  nextAiringEp?: number | null
-  nextAiringAt?: Date | string | null
-  lastSyncedAt?: Date | string | null
-  tmdbId?: number | null
-  tmdbMediaType?: string | null
-  externalUrl?: string | null
-  streamingCheckedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  mergeOrder?: number
-  mergedInto?: Prisma.AnimeCreateNestedOneWithoutMergedAnimesInput
-  franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
-  animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
-  linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
-}
-
-export type AnimeUncheckedCreateWithoutMergedAnimesInput = {
-  id?: number
-  anilistId?: number | null
-  source?: $Enums.AnimeSource
-  titleEnglish?: string | null
-  titleRomaji: string
-  titleNative?: string | null
-  coverImageUrl?: string | null
-  synopsis?: string | null
-  genres?: string
-  totalEpisodes?: number | null
-  totalSeasons?: number | null
-  episodesPerSeason?: string | null
-  durationMins?: number | null
-  airingStatus?: $Enums.AiringStatus
-  displayFormat?: $Enums.DisplayFormat
-  sourceMaterial?: $Enums.SourceMaterial | null
-  season?: $Enums.Season | null
-  seasonYear?: number | null
-  meanScore?: number | null
-  nextAiringEp?: number | null
-  nextAiringAt?: Date | string | null
-  lastSyncedAt?: Date | string | null
-  tmdbId?: number | null
-  tmdbMediaType?: string | null
-  externalUrl?: string | null
-  streamingCheckedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  mergedIntoId?: number | null
-  mergeOrder?: number
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
-  animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
-  linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
-}
-
-export type AnimeCreateOrConnectWithoutMergedAnimesInput = {
-  where: Prisma.AnimeWhereUniqueInput
-  create: Prisma.XOR<Prisma.AnimeCreateWithoutMergedAnimesInput, Prisma.AnimeUncheckedCreateWithoutMergedAnimesInput>
-}
-
-export type AnimeCreateWithoutMergedIntoInput = {
-  anilistId?: number | null
-  source?: $Enums.AnimeSource
-  titleEnglish?: string | null
-  titleRomaji: string
-  titleNative?: string | null
-  coverImageUrl?: string | null
-  synopsis?: string | null
-  genres?: string
-  totalEpisodes?: number | null
-  totalSeasons?: number | null
-  episodesPerSeason?: string | null
-  durationMins?: number | null
-  airingStatus?: $Enums.AiringStatus
-  displayFormat?: $Enums.DisplayFormat
-  sourceMaterial?: $Enums.SourceMaterial | null
-  season?: $Enums.Season | null
-  seasonYear?: number | null
-  meanScore?: number | null
-  nextAiringEp?: number | null
-  nextAiringAt?: Date | string | null
-  lastSyncedAt?: Date | string | null
-  tmdbId?: number | null
-  tmdbMediaType?: string | null
-  externalUrl?: string | null
-  streamingCheckedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  mergeOrder?: number
-  mergedAnimes?: Prisma.AnimeCreateNestedManyWithoutMergedIntoInput
-  franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
-  animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
-  linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
-}
-
-export type AnimeUncheckedCreateWithoutMergedIntoInput = {
-  id?: number
-  anilistId?: number | null
-  source?: $Enums.AnimeSource
-  titleEnglish?: string | null
-  titleRomaji: string
-  titleNative?: string | null
-  coverImageUrl?: string | null
-  synopsis?: string | null
-  genres?: string
-  totalEpisodes?: number | null
-  totalSeasons?: number | null
-  episodesPerSeason?: string | null
-  durationMins?: number | null
-  airingStatus?: $Enums.AiringStatus
-  displayFormat?: $Enums.DisplayFormat
-  sourceMaterial?: $Enums.SourceMaterial | null
-  season?: $Enums.Season | null
-  seasonYear?: number | null
-  meanScore?: number | null
-  nextAiringEp?: number | null
-  nextAiringAt?: Date | string | null
-  lastSyncedAt?: Date | string | null
-  tmdbId?: number | null
-  tmdbMediaType?: string | null
-  externalUrl?: string | null
-  streamingCheckedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  mergeOrder?: number
-  mergedAnimes?: Prisma.AnimeUncheckedCreateNestedManyWithoutMergedIntoInput
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
-  animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
-  linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
-}
-
-export type AnimeCreateOrConnectWithoutMergedIntoInput = {
-  where: Prisma.AnimeWhereUniqueInput
-  create: Prisma.XOR<Prisma.AnimeCreateWithoutMergedIntoInput, Prisma.AnimeUncheckedCreateWithoutMergedIntoInput>
-}
-
-export type AnimeCreateManyMergedIntoInputEnvelope = {
-  data: Prisma.AnimeCreateManyMergedIntoInput | Prisma.AnimeCreateManyMergedIntoInput[]
-  skipDuplicates?: boolean
-}
-
-export type AnimeUpsertWithoutMergedAnimesInput = {
-  update: Prisma.XOR<Prisma.AnimeUpdateWithoutMergedAnimesInput, Prisma.AnimeUncheckedUpdateWithoutMergedAnimesInput>
-  create: Prisma.XOR<Prisma.AnimeCreateWithoutMergedAnimesInput, Prisma.AnimeUncheckedCreateWithoutMergedAnimesInput>
-  where?: Prisma.AnimeWhereInput
-}
-
-export type AnimeUpdateToOneWithWhereWithoutMergedAnimesInput = {
-  where?: Prisma.AnimeWhereInput
-  data: Prisma.XOR<Prisma.AnimeUpdateWithoutMergedAnimesInput, Prisma.AnimeUncheckedUpdateWithoutMergedAnimesInput>
-}
-
-export type AnimeUpdateWithoutMergedAnimesInput = {
-  anilistId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  source?: Prisma.EnumAnimeSourceFieldUpdateOperationsInput | $Enums.AnimeSource
-  titleEnglish?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  titleRomaji?: Prisma.StringFieldUpdateOperationsInput | string
-  titleNative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  genres?: Prisma.StringFieldUpdateOperationsInput | string
-  totalEpisodes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  totalSeasons?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  episodesPerSeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  durationMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  airingStatus?: Prisma.EnumAiringStatusFieldUpdateOperationsInput | $Enums.AiringStatus
-  displayFormat?: Prisma.EnumDisplayFormatFieldUpdateOperationsInput | $Enums.DisplayFormat
-  sourceMaterial?: Prisma.NullableEnumSourceMaterialFieldUpdateOperationsInput | $Enums.SourceMaterial | null
-  season?: Prisma.NullableEnumSeasonFieldUpdateOperationsInput | $Enums.Season | null
-  seasonYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedInto?: Prisma.AnimeUpdateOneWithoutMergedAnimesNestedInput
-  franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
-  animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
-  linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
-}
-
-export type AnimeUncheckedUpdateWithoutMergedAnimesInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  anilistId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  source?: Prisma.EnumAnimeSourceFieldUpdateOperationsInput | $Enums.AnimeSource
-  titleEnglish?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  titleRomaji?: Prisma.StringFieldUpdateOperationsInput | string
-  titleNative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  genres?: Prisma.StringFieldUpdateOperationsInput | string
-  totalEpisodes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  totalSeasons?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  episodesPerSeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  durationMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  airingStatus?: Prisma.EnumAiringStatusFieldUpdateOperationsInput | $Enums.AiringStatus
-  displayFormat?: Prisma.EnumDisplayFormatFieldUpdateOperationsInput | $Enums.DisplayFormat
-  sourceMaterial?: Prisma.NullableEnumSourceMaterialFieldUpdateOperationsInput | $Enums.SourceMaterial | null
-  season?: Prisma.NullableEnumSeasonFieldUpdateOperationsInput | $Enums.Season | null
-  seasonYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergedIntoId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
-  animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
-  linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
-}
-
-export type AnimeUpsertWithWhereUniqueWithoutMergedIntoInput = {
-  where: Prisma.AnimeWhereUniqueInput
-  update: Prisma.XOR<Prisma.AnimeUpdateWithoutMergedIntoInput, Prisma.AnimeUncheckedUpdateWithoutMergedIntoInput>
-  create: Prisma.XOR<Prisma.AnimeCreateWithoutMergedIntoInput, Prisma.AnimeUncheckedCreateWithoutMergedIntoInput>
-}
-
-export type AnimeUpdateWithWhereUniqueWithoutMergedIntoInput = {
-  where: Prisma.AnimeWhereUniqueInput
-  data: Prisma.XOR<Prisma.AnimeUpdateWithoutMergedIntoInput, Prisma.AnimeUncheckedUpdateWithoutMergedIntoInput>
-}
-
-export type AnimeUpdateManyWithWhereWithoutMergedIntoInput = {
-  where: Prisma.AnimeScalarWhereInput
-  data: Prisma.XOR<Prisma.AnimeUpdateManyMutationInput, Prisma.AnimeUncheckedUpdateManyWithoutMergedIntoInput>
-}
-
-export type AnimeScalarWhereInput = {
-  AND?: Prisma.AnimeScalarWhereInput | Prisma.AnimeScalarWhereInput[]
-  OR?: Prisma.AnimeScalarWhereInput[]
-  NOT?: Prisma.AnimeScalarWhereInput | Prisma.AnimeScalarWhereInput[]
-  id?: Prisma.IntFilter<"Anime"> | number
-  anilistId?: Prisma.IntNullableFilter<"Anime"> | number | null
-  source?: Prisma.EnumAnimeSourceFilter<"Anime"> | $Enums.AnimeSource
-  titleEnglish?: Prisma.StringNullableFilter<"Anime"> | string | null
-  titleRomaji?: Prisma.StringFilter<"Anime"> | string
-  titleNative?: Prisma.StringNullableFilter<"Anime"> | string | null
-  coverImageUrl?: Prisma.StringNullableFilter<"Anime"> | string | null
-  synopsis?: Prisma.StringNullableFilter<"Anime"> | string | null
-  genres?: Prisma.StringFilter<"Anime"> | string
-  totalEpisodes?: Prisma.IntNullableFilter<"Anime"> | number | null
-  totalSeasons?: Prisma.IntNullableFilter<"Anime"> | number | null
-  episodesPerSeason?: Prisma.StringNullableFilter<"Anime"> | string | null
-  durationMins?: Prisma.IntNullableFilter<"Anime"> | number | null
-  airingStatus?: Prisma.EnumAiringStatusFilter<"Anime"> | $Enums.AiringStatus
-  displayFormat?: Prisma.EnumDisplayFormatFilter<"Anime"> | $Enums.DisplayFormat
-  sourceMaterial?: Prisma.EnumSourceMaterialNullableFilter<"Anime"> | $Enums.SourceMaterial | null
-  season?: Prisma.EnumSeasonNullableFilter<"Anime"> | $Enums.Season | null
-  seasonYear?: Prisma.IntNullableFilter<"Anime"> | number | null
-  meanScore?: Prisma.IntNullableFilter<"Anime"> | number | null
-  nextAiringEp?: Prisma.IntNullableFilter<"Anime"> | number | null
-  nextAiringAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
-  lastSyncedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
-  tmdbId?: Prisma.IntNullableFilter<"Anime"> | number | null
-  tmdbMediaType?: Prisma.StringNullableFilter<"Anime"> | string | null
-  externalUrl?: Prisma.StringNullableFilter<"Anime"> | string | null
-  streamingCheckedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
-  createdAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
-  mergedIntoId?: Prisma.IntNullableFilter<"Anime"> | number | null
-  mergeOrder?: Prisma.IntFilter<"Anime"> | number
 }
 
 export type AnimeCreateWithoutLinkedInInput = {
@@ -1833,12 +1337,8 @@ export type AnimeCreateWithoutLinkedInInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergeOrder?: number
-  mergedInto?: Prisma.AnimeCreateNestedOneWithoutMergedAnimesInput
-  mergedAnimes?: Prisma.AnimeCreateNestedManyWithoutMergedIntoInput
   franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
   animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
 }
 
@@ -1871,12 +1371,8 @@ export type AnimeUncheckedCreateWithoutLinkedInInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergedIntoId?: number | null
-  mergeOrder?: number
-  mergedAnimes?: Prisma.AnimeUncheckedCreateNestedManyWithoutMergedIntoInput
   franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
   animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
 }
 
@@ -1924,12 +1420,8 @@ export type AnimeUpdateWithoutLinkedInInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedInto?: Prisma.AnimeUpdateOneWithoutMergedAnimesNestedInput
-  mergedAnimes?: Prisma.AnimeUpdateManyWithoutMergedIntoNestedInput
   franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
   animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
 }
 
@@ -1962,12 +1454,8 @@ export type AnimeUncheckedUpdateWithoutLinkedInInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergedIntoId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedAnimes?: Prisma.AnimeUncheckedUpdateManyWithoutMergedIntoNestedInput
   franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
   animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
 }
 
@@ -1999,12 +1487,8 @@ export type AnimeCreateWithoutStreamingLinksInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergeOrder?: number
-  mergedInto?: Prisma.AnimeCreateNestedOneWithoutMergedAnimesInput
-  mergedAnimes?: Prisma.AnimeCreateNestedManyWithoutMergedIntoInput
   franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
   animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
 }
 
@@ -2037,12 +1521,8 @@ export type AnimeUncheckedCreateWithoutStreamingLinksInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  mergedIntoId?: number | null
-  mergeOrder?: number
-  mergedAnimes?: Prisma.AnimeUncheckedCreateNestedManyWithoutMergedIntoInput
   franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
   animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
 }
 
@@ -2090,12 +1570,8 @@ export type AnimeUpdateWithoutStreamingLinksInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedInto?: Prisma.AnimeUpdateOneWithoutMergedAnimesNestedInput
-  mergedAnimes?: Prisma.AnimeUpdateManyWithoutMergedIntoNestedInput
   franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
   animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
 }
 
@@ -2128,318 +1604,9 @@ export type AnimeUncheckedUpdateWithoutStreamingLinksInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergedIntoId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedAnimes?: Prisma.AnimeUncheckedUpdateManyWithoutMergedIntoNestedInput
   franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
   animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
-}
-
-export type AnimeCreateWithoutUserEntriesInput = {
-  anilistId?: number | null
-  source?: $Enums.AnimeSource
-  titleEnglish?: string | null
-  titleRomaji: string
-  titleNative?: string | null
-  coverImageUrl?: string | null
-  synopsis?: string | null
-  genres?: string
-  totalEpisodes?: number | null
-  totalSeasons?: number | null
-  episodesPerSeason?: string | null
-  durationMins?: number | null
-  airingStatus?: $Enums.AiringStatus
-  displayFormat?: $Enums.DisplayFormat
-  sourceMaterial?: $Enums.SourceMaterial | null
-  season?: $Enums.Season | null
-  seasonYear?: number | null
-  meanScore?: number | null
-  nextAiringEp?: number | null
-  nextAiringAt?: Date | string | null
-  lastSyncedAt?: Date | string | null
-  tmdbId?: number | null
-  tmdbMediaType?: string | null
-  externalUrl?: string | null
-  streamingCheckedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  mergeOrder?: number
-  mergedInto?: Prisma.AnimeCreateNestedOneWithoutMergedAnimesInput
-  mergedAnimes?: Prisma.AnimeCreateNestedManyWithoutMergedIntoInput
-  franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
-  animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
-  linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
-}
-
-export type AnimeUncheckedCreateWithoutUserEntriesInput = {
-  id?: number
-  anilistId?: number | null
-  source?: $Enums.AnimeSource
-  titleEnglish?: string | null
-  titleRomaji: string
-  titleNative?: string | null
-  coverImageUrl?: string | null
-  synopsis?: string | null
-  genres?: string
-  totalEpisodes?: number | null
-  totalSeasons?: number | null
-  episodesPerSeason?: string | null
-  durationMins?: number | null
-  airingStatus?: $Enums.AiringStatus
-  displayFormat?: $Enums.DisplayFormat
-  sourceMaterial?: $Enums.SourceMaterial | null
-  season?: $Enums.Season | null
-  seasonYear?: number | null
-  meanScore?: number | null
-  nextAiringEp?: number | null
-  nextAiringAt?: Date | string | null
-  lastSyncedAt?: Date | string | null
-  tmdbId?: number | null
-  tmdbMediaType?: string | null
-  externalUrl?: string | null
-  streamingCheckedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  mergedIntoId?: number | null
-  mergeOrder?: number
-  mergedAnimes?: Prisma.AnimeUncheckedCreateNestedManyWithoutMergedIntoInput
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
-  animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
-  linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
-}
-
-export type AnimeCreateOrConnectWithoutUserEntriesInput = {
-  where: Prisma.AnimeWhereUniqueInput
-  create: Prisma.XOR<Prisma.AnimeCreateWithoutUserEntriesInput, Prisma.AnimeUncheckedCreateWithoutUserEntriesInput>
-}
-
-export type AnimeUpsertWithoutUserEntriesInput = {
-  update: Prisma.XOR<Prisma.AnimeUpdateWithoutUserEntriesInput, Prisma.AnimeUncheckedUpdateWithoutUserEntriesInput>
-  create: Prisma.XOR<Prisma.AnimeCreateWithoutUserEntriesInput, Prisma.AnimeUncheckedCreateWithoutUserEntriesInput>
-  where?: Prisma.AnimeWhereInput
-}
-
-export type AnimeUpdateToOneWithWhereWithoutUserEntriesInput = {
-  where?: Prisma.AnimeWhereInput
-  data: Prisma.XOR<Prisma.AnimeUpdateWithoutUserEntriesInput, Prisma.AnimeUncheckedUpdateWithoutUserEntriesInput>
-}
-
-export type AnimeUpdateWithoutUserEntriesInput = {
-  anilistId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  source?: Prisma.EnumAnimeSourceFieldUpdateOperationsInput | $Enums.AnimeSource
-  titleEnglish?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  titleRomaji?: Prisma.StringFieldUpdateOperationsInput | string
-  titleNative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  genres?: Prisma.StringFieldUpdateOperationsInput | string
-  totalEpisodes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  totalSeasons?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  episodesPerSeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  durationMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  airingStatus?: Prisma.EnumAiringStatusFieldUpdateOperationsInput | $Enums.AiringStatus
-  displayFormat?: Prisma.EnumDisplayFormatFieldUpdateOperationsInput | $Enums.DisplayFormat
-  sourceMaterial?: Prisma.NullableEnumSourceMaterialFieldUpdateOperationsInput | $Enums.SourceMaterial | null
-  season?: Prisma.NullableEnumSeasonFieldUpdateOperationsInput | $Enums.Season | null
-  seasonYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedInto?: Prisma.AnimeUpdateOneWithoutMergedAnimesNestedInput
-  mergedAnimes?: Prisma.AnimeUpdateManyWithoutMergedIntoNestedInput
-  franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
-  animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
-  linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
-}
-
-export type AnimeUncheckedUpdateWithoutUserEntriesInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  anilistId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  source?: Prisma.EnumAnimeSourceFieldUpdateOperationsInput | $Enums.AnimeSource
-  titleEnglish?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  titleRomaji?: Prisma.StringFieldUpdateOperationsInput | string
-  titleNative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  genres?: Prisma.StringFieldUpdateOperationsInput | string
-  totalEpisodes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  totalSeasons?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  episodesPerSeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  durationMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  airingStatus?: Prisma.EnumAiringStatusFieldUpdateOperationsInput | $Enums.AiringStatus
-  displayFormat?: Prisma.EnumDisplayFormatFieldUpdateOperationsInput | $Enums.DisplayFormat
-  sourceMaterial?: Prisma.NullableEnumSourceMaterialFieldUpdateOperationsInput | $Enums.SourceMaterial | null
-  season?: Prisma.NullableEnumSeasonFieldUpdateOperationsInput | $Enums.Season | null
-  seasonYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergedIntoId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedAnimes?: Prisma.AnimeUncheckedUpdateManyWithoutMergedIntoNestedInput
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
-  animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
-  linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
-}
-
-export type AnimeCreateManyMergedIntoInput = {
-  id?: number
-  anilistId?: number | null
-  source?: $Enums.AnimeSource
-  titleEnglish?: string | null
-  titleRomaji: string
-  titleNative?: string | null
-  coverImageUrl?: string | null
-  synopsis?: string | null
-  genres?: string
-  totalEpisodes?: number | null
-  totalSeasons?: number | null
-  episodesPerSeason?: string | null
-  durationMins?: number | null
-  airingStatus?: $Enums.AiringStatus
-  displayFormat?: $Enums.DisplayFormat
-  sourceMaterial?: $Enums.SourceMaterial | null
-  season?: $Enums.Season | null
-  seasonYear?: number | null
-  meanScore?: number | null
-  nextAiringEp?: number | null
-  nextAiringAt?: Date | string | null
-  lastSyncedAt?: Date | string | null
-  tmdbId?: number | null
-  tmdbMediaType?: string | null
-  externalUrl?: string | null
-  streamingCheckedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  mergeOrder?: number
-}
-
-export type AnimeUpdateWithoutMergedIntoInput = {
-  anilistId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  source?: Prisma.EnumAnimeSourceFieldUpdateOperationsInput | $Enums.AnimeSource
-  titleEnglish?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  titleRomaji?: Prisma.StringFieldUpdateOperationsInput | string
-  titleNative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  genres?: Prisma.StringFieldUpdateOperationsInput | string
-  totalEpisodes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  totalSeasons?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  episodesPerSeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  durationMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  airingStatus?: Prisma.EnumAiringStatusFieldUpdateOperationsInput | $Enums.AiringStatus
-  displayFormat?: Prisma.EnumDisplayFormatFieldUpdateOperationsInput | $Enums.DisplayFormat
-  sourceMaterial?: Prisma.NullableEnumSourceMaterialFieldUpdateOperationsInput | $Enums.SourceMaterial | null
-  season?: Prisma.NullableEnumSeasonFieldUpdateOperationsInput | $Enums.Season | null
-  seasonYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedAnimes?: Prisma.AnimeUpdateManyWithoutMergedIntoNestedInput
-  franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
-  animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
-  linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
-}
-
-export type AnimeUncheckedUpdateWithoutMergedIntoInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  anilistId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  source?: Prisma.EnumAnimeSourceFieldUpdateOperationsInput | $Enums.AnimeSource
-  titleEnglish?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  titleRomaji?: Prisma.StringFieldUpdateOperationsInput | string
-  titleNative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  genres?: Prisma.StringFieldUpdateOperationsInput | string
-  totalEpisodes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  totalSeasons?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  episodesPerSeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  durationMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  airingStatus?: Prisma.EnumAiringStatusFieldUpdateOperationsInput | $Enums.AiringStatus
-  displayFormat?: Prisma.EnumDisplayFormatFieldUpdateOperationsInput | $Enums.DisplayFormat
-  sourceMaterial?: Prisma.NullableEnumSourceMaterialFieldUpdateOperationsInput | $Enums.SourceMaterial | null
-  season?: Prisma.NullableEnumSeasonFieldUpdateOperationsInput | $Enums.Season | null
-  seasonYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
-  mergedAnimes?: Prisma.AnimeUncheckedUpdateManyWithoutMergedIntoNestedInput
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
-  animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
-  linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
-}
-
-export type AnimeUncheckedUpdateManyWithoutMergedIntoInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  anilistId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  source?: Prisma.EnumAnimeSourceFieldUpdateOperationsInput | $Enums.AnimeSource
-  titleEnglish?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  titleRomaji?: Prisma.StringFieldUpdateOperationsInput | string
-  titleNative?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  coverImageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  synopsis?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  genres?: Prisma.StringFieldUpdateOperationsInput | string
-  totalEpisodes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  totalSeasons?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  episodesPerSeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  durationMins?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  airingStatus?: Prisma.EnumAiringStatusFieldUpdateOperationsInput | $Enums.AiringStatus
-  displayFormat?: Prisma.EnumDisplayFormatFieldUpdateOperationsInput | $Enums.DisplayFormat
-  sourceMaterial?: Prisma.NullableEnumSourceMaterialFieldUpdateOperationsInput | $Enums.SourceMaterial | null
-  season?: Prisma.NullableEnumSeasonFieldUpdateOperationsInput | $Enums.Season | null
-  seasonYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  mergeOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -2448,19 +1615,15 @@ export type AnimeUncheckedUpdateManyWithoutMergedIntoInput = {
  */
 
 export type AnimeCountOutputType = {
-  mergedAnimes: number
   franchiseEntries: number
   animeStudios: number
-  userEntries: number
   streamingLinks: number
   linkedIn: number
 }
 
 export type AnimeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mergedAnimes?: boolean | AnimeCountOutputTypeCountMergedAnimesArgs
   franchiseEntries?: boolean | AnimeCountOutputTypeCountFranchiseEntriesArgs
   animeStudios?: boolean | AnimeCountOutputTypeCountAnimeStudiosArgs
-  userEntries?: boolean | AnimeCountOutputTypeCountUserEntriesArgs
   streamingLinks?: boolean | AnimeCountOutputTypeCountStreamingLinksArgs
   linkedIn?: boolean | AnimeCountOutputTypeCountLinkedInArgs
 }
@@ -2478,13 +1641,6 @@ export type AnimeCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extens
 /**
  * AnimeCountOutputType without action
  */
-export type AnimeCountOutputTypeCountMergedAnimesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AnimeWhereInput
-}
-
-/**
- * AnimeCountOutputType without action
- */
 export type AnimeCountOutputTypeCountFranchiseEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FranchiseEntryWhereInput
 }
@@ -2494,13 +1650,6 @@ export type AnimeCountOutputTypeCountFranchiseEntriesArgs<ExtArgs extends runtim
  */
 export type AnimeCountOutputTypeCountAnimeStudiosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AnimeStudioWhereInput
-}
-
-/**
- * AnimeCountOutputType without action
- */
-export type AnimeCountOutputTypeCountUserEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.UserEntryWhereInput
 }
 
 /**
@@ -2547,13 +1696,8 @@ export type AnimeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   streamingCheckedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mergedIntoId?: boolean
-  mergeOrder?: boolean
-  mergedInto?: boolean | Prisma.Anime$mergedIntoArgs<ExtArgs>
-  mergedAnimes?: boolean | Prisma.Anime$mergedAnimesArgs<ExtArgs>
   franchiseEntries?: boolean | Prisma.Anime$franchiseEntriesArgs<ExtArgs>
   animeStudios?: boolean | Prisma.Anime$animeStudiosArgs<ExtArgs>
-  userEntries?: boolean | Prisma.Anime$userEntriesArgs<ExtArgs>
   streamingLinks?: boolean | Prisma.Anime$streamingLinksArgs<ExtArgs>
   linkedIn?: boolean | Prisma.Anime$linkedInArgs<ExtArgs>
   _count?: boolean | Prisma.AnimeCountOutputTypeDefaultArgs<ExtArgs>
@@ -2588,9 +1732,6 @@ export type AnimeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   streamingCheckedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mergedIntoId?: boolean
-  mergeOrder?: boolean
-  mergedInto?: boolean | Prisma.Anime$mergedIntoArgs<ExtArgs>
 }, ExtArgs["result"]["anime"]>
 
 export type AnimeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2622,9 +1763,6 @@ export type AnimeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   streamingCheckedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mergedIntoId?: boolean
-  mergeOrder?: boolean
-  mergedInto?: boolean | Prisma.Anime$mergedIntoArgs<ExtArgs>
 }, ExtArgs["result"]["anime"]>
 
 export type AnimeSelectScalar = {
@@ -2656,36 +1794,24 @@ export type AnimeSelectScalar = {
   streamingCheckedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  mergedIntoId?: boolean
-  mergeOrder?: boolean
 }
 
-export type AnimeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "anilistId" | "source" | "titleEnglish" | "titleRomaji" | "titleNative" | "coverImageUrl" | "synopsis" | "genres" | "totalEpisodes" | "totalSeasons" | "episodesPerSeason" | "durationMins" | "airingStatus" | "displayFormat" | "sourceMaterial" | "season" | "seasonYear" | "meanScore" | "nextAiringEp" | "nextAiringAt" | "lastSyncedAt" | "tmdbId" | "tmdbMediaType" | "externalUrl" | "streamingCheckedAt" | "createdAt" | "updatedAt" | "mergedIntoId" | "mergeOrder", ExtArgs["result"]["anime"]>
+export type AnimeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "anilistId" | "source" | "titleEnglish" | "titleRomaji" | "titleNative" | "coverImageUrl" | "synopsis" | "genres" | "totalEpisodes" | "totalSeasons" | "episodesPerSeason" | "durationMins" | "airingStatus" | "displayFormat" | "sourceMaterial" | "season" | "seasonYear" | "meanScore" | "nextAiringEp" | "nextAiringAt" | "lastSyncedAt" | "tmdbId" | "tmdbMediaType" | "externalUrl" | "streamingCheckedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["anime"]>
 export type AnimeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mergedInto?: boolean | Prisma.Anime$mergedIntoArgs<ExtArgs>
-  mergedAnimes?: boolean | Prisma.Anime$mergedAnimesArgs<ExtArgs>
   franchiseEntries?: boolean | Prisma.Anime$franchiseEntriesArgs<ExtArgs>
   animeStudios?: boolean | Prisma.Anime$animeStudiosArgs<ExtArgs>
-  userEntries?: boolean | Prisma.Anime$userEntriesArgs<ExtArgs>
   streamingLinks?: boolean | Prisma.Anime$streamingLinksArgs<ExtArgs>
   linkedIn?: boolean | Prisma.Anime$linkedInArgs<ExtArgs>
   _count?: boolean | Prisma.AnimeCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type AnimeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mergedInto?: boolean | Prisma.Anime$mergedIntoArgs<ExtArgs>
-}
-export type AnimeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  mergedInto?: boolean | Prisma.Anime$mergedIntoArgs<ExtArgs>
-}
+export type AnimeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type AnimeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $AnimePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Anime"
   objects: {
-    mergedInto: Prisma.$AnimePayload<ExtArgs> | null
-    mergedAnimes: Prisma.$AnimePayload<ExtArgs>[]
     franchiseEntries: Prisma.$FranchiseEntryPayload<ExtArgs>[]
     animeStudios: Prisma.$AnimeStudioPayload<ExtArgs>[]
-    userEntries: Prisma.$UserEntryPayload<ExtArgs>[]
     streamingLinks: Prisma.$StreamingLinkPayload<ExtArgs>[]
     linkedIn: Prisma.$LinkedAnimePayload<ExtArgs>[]
   }
@@ -2718,8 +1844,6 @@ export type $AnimePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     streamingCheckedAt: Date | null
     createdAt: Date
     updatedAt: Date
-    mergedIntoId: number | null
-    mergeOrder: number
   }, ExtArgs["result"]["anime"]>
   composites: {}
 }
@@ -3114,11 +2238,8 @@ readonly fields: AnimeFieldRefs;
  */
 export interface Prisma__AnimeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  mergedInto<T extends Prisma.Anime$mergedIntoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$mergedIntoArgs<ExtArgs>>): Prisma.Prisma__AnimeClient<runtime.Types.Result.GetResult<Prisma.$AnimePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  mergedAnimes<T extends Prisma.Anime$mergedAnimesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$mergedAnimesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnimePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   franchiseEntries<T extends Prisma.Anime$franchiseEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$franchiseEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FranchiseEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   animeStudios<T extends Prisma.Anime$animeStudiosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$animeStudiosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnimeStudioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  userEntries<T extends Prisma.Anime$userEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$userEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   streamingLinks<T extends Prisma.Anime$streamingLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$streamingLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StreamingLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   linkedIn<T extends Prisma.Anime$linkedInArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$linkedInArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LinkedAnimePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3178,8 +2299,6 @@ export interface AnimeFieldRefs {
   readonly streamingCheckedAt: Prisma.FieldRef<"Anime", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Anime", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Anime", 'DateTime'>
-  readonly mergedIntoId: Prisma.FieldRef<"Anime", 'Int'>
-  readonly mergeOrder: Prisma.FieldRef<"Anime", 'Int'>
 }
     
 
@@ -3429,10 +2548,6 @@ export type AnimeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    */
   data: Prisma.AnimeCreateManyInput | Prisma.AnimeCreateManyInput[]
   skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnimeIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -3503,10 +2618,6 @@ export type AnimeUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many Anime to update.
    */
   limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnimeIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -3576,49 +2687,6 @@ export type AnimeDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
- * Anime.mergedInto
- */
-export type Anime$mergedIntoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Anime
-   */
-  select?: Prisma.AnimeSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Anime
-   */
-  omit?: Prisma.AnimeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnimeInclude<ExtArgs> | null
-  where?: Prisma.AnimeWhereInput
-}
-
-/**
- * Anime.mergedAnimes
- */
-export type Anime$mergedAnimesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Anime
-   */
-  select?: Prisma.AnimeSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Anime
-   */
-  omit?: Prisma.AnimeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnimeInclude<ExtArgs> | null
-  where?: Prisma.AnimeWhereInput
-  orderBy?: Prisma.AnimeOrderByWithRelationInput | Prisma.AnimeOrderByWithRelationInput[]
-  cursor?: Prisma.AnimeWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AnimeScalarFieldEnum | Prisma.AnimeScalarFieldEnum[]
-}
-
-/**
  * Anime.franchiseEntries
  */
 export type Anime$franchiseEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3664,30 +2732,6 @@ export type Anime$animeStudiosArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.AnimeStudioScalarFieldEnum | Prisma.AnimeStudioScalarFieldEnum[]
-}
-
-/**
- * Anime.userEntries
- */
-export type Anime$userEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the UserEntry
-   */
-  select?: Prisma.UserEntrySelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the UserEntry
-   */
-  omit?: Prisma.UserEntryOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserEntryInclude<ExtArgs> | null
-  where?: Prisma.UserEntryWhereInput
-  orderBy?: Prisma.UserEntryOrderByWithRelationInput | Prisma.UserEntryOrderByWithRelationInput[]
-  cursor?: Prisma.UserEntryWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.UserEntryScalarFieldEnum | Prisma.UserEntryScalarFieldEnum[]
 }
 
 /**

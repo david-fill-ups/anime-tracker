@@ -148,7 +148,6 @@ export default async function AnimeDetailPage({
               franchiseIds={rawAnime.franchiseEntries.map((fe) => fe.franchise.id)}
               linkId={link.id}
               linkedAnilistIds={link.linkedAnime.map((la) => la.anime.anilistId)}
-              currentAnimeId={rawAnime.id}
             />
           </Suspense>
         )}
@@ -287,7 +286,6 @@ export default async function AnimeDetailPage({
             franchiseIds={rawAnime.franchiseEntries.map((fe) => fe.franchise.id)}
             linkId={link?.id ?? null}
             linkedAnilistIds={link?.linkedAnime.map((la) => la.anime.anilistId) ?? []}
-            currentAnimeId={rawAnime.id}
           />
         </Suspense>
       )}

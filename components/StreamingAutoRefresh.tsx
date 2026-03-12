@@ -28,11 +28,10 @@ export default function StreamingAutoRefresh({ animeId, source, streamingChecked
 
     const requests: Promise<Response>[] = [];
 
-    if (isStale(streamingCheckedAt))
+    if (isStale(streamingCheckedAt)) {
       requests.push(fetch(`/api/anime/${animeId}/streaming/refresh`, { method: "POST" }));
-
-    if (isStale(streamingCheckedAt))
       requests.push(fetch(`/api/anime/${animeId}/refresh-seasons`, { method: "POST" }));
+    }
 
     if (source === "ANILIST" && isStale(lastSyncedAt))
       requests.push(fetch(`/api/anime/${animeId}/sync`, { method: "POST" }));

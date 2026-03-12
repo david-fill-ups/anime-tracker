@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { fetchAniListById, mapDisplayFormat, mapSourceMaterial } from "./anilist";
+import { fetchAniListById, mapAniListToAnimeData } from "./anilist";
 import type { AniListAnime } from "./anilist";
 import type { FranchiseEntryType, DisplayFormat } from "@/app/generated/prisma";
 
@@ -57,29 +57,7 @@ async function ensureAnimeInDb(anilistData: AniListAnime) {
 
   try {
     return await db.anime.create({
-      data: {
-        anilistId: anilistData.id,
-        source: "ANILIST",
-        titleRomaji: anilistData.title.romaji,
-        titleEnglish: anilistData.title.english ?? null,
-        titleNative: anilistData.title.native ?? null,
-        coverImageUrl: anilistData.coverImage.large,
-        synopsis: anilistData.description ?? null,
-        genres: JSON.stringify(anilistData.genres),
-        totalEpisodes: anilistData.episodes ?? null,
-        durationMins: anilistData.duration ?? null,
-        airingStatus: anilistData.status,
-        displayFormat: mapDisplayFormat(anilistData.format),
-        sourceMaterial: mapSourceMaterial(anilistData.source),
-        season: anilistData.season ?? null,
-        seasonYear: anilistData.seasonYear ?? null,
-        meanScore: anilistData.meanScore ?? null,
-        nextAiringEp: anilistData.nextAiringEpisode?.episode ?? null,
-        nextAiringAt: anilistData.nextAiringEpisode
-          ? new Date(anilistData.nextAiringEpisode.airingAt * 1000)
-          : null,
-        lastSyncedAt: new Date(),
-      },
+      data: mapAniListToAnimeData(anilistData),
     });
   } catch {
     // Race condition — another request may have created it; try again
