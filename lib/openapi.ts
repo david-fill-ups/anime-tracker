@@ -413,9 +413,22 @@ export function buildOpenApiSpec(): AnyObj {
           operationId: "addAnimeToLink",
           summary: "Add anime to link",
           description:
-            "Adds an existing anime (looked up by AniList ID) as a new position in this link.",
+            "Adds an anime as a new position in this link. Accepts `{ animeId }` (existing catalog ID), `{ anilistId }` (fetched from AniList if not in catalog), or `{ manual: { title, totalEpisodes? } }`.",
           tags: ["Links"],
-          requestBody: jsonBody(LinkAniListSchema),
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  oneOf: [
+                    { type: "object", properties: { animeId: { type: "integer" } }, required: ["animeId"] },
+                    { type: "object", properties: { anilistId: { type: "integer" } }, required: ["anilistId"] },
+                    { type: "object", properties: { manual: { type: "object", properties: { title: { type: "string" }, totalEpisodes: { type: "integer" } }, required: ["title"] } }, required: ["manual"] },
+                  ],
+                },
+              },
+            },
+          },
           responses: {
             "200": resp("Updated link"),
             "401": resp("Unauthorized"),
@@ -481,10 +494,14 @@ export function buildOpenApiSpec(): AnyObj {
           operationId: "listFranchises",
           summary: "List franchises",
           description:
-            "Returns all franchise groups with their anime entries and watch statuses.",
+            "Returns franchise groups with their anime entries and watch statuses. Paginated — default 50 per page, max 100.",
           tags: ["Franchises"],
+          parameters: [
+            queryParam("page", "Page number (default 1)"),
+            queryParam("limit", "Results per page (default 50, max 100)"),
+          ],
           responses: {
-            "200": resp("Array of franchises with entries"),
+            "200": resp("{ data: Franchise[], total: number, page: number, limit: number, pages: number }"),
             "401": resp("Unauthorized"),
           },
         },
@@ -566,11 +583,15 @@ export function buildOpenApiSpec(): AnyObj {
           operationId: "listPeople",
           summary: "List people",
           description:
-            "Returns all people (recommenders/watchers) with their recommendation stats — total count, rated count, average score.",
+            "Returns people (recommenders/watchers) with their recommendation stats — total count, rated count, average score. Paginated — default 100 per page, max 200.",
           tags: ["People"],
+          parameters: [
+            queryParam("page", "Page number (default 1)"),
+            queryParam("limit", "Results per page (default 100, max 200)"),
+          ],
           responses: {
             "200": resp(
-              "Array of { id, name, totalRecommendations, ratedCount, avgScore }",
+              "{ data: { id, name, totalRecommendations, ratedCount, avgScore }[], total: number, page: number, limit: number, pages: number }",
             ),
             "401": resp("Unauthorized"),
           },
@@ -767,7 +788,7 @@ export function buildOpenApiSpec(): AnyObj {
             "Re-fetches AniList metadata and streaming links for every anime in the library. Subject to a 5-minute cooldown. Returns 409 if a sync is already in progress for this user.",
           tags: ["Sync"],
           responses: {
-            "200": resp("{ synced: number, errors: number, total: number }"),
+            "200": resp("{ synced: number, errors: number, total: number, failed: { id: number, title: string, reason: string }[] }"),
             "401": resp("Unauthorized"),
             "409": resp("Sync already in progress"),
             "429": resp("Cooldown active — wait before re-syncing"),

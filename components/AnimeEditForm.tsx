@@ -153,8 +153,6 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
     startedAt: entry?.startedAt ? entry.startedAt.toISOString().split("T")[0] : "",
     completedAt: entry?.completedAt ? entry.completedAt.toISOString().split("T")[0] : "",
   });
-  // TODO[TEMP]: verified state — remove after data review
-  const [verified, setVerified] = useState(entry?.verified ?? false);
   const [sourceSuggestions, setSourceSuggestions] = useState<string[]>([]);
   const [episodeNames, setEpisodeNames] = useState<Record<number, { number: number; name: string }[]>>({});
 
@@ -217,11 +215,10 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
     ? virtualEpsPerSeason.reduce((a, b) => a + b, 0)
     : null;
 
-  async function save(formOverrides: Partial<typeof form> = {}, euOverride?: string, verifiedOverride?: boolean) {
+  async function save(formOverrides: Partial<typeof form> = {}, euOverride?: string) {
     const f = { ...form, ...formOverrides };
     if (!f.watchStatus) return; // No status selected yet — don't create an entry
     const eu = euOverride ?? externalUrl;
-    const v = verifiedOverride ?? verified;
     const isComp = f.watchStatus === "COMPLETED";
 
     setSaveStatus("saving");
@@ -250,7 +247,6 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
         discoverySource: (f.discoveryType === "PLATFORM" || f.discoveryType === "OTHER") ? f.discoverySource || null : null,
         startedAt: f.startedAt || null,
         completedAt: isComp ? (f.completedAt || null) : null,
-        verified: v, // TODO[TEMP]: remove after data review
         ...(anime.source === "MANUAL" && { externalUrl: eu.trim() || null }),
       }),
     });
@@ -290,19 +286,6 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
 
   return (
     <div className="space-y-4">
-      {/* TODO[TEMP]: Verified checkbox — remove after data review */}
-      <label className="flex items-center gap-2 cursor-pointer w-fit">
-        <input
-          type="checkbox"
-          checked={verified}
-          onChange={(e) => { setVerified(e.target.checked); save({}, undefined, e.target.checked); }}
-          className="w-4 h-4 cursor-pointer accent-green-500"
-        />
-        <span className={`text-sm font-medium ${verified ? "text-green-400" : "text-slate-400"}`}>
-          Verified
-        </span>
-      </label>
-
       <div className="grid grid-cols-2 gap-4">
         {/* Row 1: Personal Rating — full width */}
         <div className="col-span-2">

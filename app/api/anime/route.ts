@@ -19,15 +19,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "AniList entry not found" }, { status: 404 });
     }
 
-    // If anime already exists in the global catalog, reuse it
-    const existing = await db.anime.findUnique({ where: { anilistId: data.id } });
-
-    const anime = existing ?? await db.anime.create({
-      data: {
+    // Upsert guards against race conditions when multiple requests add the same AniList anime
+    const studioData = await upsertStudios(data.studios.edges);
+    const anime = await db.anime.upsert({
+      where: { anilistId: data.id },
+      update: {},
+      create: {
         ...mapAniListToAnimeData(data),
-        animeStudios: {
-          create: await upsertStudios(data.studios.edges),
-        },
+        animeStudios: { create: studioData },
       },
     });
 

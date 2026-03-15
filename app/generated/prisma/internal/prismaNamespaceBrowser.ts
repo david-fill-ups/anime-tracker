@@ -203,16 +203,16 @@ export const AnimeScalarFieldEnum = {
   meanScore: 'meanScore',
   nextAiringEp: 'nextAiringEp',
   nextAiringAt: 'nextAiringAt',
-  startYear: 'startYear',
-  startMonth: 'startMonth',
-  startDay: 'startDay',
   lastSyncedAt: 'lastSyncedAt',
   tmdbId: 'tmdbId',
   tmdbMediaType: 'tmdbMediaType',
   externalUrl: 'externalUrl',
   streamingCheckedAt: 'streamingCheckedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  startDay: 'startDay',
+  startMonth: 'startMonth',
+  startYear: 'startYear'
 } as const
 
 export type AnimeScalarFieldEnum = (typeof AnimeScalarFieldEnum)[keyof typeof AnimeScalarFieldEnum]
@@ -251,7 +251,6 @@ export type StreamingLinkScalarFieldEnum = (typeof StreamingLinkScalarFieldEnum)
 
 export const UserEntryScalarFieldEnum = {
   id: 'id',
-  linkId: 'linkId',
   userId: 'userId',
   watchStatus: 'watchStatus',
   currentEpisode: 'currentEpisode',
@@ -259,13 +258,13 @@ export const UserEntryScalarFieldEnum = {
   notes: 'notes',
   watchContextPersonId: 'watchContextPersonId',
   recommenderId: 'recommenderId',
-  discoveryType: 'discoveryType',
-  discoverySource: 'discoverySource',
   startedAt: 'startedAt',
   completedAt: 'completedAt',
-  verified: 'verified',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  discoverySource: 'discoverySource',
+  discoveryType: 'discoveryType',
+  linkId: 'linkId'
 } as const
 
 export type UserEntryScalarFieldEnum = (typeof UserEntryScalarFieldEnum)[keyof typeof UserEntryScalarFieldEnum]

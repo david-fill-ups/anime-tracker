@@ -190,7 +190,6 @@ model UserEntry {
   recommenderId        Int?
   startedAt            DateTime?
   completedAt          DateTime?
-  verified             Boolean        @default(false)
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
   discoverySource      String?

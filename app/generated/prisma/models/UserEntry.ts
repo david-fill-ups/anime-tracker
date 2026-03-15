@@ -28,25 +28,24 @@ export type AggregateUserEntry = {
 
 export type UserEntryAvgAggregateOutputType = {
   id: number | null
-  linkId: number | null
   currentEpisode: number | null
   score: number | null
   watchContextPersonId: number | null
   recommenderId: number | null
+  linkId: number | null
 }
 
 export type UserEntrySumAggregateOutputType = {
   id: number | null
-  linkId: number | null
   currentEpisode: number | null
   score: number | null
   watchContextPersonId: number | null
   recommenderId: number | null
+  linkId: number | null
 }
 
 export type UserEntryMinAggregateOutputType = {
   id: number | null
-  linkId: number | null
   userId: string | null
   watchStatus: $Enums.WatchStatus | null
   currentEpisode: number | null
@@ -54,18 +53,17 @@ export type UserEntryMinAggregateOutputType = {
   notes: string | null
   watchContextPersonId: number | null
   recommenderId: number | null
-  discoveryType: $Enums.DiscoveryType | null
-  discoverySource: string | null
   startedAt: Date | null
   completedAt: Date | null
-  verified: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
+  discoverySource: string | null
+  discoveryType: $Enums.DiscoveryType | null
+  linkId: number | null
 }
 
 export type UserEntryMaxAggregateOutputType = {
   id: number | null
-  linkId: number | null
   userId: string | null
   watchStatus: $Enums.WatchStatus | null
   currentEpisode: number | null
@@ -73,18 +71,17 @@ export type UserEntryMaxAggregateOutputType = {
   notes: string | null
   watchContextPersonId: number | null
   recommenderId: number | null
-  discoveryType: $Enums.DiscoveryType | null
-  discoverySource: string | null
   startedAt: Date | null
   completedAt: Date | null
-  verified: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
+  discoverySource: string | null
+  discoveryType: $Enums.DiscoveryType | null
+  linkId: number | null
 }
 
 export type UserEntryCountAggregateOutputType = {
   id: number
-  linkId: number
   userId: number
   watchStatus: number
   currentEpisode: number
@@ -92,38 +89,37 @@ export type UserEntryCountAggregateOutputType = {
   notes: number
   watchContextPersonId: number
   recommenderId: number
-  discoveryType: number
-  discoverySource: number
   startedAt: number
   completedAt: number
-  verified: number
   createdAt: number
   updatedAt: number
+  discoverySource: number
+  discoveryType: number
+  linkId: number
   _all: number
 }
 
 
 export type UserEntryAvgAggregateInputType = {
   id?: true
-  linkId?: true
   currentEpisode?: true
   score?: true
   watchContextPersonId?: true
   recommenderId?: true
+  linkId?: true
 }
 
 export type UserEntrySumAggregateInputType = {
   id?: true
-  linkId?: true
   currentEpisode?: true
   score?: true
   watchContextPersonId?: true
   recommenderId?: true
+  linkId?: true
 }
 
 export type UserEntryMinAggregateInputType = {
   id?: true
-  linkId?: true
   userId?: true
   watchStatus?: true
   currentEpisode?: true
@@ -131,18 +127,17 @@ export type UserEntryMinAggregateInputType = {
   notes?: true
   watchContextPersonId?: true
   recommenderId?: true
-  discoveryType?: true
-  discoverySource?: true
   startedAt?: true
   completedAt?: true
-  verified?: true
   createdAt?: true
   updatedAt?: true
+  discoverySource?: true
+  discoveryType?: true
+  linkId?: true
 }
 
 export type UserEntryMaxAggregateInputType = {
   id?: true
-  linkId?: true
   userId?: true
   watchStatus?: true
   currentEpisode?: true
@@ -150,18 +145,17 @@ export type UserEntryMaxAggregateInputType = {
   notes?: true
   watchContextPersonId?: true
   recommenderId?: true
-  discoveryType?: true
-  discoverySource?: true
   startedAt?: true
   completedAt?: true
-  verified?: true
   createdAt?: true
   updatedAt?: true
+  discoverySource?: true
+  discoveryType?: true
+  linkId?: true
 }
 
 export type UserEntryCountAggregateInputType = {
   id?: true
-  linkId?: true
   userId?: true
   watchStatus?: true
   currentEpisode?: true
@@ -169,13 +163,13 @@ export type UserEntryCountAggregateInputType = {
   notes?: true
   watchContextPersonId?: true
   recommenderId?: true
-  discoveryType?: true
-  discoverySource?: true
   startedAt?: true
   completedAt?: true
-  verified?: true
   createdAt?: true
   updatedAt?: true
+  discoverySource?: true
+  discoveryType?: true
+  linkId?: true
   _all?: true
 }
 
@@ -267,7 +261,6 @@ export type UserEntryGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 
 export type UserEntryGroupByOutputType = {
   id: number
-  linkId: number | null
   userId: string
   watchStatus: $Enums.WatchStatus
   currentEpisode: number
@@ -275,13 +268,13 @@ export type UserEntryGroupByOutputType = {
   notes: string | null
   watchContextPersonId: number | null
   recommenderId: number | null
-  discoveryType: $Enums.DiscoveryType | null
-  discoverySource: string | null
   startedAt: Date | null
   completedAt: Date | null
-  verified: boolean
   createdAt: Date
   updatedAt: Date
+  discoverySource: string | null
+  discoveryType: $Enums.DiscoveryType | null
+  linkId: number | null
   _count: UserEntryCountAggregateOutputType | null
   _avg: UserEntryAvgAggregateOutputType | null
   _sum: UserEntrySumAggregateOutputType | null
@@ -309,7 +302,6 @@ export type UserEntryWhereInput = {
   OR?: Prisma.UserEntryWhereInput[]
   NOT?: Prisma.UserEntryWhereInput | Prisma.UserEntryWhereInput[]
   id?: Prisma.IntFilter<"UserEntry"> | number
-  linkId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
   userId?: Prisma.StringFilter<"UserEntry"> | string
   watchStatus?: Prisma.EnumWatchStatusFilter<"UserEntry"> | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFilter<"UserEntry"> | number
@@ -317,22 +309,21 @@ export type UserEntryWhereInput = {
   notes?: Prisma.StringNullableFilter<"UserEntry"> | string | null
   watchContextPersonId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
   recommenderId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
-  discoveryType?: Prisma.EnumDiscoveryTypeNullableFilter<"UserEntry"> | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.StringNullableFilter<"UserEntry"> | string | null
   startedAt?: Prisma.DateTimeNullableFilter<"UserEntry"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"UserEntry"> | Date | string | null
-  verified?: Prisma.BoolFilter<"UserEntry"> | boolean
   createdAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
+  discoverySource?: Prisma.StringNullableFilter<"UserEntry"> | string | null
+  discoveryType?: Prisma.EnumDiscoveryTypeNullableFilter<"UserEntry"> | $Enums.DiscoveryType | null
+  linkId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
   link?: Prisma.XOR<Prisma.LinkNullableScalarRelationFilter, Prisma.LinkWhereInput> | null
+  recommender?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   watchContextPerson?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
-  recommender?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
 }
 
 export type UserEntryOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  linkId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -340,17 +331,17 @@ export type UserEntryOrderByWithRelationInput = {
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   watchContextPersonId?: Prisma.SortOrderInput | Prisma.SortOrder
   recommenderId?: Prisma.SortOrderInput | Prisma.SortOrder
-  discoveryType?: Prisma.SortOrderInput | Prisma.SortOrder
-  discoverySource?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  discoverySource?: Prisma.SortOrderInput | Prisma.SortOrder
+  discoveryType?: Prisma.SortOrderInput | Prisma.SortOrder
+  linkId?: Prisma.SortOrderInput | Prisma.SortOrder
   link?: Prisma.LinkOrderByWithRelationInput
+  recommender?: Prisma.PersonOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
   watchContextPerson?: Prisma.PersonOrderByWithRelationInput
-  recommender?: Prisma.PersonOrderByWithRelationInput
 }
 
 export type UserEntryWhereUniqueInput = Prisma.AtLeast<{
@@ -366,22 +357,20 @@ export type UserEntryWhereUniqueInput = Prisma.AtLeast<{
   notes?: Prisma.StringNullableFilter<"UserEntry"> | string | null
   watchContextPersonId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
   recommenderId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
-  discoveryType?: Prisma.EnumDiscoveryTypeNullableFilter<"UserEntry"> | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.StringNullableFilter<"UserEntry"> | string | null
   startedAt?: Prisma.DateTimeNullableFilter<"UserEntry"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"UserEntry"> | Date | string | null
-  verified?: Prisma.BoolFilter<"UserEntry"> | boolean
   createdAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
+  discoverySource?: Prisma.StringNullableFilter<"UserEntry"> | string | null
+  discoveryType?: Prisma.EnumDiscoveryTypeNullableFilter<"UserEntry"> | $Enums.DiscoveryType | null
   link?: Prisma.XOR<Prisma.LinkNullableScalarRelationFilter, Prisma.LinkWhereInput> | null
+  recommender?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   watchContextPerson?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
-  recommender?: Prisma.XOR<Prisma.PersonNullableScalarRelationFilter, Prisma.PersonWhereInput> | null
 }, "id" | "linkId">
 
 export type UserEntryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  linkId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -389,13 +378,13 @@ export type UserEntryOrderByWithAggregationInput = {
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   watchContextPersonId?: Prisma.SortOrderInput | Prisma.SortOrder
   recommenderId?: Prisma.SortOrderInput | Prisma.SortOrder
-  discoveryType?: Prisma.SortOrderInput | Prisma.SortOrder
-  discoverySource?: Prisma.SortOrderInput | Prisma.SortOrder
   startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  discoverySource?: Prisma.SortOrderInput | Prisma.SortOrder
+  discoveryType?: Prisma.SortOrderInput | Prisma.SortOrder
+  linkId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserEntryCountOrderByAggregateInput
   _avg?: Prisma.UserEntryAvgOrderByAggregateInput
   _max?: Prisma.UserEntryMaxOrderByAggregateInput
@@ -408,7 +397,6 @@ export type UserEntryScalarWhereWithAggregatesInput = {
   OR?: Prisma.UserEntryScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserEntryScalarWhereWithAggregatesInput | Prisma.UserEntryScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"UserEntry"> | number
-  linkId?: Prisma.IntNullableWithAggregatesFilter<"UserEntry"> | number | null
   userId?: Prisma.StringWithAggregatesFilter<"UserEntry"> | string
   watchStatus?: Prisma.EnumWatchStatusWithAggregatesFilter<"UserEntry"> | $Enums.WatchStatus
   currentEpisode?: Prisma.IntWithAggregatesFilter<"UserEntry"> | number
@@ -416,13 +404,13 @@ export type UserEntryScalarWhereWithAggregatesInput = {
   notes?: Prisma.StringNullableWithAggregatesFilter<"UserEntry"> | string | null
   watchContextPersonId?: Prisma.IntNullableWithAggregatesFilter<"UserEntry"> | number | null
   recommenderId?: Prisma.IntNullableWithAggregatesFilter<"UserEntry"> | number | null
-  discoveryType?: Prisma.EnumDiscoveryTypeNullableWithAggregatesFilter<"UserEntry"> | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.StringNullableWithAggregatesFilter<"UserEntry"> | string | null
   startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"UserEntry"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"UserEntry"> | Date | string | null
-  verified?: Prisma.BoolWithAggregatesFilter<"UserEntry"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserEntry"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UserEntry"> | Date | string
+  discoverySource?: Prisma.StringNullableWithAggregatesFilter<"UserEntry"> | string | null
+  discoveryType?: Prisma.EnumDiscoveryTypeNullableWithAggregatesFilter<"UserEntry"> | $Enums.DiscoveryType | null
+  linkId?: Prisma.IntNullableWithAggregatesFilter<"UserEntry"> | number | null
 }
 
 export type UserEntryCreateInput = {
@@ -430,22 +418,20 @@ export type UserEntryCreateInput = {
   currentEpisode?: number
   score?: number | null
   notes?: string | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
   link?: Prisma.LinkCreateNestedOneWithoutUserEntryInput
+  recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
   user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
   watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
-  recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
 }
 
 export type UserEntryUncheckedCreateInput = {
   id?: number
-  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -453,13 +439,13 @@ export type UserEntryUncheckedCreateInput = {
   notes?: string | null
   watchContextPersonId?: number | null
   recommenderId?: number | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  linkId?: number | null
 }
 
 export type UserEntryUpdateInput = {
@@ -467,22 +453,20 @@ export type UserEntryUpdateInput = {
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
   link?: Prisma.LinkUpdateOneWithoutUserEntryNestedInput
+  recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
   watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
-  recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
 }
 
 export type UserEntryUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -490,18 +474,17 @@ export type UserEntryUncheckedUpdateInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   watchContextPersonId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommenderId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type UserEntryCreateManyInput = {
   id?: number
-  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
@@ -509,13 +492,13 @@ export type UserEntryCreateManyInput = {
   notes?: string | null
   watchContextPersonId?: number | null
   recommenderId?: number | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  linkId?: number | null
 }
 
 export type UserEntryUpdateManyMutationInput = {
@@ -523,18 +506,16 @@ export type UserEntryUpdateManyMutationInput = {
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
 }
 
 export type UserEntryUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
@@ -542,13 +523,13 @@ export type UserEntryUncheckedUpdateManyInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   watchContextPersonId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommenderId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type UserEntryListRelationFilter = {
@@ -568,7 +549,6 @@ export type UserEntryNullableScalarRelationFilter = {
 
 export type UserEntryCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  linkId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -576,27 +556,26 @@ export type UserEntryCountOrderByAggregateInput = {
   notes?: Prisma.SortOrder
   watchContextPersonId?: Prisma.SortOrder
   recommenderId?: Prisma.SortOrder
-  discoveryType?: Prisma.SortOrder
-  discoverySource?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  discoverySource?: Prisma.SortOrder
+  discoveryType?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
 }
 
 export type UserEntryAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  linkId?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
   score?: Prisma.SortOrder
   watchContextPersonId?: Prisma.SortOrder
   recommenderId?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
 }
 
 export type UserEntryMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  linkId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -604,18 +583,17 @@ export type UserEntryMaxOrderByAggregateInput = {
   notes?: Prisma.SortOrder
   watchContextPersonId?: Prisma.SortOrder
   recommenderId?: Prisma.SortOrder
-  discoveryType?: Prisma.SortOrder
-  discoverySource?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  discoverySource?: Prisma.SortOrder
+  discoveryType?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
 }
 
 export type UserEntryMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  linkId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   watchStatus?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
@@ -623,22 +601,22 @@ export type UserEntryMinOrderByAggregateInput = {
   notes?: Prisma.SortOrder
   watchContextPersonId?: Prisma.SortOrder
   recommenderId?: Prisma.SortOrder
-  discoveryType?: Prisma.SortOrder
-  discoverySource?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
-  verified?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  discoverySource?: Prisma.SortOrder
+  discoveryType?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
 }
 
 export type UserEntrySumOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  linkId?: Prisma.SortOrder
   currentEpisode?: Prisma.SortOrder
   score?: Prisma.SortOrder
   watchContextPersonId?: Prisma.SortOrder
   recommenderId?: Prisma.SortOrder
+  linkId?: Prisma.SortOrder
 }
 
 export type UserEntryCreateNestedManyWithoutUserInput = {
@@ -820,34 +798,32 @@ export type UserEntryCreateWithoutUserInput = {
   currentEpisode?: number
   score?: number | null
   notes?: string | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
   link?: Prisma.LinkCreateNestedOneWithoutUserEntryInput
-  watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
   recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
+  watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
 }
 
 export type UserEntryUncheckedCreateWithoutUserInput = {
   id?: number
-  linkId?: number | null
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
   score?: number | null
   notes?: string | null
   watchContextPersonId?: number | null
   recommenderId?: number | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  linkId?: number | null
 }
 
 export type UserEntryCreateOrConnectWithoutUserInput = {
@@ -881,7 +857,6 @@ export type UserEntryScalarWhereInput = {
   OR?: Prisma.UserEntryScalarWhereInput[]
   NOT?: Prisma.UserEntryScalarWhereInput | Prisma.UserEntryScalarWhereInput[]
   id?: Prisma.IntFilter<"UserEntry"> | number
-  linkId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
   userId?: Prisma.StringFilter<"UserEntry"> | string
   watchStatus?: Prisma.EnumWatchStatusFilter<"UserEntry"> | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFilter<"UserEntry"> | number
@@ -889,13 +864,13 @@ export type UserEntryScalarWhereInput = {
   notes?: Prisma.StringNullableFilter<"UserEntry"> | string | null
   watchContextPersonId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
   recommenderId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
-  discoveryType?: Prisma.EnumDiscoveryTypeNullableFilter<"UserEntry"> | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.StringNullableFilter<"UserEntry"> | string | null
   startedAt?: Prisma.DateTimeNullableFilter<"UserEntry"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"UserEntry"> | Date | string | null
-  verified?: Prisma.BoolFilter<"UserEntry"> | boolean
   createdAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserEntry"> | Date | string
+  discoverySource?: Prisma.StringNullableFilter<"UserEntry"> | string | null
+  discoveryType?: Prisma.EnumDiscoveryTypeNullableFilter<"UserEntry"> | $Enums.DiscoveryType | null
+  linkId?: Prisma.IntNullableFilter<"UserEntry"> | number | null
 }
 
 export type UserEntryCreateWithoutRecommenderInput = {
@@ -903,13 +878,12 @@ export type UserEntryCreateWithoutRecommenderInput = {
   currentEpisode?: number
   score?: number | null
   notes?: string | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
   link?: Prisma.LinkCreateNestedOneWithoutUserEntryInput
   user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
   watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
@@ -917,20 +891,19 @@ export type UserEntryCreateWithoutRecommenderInput = {
 
 export type UserEntryUncheckedCreateWithoutRecommenderInput = {
   id?: number
-  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
   score?: number | null
   notes?: string | null
   watchContextPersonId?: number | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  linkId?: number | null
 }
 
 export type UserEntryCreateOrConnectWithoutRecommenderInput = {
@@ -948,34 +921,32 @@ export type UserEntryCreateWithoutWatchContextPersonInput = {
   currentEpisode?: number
   score?: number | null
   notes?: string | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
   link?: Prisma.LinkCreateNestedOneWithoutUserEntryInput
-  user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
   recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
+  user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
 }
 
 export type UserEntryUncheckedCreateWithoutWatchContextPersonInput = {
   id?: number
-  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
   score?: number | null
   notes?: string | null
   recommenderId?: number | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  linkId?: number | null
 }
 
 export type UserEntryCreateOrConnectWithoutWatchContextPersonInput = {
@@ -1025,16 +996,15 @@ export type UserEntryCreateWithoutLinkInput = {
   currentEpisode?: number
   score?: number | null
   notes?: string | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
   user: Prisma.UserCreateNestedOneWithoutUserEntriesInput
   watchContextPerson?: Prisma.PersonCreateNestedOneWithoutWatchContextEntriesInput
-  recommender?: Prisma.PersonCreateNestedOneWithoutEntriesInput
 }
 
 export type UserEntryUncheckedCreateWithoutLinkInput = {
@@ -1046,13 +1016,12 @@ export type UserEntryUncheckedCreateWithoutLinkInput = {
   notes?: string | null
   watchContextPersonId?: number | null
   recommenderId?: number | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
 }
 
 export type UserEntryCreateOrConnectWithoutLinkInput = {
@@ -1076,16 +1045,15 @@ export type UserEntryUpdateWithoutLinkInput = {
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
   watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
-  recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
 }
 
 export type UserEntryUncheckedUpdateWithoutLinkInput = {
@@ -1097,31 +1065,29 @@ export type UserEntryUncheckedUpdateWithoutLinkInput = {
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   watchContextPersonId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommenderId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
 }
 
 export type UserEntryCreateManyUserInput = {
   id?: number
-  linkId?: number | null
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
   score?: number | null
   notes?: string | null
   watchContextPersonId?: number | null
   recommenderId?: number | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  linkId?: number | null
 }
 
 export type UserEntryUpdateWithoutUserInput = {
@@ -1129,88 +1095,83 @@ export type UserEntryUpdateWithoutUserInput = {
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
   link?: Prisma.LinkUpdateOneWithoutUserEntryNestedInput
-  watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
   recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
+  watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
 }
 
 export type UserEntryUncheckedUpdateWithoutUserInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   watchContextPersonId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommenderId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type UserEntryUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   watchContextPersonId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recommenderId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type UserEntryCreateManyRecommenderInput = {
   id?: number
-  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
   score?: number | null
   notes?: string | null
   watchContextPersonId?: number | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  linkId?: number | null
 }
 
 export type UserEntryCreateManyWatchContextPersonInput = {
   id?: number
-  linkId?: number | null
   userId: string
   watchStatus?: $Enums.WatchStatus
   currentEpisode?: number
   score?: number | null
   notes?: string | null
   recommenderId?: number | null
-  discoveryType?: $Enums.DiscoveryType | null
-  discoverySource?: string | null
   startedAt?: Date | string | null
   completedAt?: Date | string | null
-  verified?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  discoverySource?: string | null
+  discoveryType?: $Enums.DiscoveryType | null
+  linkId?: number | null
 }
 
 export type UserEntryUpdateWithoutRecommenderInput = {
@@ -1218,13 +1179,12 @@ export type UserEntryUpdateWithoutRecommenderInput = {
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
   link?: Prisma.LinkUpdateOneWithoutUserEntryNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
   watchContextPerson?: Prisma.PersonUpdateOneWithoutWatchContextEntriesNestedInput
@@ -1232,38 +1192,36 @@ export type UserEntryUpdateWithoutRecommenderInput = {
 
 export type UserEntryUncheckedUpdateWithoutRecommenderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   watchContextPersonId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type UserEntryUncheckedUpdateManyWithoutRecommenderInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   watchContextPersonId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type UserEntryUpdateWithoutWatchContextPersonInput = {
@@ -1271,59 +1229,55 @@ export type UserEntryUpdateWithoutWatchContextPersonInput = {
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
   link?: Prisma.LinkUpdateOneWithoutUserEntryNestedInput
-  user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
   recommender?: Prisma.PersonUpdateOneWithoutEntriesNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutUserEntriesNestedInput
 }
 
 export type UserEntryUncheckedUpdateWithoutWatchContextPersonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recommenderId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type UserEntryUncheckedUpdateManyWithoutWatchContextPersonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   watchStatus?: Prisma.EnumWatchStatusFieldUpdateOperationsInput | $Enums.WatchStatus
   currentEpisode?: Prisma.IntFieldUpdateOperationsInput | number
   score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   recommenderId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
-  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  verified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  discoverySource?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discoveryType?: Prisma.NullableEnumDiscoveryTypeFieldUpdateOperationsInput | $Enums.DiscoveryType | null
+  linkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 
 
 export type UserEntrySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  linkId?: boolean
   userId?: boolean
   watchStatus?: boolean
   currentEpisode?: boolean
@@ -1331,22 +1285,21 @@ export type UserEntrySelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   notes?: boolean
   watchContextPersonId?: boolean
   recommenderId?: boolean
-  discoveryType?: boolean
-  discoverySource?: boolean
   startedAt?: boolean
   completedAt?: boolean
-  verified?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  discoverySource?: boolean
+  discoveryType?: boolean
+  linkId?: boolean
   link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
+  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
-  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
 }, ExtArgs["result"]["userEntry"]>
 
 export type UserEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  linkId?: boolean
   userId?: boolean
   watchStatus?: boolean
   currentEpisode?: boolean
@@ -1354,22 +1307,21 @@ export type UserEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   notes?: boolean
   watchContextPersonId?: boolean
   recommenderId?: boolean
-  discoveryType?: boolean
-  discoverySource?: boolean
   startedAt?: boolean
   completedAt?: boolean
-  verified?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  discoverySource?: boolean
+  discoveryType?: boolean
+  linkId?: boolean
   link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
+  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
-  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
 }, ExtArgs["result"]["userEntry"]>
 
 export type UserEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  linkId?: boolean
   userId?: boolean
   watchStatus?: boolean
   currentEpisode?: boolean
@@ -1377,22 +1329,21 @@ export type UserEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   notes?: boolean
   watchContextPersonId?: boolean
   recommenderId?: boolean
-  discoveryType?: boolean
-  discoverySource?: boolean
   startedAt?: boolean
   completedAt?: boolean
-  verified?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  discoverySource?: boolean
+  discoveryType?: boolean
+  linkId?: boolean
   link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
+  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
-  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
 }, ExtArgs["result"]["userEntry"]>
 
 export type UserEntrySelectScalar = {
   id?: boolean
-  linkId?: boolean
   userId?: boolean
   watchStatus?: boolean
   currentEpisode?: boolean
@@ -1400,46 +1351,45 @@ export type UserEntrySelectScalar = {
   notes?: boolean
   watchContextPersonId?: boolean
   recommenderId?: boolean
-  discoveryType?: boolean
-  discoverySource?: boolean
   startedAt?: boolean
   completedAt?: boolean
-  verified?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  discoverySource?: boolean
+  discoveryType?: boolean
+  linkId?: boolean
 }
 
-export type UserEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "linkId" | "userId" | "watchStatus" | "currentEpisode" | "score" | "notes" | "watchContextPersonId" | "recommenderId" | "discoveryType" | "discoverySource" | "startedAt" | "completedAt" | "verified" | "createdAt" | "updatedAt", ExtArgs["result"]["userEntry"]>
+export type UserEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "watchStatus" | "currentEpisode" | "score" | "notes" | "watchContextPersonId" | "recommenderId" | "startedAt" | "completedAt" | "createdAt" | "updatedAt" | "discoverySource" | "discoveryType" | "linkId", ExtArgs["result"]["userEntry"]>
 export type UserEntryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
+  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
-  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
 }
 export type UserEntryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
+  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
-  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
 }
 export type UserEntryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   link?: boolean | Prisma.UserEntry$linkArgs<ExtArgs>
+  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   watchContextPerson?: boolean | Prisma.UserEntry$watchContextPersonArgs<ExtArgs>
-  recommender?: boolean | Prisma.UserEntry$recommenderArgs<ExtArgs>
 }
 
 export type $UserEntryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "UserEntry"
   objects: {
     link: Prisma.$LinkPayload<ExtArgs> | null
+    recommender: Prisma.$PersonPayload<ExtArgs> | null
     user: Prisma.$UserPayload<ExtArgs>
     watchContextPerson: Prisma.$PersonPayload<ExtArgs> | null
-    recommender: Prisma.$PersonPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    linkId: number | null
     userId: string
     watchStatus: $Enums.WatchStatus
     currentEpisode: number
@@ -1447,13 +1397,13 @@ export type $UserEntryPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     notes: string | null
     watchContextPersonId: number | null
     recommenderId: number | null
-    discoveryType: $Enums.DiscoveryType | null
-    discoverySource: string | null
     startedAt: Date | null
     completedAt: Date | null
-    verified: boolean
     createdAt: Date
     updatedAt: Date
+    discoverySource: string | null
+    discoveryType: $Enums.DiscoveryType | null
+    linkId: number | null
   }, ExtArgs["result"]["userEntry"]>
   composites: {}
 }
@@ -1849,9 +1799,9 @@ readonly fields: UserEntryFieldRefs;
 export interface Prisma__UserEntryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   link<T extends Prisma.UserEntry$linkArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserEntry$linkArgs<ExtArgs>>): Prisma.Prisma__LinkClient<runtime.Types.Result.GetResult<Prisma.$LinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  recommender<T extends Prisma.UserEntry$recommenderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserEntry$recommenderArgs<ExtArgs>>): Prisma.Prisma__PersonClient<runtime.Types.Result.GetResult<Prisma.$PersonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   watchContextPerson<T extends Prisma.UserEntry$watchContextPersonArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserEntry$watchContextPersonArgs<ExtArgs>>): Prisma.Prisma__PersonClient<runtime.Types.Result.GetResult<Prisma.$PersonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  recommender<T extends Prisma.UserEntry$recommenderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserEntry$recommenderArgs<ExtArgs>>): Prisma.Prisma__PersonClient<runtime.Types.Result.GetResult<Prisma.$PersonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1882,7 +1832,6 @@ export interface Prisma__UserEntryClient<T, Null = never, ExtArgs extends runtim
  */
 export interface UserEntryFieldRefs {
   readonly id: Prisma.FieldRef<"UserEntry", 'Int'>
-  readonly linkId: Prisma.FieldRef<"UserEntry", 'Int'>
   readonly userId: Prisma.FieldRef<"UserEntry", 'String'>
   readonly watchStatus: Prisma.FieldRef<"UserEntry", 'WatchStatus'>
   readonly currentEpisode: Prisma.FieldRef<"UserEntry", 'Int'>
@@ -1890,13 +1839,13 @@ export interface UserEntryFieldRefs {
   readonly notes: Prisma.FieldRef<"UserEntry", 'String'>
   readonly watchContextPersonId: Prisma.FieldRef<"UserEntry", 'Int'>
   readonly recommenderId: Prisma.FieldRef<"UserEntry", 'Int'>
-  readonly discoveryType: Prisma.FieldRef<"UserEntry", 'DiscoveryType'>
-  readonly discoverySource: Prisma.FieldRef<"UserEntry", 'String'>
   readonly startedAt: Prisma.FieldRef<"UserEntry", 'DateTime'>
   readonly completedAt: Prisma.FieldRef<"UserEntry", 'DateTime'>
-  readonly verified: Prisma.FieldRef<"UserEntry", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"UserEntry", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UserEntry", 'DateTime'>
+  readonly discoverySource: Prisma.FieldRef<"UserEntry", 'String'>
+  readonly discoveryType: Prisma.FieldRef<"UserEntry", 'DiscoveryType'>
+  readonly linkId: Prisma.FieldRef<"UserEntry", 'Int'>
 }
     
 
@@ -2312,9 +2261,9 @@ export type UserEntry$linkArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * UserEntry.watchContextPerson
+ * UserEntry.recommender
  */
-export type UserEntry$watchContextPersonArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type UserEntry$recommenderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Person
    */
@@ -2331,9 +2280,9 @@ export type UserEntry$watchContextPersonArgs<ExtArgs extends runtime.Types.Exten
 }
 
 /**
- * UserEntry.recommender
+ * UserEntry.watchContextPerson
  */
-export type UserEntry$recommenderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type UserEntry$watchContextPersonArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Person
    */

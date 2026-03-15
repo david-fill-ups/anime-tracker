@@ -102,7 +102,6 @@ export const UpdateAnimeSchema = z.object({
   discoverySource: z.string().nullable().optional(),
   startedAt: z.string().nullable().optional(),
   completedAt: z.string().nullable().optional(),
-  verified: z.boolean().optional(),
   // Anime metadata fields
   titleRomaji: z.string().min(1).optional(),
   titleEnglish: z.string().nullable().optional(),
@@ -180,6 +179,8 @@ export async function wrapHandler(
   try {
     return await handler();
   } catch (err) {
+    // Re-propagate thrown Response objects (e.g., 401 from requireUserId)
+    if (err instanceof Response) return err as NextResponse;
     console.error("[api] Unhandled error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

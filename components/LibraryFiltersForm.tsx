@@ -191,8 +191,8 @@ export default function LibraryFiltersForm({
     const params = new URLSearchParams();
     // Preserve non-filter params from library
     if (initialParams.sort) params.set("sort", initialParams.sort);
+    if (initialParams.order) params.set("order", initialParams.order);
     if (initialParams.search) params.set("search", initialParams.search);
-    if (initialParams.verified) params.set("verified", initialParams.verified);
     // Apply filter values
     if (selectedStatuses.length > 0) params.set("status", selectedStatuses.join(","));
     if (franchise) params.set("franchise", franchise);
@@ -219,7 +219,7 @@ export default function LibraryFiltersForm({
   // Back link preserves current library URL state
   const backParams = new URLSearchParams();
   for (const key of [
-    "sort", "search", "verified", "status",
+    "sort", "order", "search", "status",
     "franchise", "format", "context", "genre", "studio", "minScore", "maxScore",
   ]) {
     if (initialParams[key]) backParams.set(key, initialParams[key]);

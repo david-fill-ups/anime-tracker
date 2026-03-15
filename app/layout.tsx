@@ -61,7 +61,7 @@ export default async function RootLayout({
         <SpotlightProvider initial={recentAnime}>
           <div className="flex min-h-screen">
             <Nav user={session.user} />
-            <main className="flex-1 ml-56 p-8">{children}</main>
+            <main className="flex-1 lg:ml-56 p-4 pt-14 lg:p-8">{children}</main>
           </div>
         </SpotlightProvider>
       </body>

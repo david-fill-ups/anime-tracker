@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
-import { fetchAniListById, mapDisplayFormat, mapSourceMaterial } from "@/lib/anilist";
+import { fetchAniListById, mapAniListToAnimeData } from "@/lib/anilist";
 import { refreshStreamingForAnime } from "@/lib/tmdb";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -43,7 +43,7 @@ export async function POST() {
   // Find all anime in user's library (primary + linked) via Link records
   const linkedAnimeRecords = await db.linkedAnime.findMany({
     where: { link: { userId } },
-    select: { anime: { select: { id: true, anilistId: true, source: true } } },
+    select: { anime: { select: { id: true, anilistId: true, source: true, titleRomaji: true, titleEnglish: true } } },
   });
 
   // Deduplicate in case same anime appears in multiple links
@@ -54,52 +54,34 @@ export async function POST() {
 
   let synced = 0;
   let errors = 0;
+  const failed: { id: number; title: string; reason: string }[] = [];
 
   try {
     for (let i = 0; i < allAnime.length; i++) {
       if (i > 0) await sleep(ITER_DELAY_MS);
       const anime = allAnime[i];
+      const title = anime.titleEnglish ?? anime.titleRomaji;
       try {
         // AniList metadata (AniList entries only)
         if (anime.source === "ANILIST" && anime.anilistId) {
           const data = await fetchAniListById(anime.anilistId);
           if (!data) {
             errors++;
+            failed.push({ id: anime.id, title, reason: "AniList fetch returned null" });
             continue;
           }
 
-          await db.anime.update({
-            where: { id: anime.id },
-            data: {
-              titleRomaji: data.title.romaji,
-              titleEnglish: data.title.english ?? null,
-              titleNative: data.title.native ?? null,
-              coverImageUrl: data.coverImage.large,
-              synopsis: data.description ?? null,
-              genres: JSON.stringify(data.genres),
-              totalEpisodes: data.episodes ?? null,
-              durationMins: data.duration ?? null,
-              airingStatus: data.status,
-              displayFormat: mapDisplayFormat(data.format),
-              sourceMaterial: mapSourceMaterial(data.source),
-              season: data.season ?? null,
-              seasonYear: data.seasonYear ?? null,
-              meanScore: data.meanScore ?? null,
-              nextAiringEp: data.nextAiringEpisode?.episode ?? null,
-              nextAiringAt: data.nextAiringEpisode
-                ? new Date(data.nextAiringEpisode.airingAt * 1000)
-                : null,
-              lastSyncedAt: new Date(),
-            },
-          });
+          const { anilistId: _a, source: _s, ...syncFields } = mapAniListToAnimeData(data);
+          await db.anime.update({ where: { id: anime.id }, data: syncFields });
         }
 
         // Streaming / where-to-watch refresh for all anime
         await refreshStreamingForAnime(anime.id);
 
         synced++;
-      } catch {
+      } catch (err) {
         errors++;
+        failed.push({ id: anime.id, title, reason: err instanceof Error ? err.message : "Unknown error" });
       }
     }
   } finally {
@@ -107,5 +89,5 @@ export async function POST() {
     lastRefreshFinished.set(userId, Date.now());
   }
 
-  return NextResponse.json({ synced, errors, total: allAnime.length });
+  return NextResponse.json({ synced, errors, total: allAnime.length, failed });
 }

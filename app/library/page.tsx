@@ -25,7 +25,7 @@ export default async function LibraryPage({
   const userId = session.user.id;
 
   const params = await searchParams;
-  const { status, search, franchise, format, context, recommender, sort = "updatedAt", genre, studio, verified, minScore, maxScore } = params; // TODO[TEMP]: verified
+  const { status, search, franchise, format, context, recommender, sort = "updatedAt", order, genre, studio, minScore, maxScore } = params;
 
   // Build the userEntry filter (always scoped to this user)
   const userEntryFilter: Record<string, unknown> = {};
@@ -57,11 +57,6 @@ export default async function LibraryPage({
     if (minScore) scoreFilter.gte = parseFloat(minScore);
     if (maxScore) scoreFilter.lte = parseFloat(maxScore);
     userEntryFilter.score = scoreFilter;
-  }
-
-  // TODO[TEMP]: verified filter — remove after data review
-  if (verified === "true" || verified === "false") {
-    userEntryFilter.verified = verified === "true";
   }
 
   // Filter to "primary" anime (order=0 in their Link) owned by this user
@@ -96,10 +91,12 @@ export default async function LibraryPage({
 
   if (genre) {
     const genreList = genre.split(",").filter(Boolean);
+    // Wrap genre in quotes to match the JSON string representation exactly
+    // e.g. `"Action"` in `["Action","Adventure"]` — prevents partial-word false positives
     if (genreList.length === 1) {
-      andConditions.push({ genres: { contains: genreList[0] } });
+      andConditions.push({ genres: { contains: `"${genreList[0]}"` } });
     } else {
-      andConditions.push({ OR: genreList.map((g) => ({ genres: { contains: g } })) });
+      andConditions.push({ OR: genreList.map((g) => ({ genres: { contains: `"${g}"` } })) });
     }
   }
 
@@ -121,7 +118,8 @@ export default async function LibraryPage({
   }
 
   // Build sort — use aggregation ordering for userEntry fields
-  const orderBy = buildOrderBy(sort);
+  const sortDir = (order === "asc" ? "asc" : "desc") as "asc" | "desc";
+  const orderBy = buildOrderBy(sort, sortDir);
 
   const include = {
     // Include Link + all linkedAnime for episode/airing aggregation + userEntry
@@ -185,16 +183,17 @@ export default async function LibraryPage({
     .sort((a, b) => {
       const ae = a.userEntry;
       const be = b.userEntry;
+      const flip = sortDir === "asc" ? -1 : 1;
       if (sort === "startedAt")
-        return (be?.startedAt?.getTime() ?? 0) - (ae?.startedAt?.getTime() ?? 0);
+        return flip * ((be?.startedAt?.getTime() ?? 0) - (ae?.startedAt?.getTime() ?? 0));
       if (sort === "completedAt")
-        return (be?.completedAt?.getTime() ?? 0) - (ae?.completedAt?.getTime() ?? 0);
+        return flip * ((be?.completedAt?.getTime() ?? 0) - (ae?.completedAt?.getTime() ?? 0));
       if (sort === "score")
-        return (be?.score ?? -1) - (ae?.score ?? -1);
+        return flip * ((be?.score ?? -1) - (ae?.score ?? -1));
       if (sort === "meanScore" || sort === "title")
         return 0; // already ordered by Prisma
       // default: updatedAt
-      return (be?.updatedAt?.getTime() ?? 0) - (ae?.updatedAt?.getTime() ?? 0);
+      return flip * ((be?.updatedAt?.getTime() ?? 0) - (ae?.updatedAt?.getTime() ?? 0));
     });
 
   // Build status counts (library statuses only)
@@ -223,9 +222,9 @@ export default async function LibraryPage({
   );
 }
 
-function buildOrderBy(sort: string): Record<string, unknown> {
+function buildOrderBy(sort: string, dir: "asc" | "desc"): Record<string, unknown> {
   // Only DB-level sorts (not user-entry fields — those are sorted client-side)
-  if (sort === "meanScore") return { meanScore: "desc" };
-  if (sort === "title") return { titleEnglish: "asc" };
-  return { updatedAt: "desc" }; // fallback; actual updatedAt sort applied client-side
+  if (sort === "meanScore") return { meanScore: dir };
+  if (sort === "title") return { titleEnglish: dir };
+  return { updatedAt: dir }; // fallback; actual updatedAt sort applied client-side
 }

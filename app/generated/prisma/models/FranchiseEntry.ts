@@ -228,8 +228,8 @@ export type FranchiseEntryWhereInput = {
   animeId?: Prisma.IntFilter<"FranchiseEntry"> | number
   order?: Prisma.IntFilter<"FranchiseEntry"> | number
   entryType?: Prisma.EnumFranchiseEntryTypeFilter<"FranchiseEntry"> | $Enums.FranchiseEntryType
-  franchise?: Prisma.XOR<Prisma.FranchiseScalarRelationFilter, Prisma.FranchiseWhereInput>
   anime?: Prisma.XOR<Prisma.AnimeScalarRelationFilter, Prisma.AnimeWhereInput>
+  franchise?: Prisma.XOR<Prisma.FranchiseScalarRelationFilter, Prisma.FranchiseWhereInput>
 }
 
 export type FranchiseEntryOrderByWithRelationInput = {
@@ -238,8 +238,8 @@ export type FranchiseEntryOrderByWithRelationInput = {
   animeId?: Prisma.SortOrder
   order?: Prisma.SortOrder
   entryType?: Prisma.SortOrder
-  franchise?: Prisma.FranchiseOrderByWithRelationInput
   anime?: Prisma.AnimeOrderByWithRelationInput
+  franchise?: Prisma.FranchiseOrderByWithRelationInput
 }
 
 export type FranchiseEntryWhereUniqueInput = Prisma.AtLeast<{
@@ -253,8 +253,8 @@ export type FranchiseEntryWhereUniqueInput = Prisma.AtLeast<{
   animeId?: Prisma.IntFilter<"FranchiseEntry"> | number
   order?: Prisma.IntFilter<"FranchiseEntry"> | number
   entryType?: Prisma.EnumFranchiseEntryTypeFilter<"FranchiseEntry"> | $Enums.FranchiseEntryType
-  franchise?: Prisma.XOR<Prisma.FranchiseScalarRelationFilter, Prisma.FranchiseWhereInput>
   anime?: Prisma.XOR<Prisma.AnimeScalarRelationFilter, Prisma.AnimeWhereInput>
+  franchise?: Prisma.XOR<Prisma.FranchiseScalarRelationFilter, Prisma.FranchiseWhereInput>
 }, "id" | "franchiseId_animeId" | "franchiseId_order">
 
 export type FranchiseEntryOrderByWithAggregationInput = {
@@ -284,8 +284,8 @@ export type FranchiseEntryScalarWhereWithAggregatesInput = {
 export type FranchiseEntryCreateInput = {
   order: number
   entryType?: $Enums.FranchiseEntryType
-  franchise: Prisma.FranchiseCreateNestedOneWithoutEntriesInput
   anime: Prisma.AnimeCreateNestedOneWithoutFranchiseEntriesInput
+  franchise: Prisma.FranchiseCreateNestedOneWithoutEntriesInput
 }
 
 export type FranchiseEntryUncheckedCreateInput = {
@@ -299,8 +299,8 @@ export type FranchiseEntryUncheckedCreateInput = {
 export type FranchiseEntryUpdateInput = {
   order?: Prisma.IntFieldUpdateOperationsInput | number
   entryType?: Prisma.EnumFranchiseEntryTypeFieldUpdateOperationsInput | $Enums.FranchiseEntryType
-  franchise?: Prisma.FranchiseUpdateOneRequiredWithoutEntriesNestedInput
   anime?: Prisma.AnimeUpdateOneRequiredWithoutFranchiseEntriesNestedInput
+  franchise?: Prisma.FranchiseUpdateOneRequiredWithoutEntriesNestedInput
 }
 
 export type FranchiseEntryUncheckedUpdateInput = {
@@ -629,8 +629,8 @@ export type FranchiseEntrySelect<ExtArgs extends runtime.Types.Extensions.Intern
   animeId?: boolean
   order?: boolean
   entryType?: boolean
-  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["franchiseEntry"]>
 
 export type FranchiseEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -639,8 +639,8 @@ export type FranchiseEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Type
   animeId?: boolean
   order?: boolean
   entryType?: boolean
-  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["franchiseEntry"]>
 
 export type FranchiseEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -649,8 +649,8 @@ export type FranchiseEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   animeId?: boolean
   order?: boolean
   entryType?: boolean
-  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["franchiseEntry"]>
 
 export type FranchiseEntrySelectScalar = {
@@ -663,23 +663,23 @@ export type FranchiseEntrySelectScalar = {
 
 export type FranchiseEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "franchiseId" | "animeId" | "order" | "entryType", ExtArgs["result"]["franchiseEntry"]>
 export type FranchiseEntryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
 }
 export type FranchiseEntryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
 }
 export type FranchiseEntryIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  franchise?: boolean | Prisma.FranchiseDefaultArgs<ExtArgs>
 }
 
 export type $FranchiseEntryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "FranchiseEntry"
   objects: {
-    franchise: Prisma.$FranchisePayload<ExtArgs>
     anime: Prisma.$AnimePayload<ExtArgs>
+    franchise: Prisma.$FranchisePayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1081,8 +1081,8 @@ readonly fields: FranchiseEntryFieldRefs;
  */
 export interface Prisma__FranchiseEntryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  franchise<T extends Prisma.FranchiseDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FranchiseDefaultArgs<ExtArgs>>): Prisma.Prisma__FranchiseClient<runtime.Types.Result.GetResult<Prisma.$FranchisePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   anime<T extends Prisma.AnimeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AnimeDefaultArgs<ExtArgs>>): Prisma.Prisma__AnimeClient<runtime.Types.Result.GetResult<Prisma.$AnimePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  franchise<T extends Prisma.FranchiseDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FranchiseDefaultArgs<ExtArgs>>): Prisma.Prisma__FranchiseClient<runtime.Types.Result.GetResult<Prisma.$FranchisePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

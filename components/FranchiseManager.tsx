@@ -92,8 +92,14 @@ export default function FranchiseManager({
         </div>
       )}
 
-      {franchises.length === 0 && (
-        <p className="text-slate-500 text-sm">No franchises yet. Create one to group related anime.</p>
+      {franchises.length === 0 && !creating && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="text-4xl mb-3">🎬</div>
+          <h3 className="text-slate-300 font-semibold mb-1">No franchises yet</h3>
+          <p className="text-slate-500 text-sm max-w-xs">
+            Group related anime series, movies, and OVAs into franchises to track your progress across a whole universe.
+          </p>
+        </div>
       )}
 
       {/* Franchise cards */}

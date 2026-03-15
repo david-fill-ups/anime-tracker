@@ -411,26 +411,16 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type PersonCreateNestedOneWithoutWatchContextEntriesInput = {
-  create?: Prisma.XOR<Prisma.PersonCreateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedCreateWithoutWatchContextEntriesInput>
-  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutWatchContextEntriesInput
-  connect?: Prisma.PersonWhereUniqueInput
-}
-
 export type PersonCreateNestedOneWithoutEntriesInput = {
   create?: Prisma.XOR<Prisma.PersonCreateWithoutEntriesInput, Prisma.PersonUncheckedCreateWithoutEntriesInput>
   connectOrCreate?: Prisma.PersonCreateOrConnectWithoutEntriesInput
   connect?: Prisma.PersonWhereUniqueInput
 }
 
-export type PersonUpdateOneWithoutWatchContextEntriesNestedInput = {
+export type PersonCreateNestedOneWithoutWatchContextEntriesInput = {
   create?: Prisma.XOR<Prisma.PersonCreateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedCreateWithoutWatchContextEntriesInput>
   connectOrCreate?: Prisma.PersonCreateOrConnectWithoutWatchContextEntriesInput
-  upsert?: Prisma.PersonUpsertWithoutWatchContextEntriesInput
-  disconnect?: Prisma.PersonWhereInput | boolean
-  delete?: Prisma.PersonWhereInput | boolean
   connect?: Prisma.PersonWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.PersonUpdateToOneWithWhereWithoutWatchContextEntriesInput, Prisma.PersonUpdateWithoutWatchContextEntriesInput>, Prisma.PersonUncheckedUpdateWithoutWatchContextEntriesInput>
 }
 
 export type PersonUpdateOneWithoutEntriesNestedInput = {
@@ -441,6 +431,16 @@ export type PersonUpdateOneWithoutEntriesNestedInput = {
   delete?: Prisma.PersonWhereInput | boolean
   connect?: Prisma.PersonWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.PersonUpdateToOneWithWhereWithoutEntriesInput, Prisma.PersonUpdateWithoutEntriesInput>, Prisma.PersonUncheckedUpdateWithoutEntriesInput>
+}
+
+export type PersonUpdateOneWithoutWatchContextEntriesNestedInput = {
+  create?: Prisma.XOR<Prisma.PersonCreateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedCreateWithoutWatchContextEntriesInput>
+  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutWatchContextEntriesInput
+  upsert?: Prisma.PersonUpsertWithoutWatchContextEntriesInput
+  disconnect?: Prisma.PersonWhereInput | boolean
+  delete?: Prisma.PersonWhereInput | boolean
+  connect?: Prisma.PersonWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PersonUpdateToOneWithWhereWithoutWatchContextEntriesInput, Prisma.PersonUpdateWithoutWatchContextEntriesInput>, Prisma.PersonUncheckedUpdateWithoutWatchContextEntriesInput>
 }
 
 export type PersonCreateWithoutUserInput = {
@@ -494,26 +494,6 @@ export type PersonScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Person"> | Date | string
 }
 
-export type PersonCreateWithoutWatchContextEntriesInput = {
-  name: string
-  createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutPeopleInput
-  entries?: Prisma.UserEntryCreateNestedManyWithoutRecommenderInput
-}
-
-export type PersonUncheckedCreateWithoutWatchContextEntriesInput = {
-  id?: number
-  name: string
-  userId: string
-  createdAt?: Date | string
-  entries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutRecommenderInput
-}
-
-export type PersonCreateOrConnectWithoutWatchContextEntriesInput = {
-  where: Prisma.PersonWhereUniqueInput
-  create: Prisma.XOR<Prisma.PersonCreateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedCreateWithoutWatchContextEntriesInput>
-}
-
 export type PersonCreateWithoutEntriesInput = {
   name: string
   createdAt?: Date | string
@@ -534,30 +514,24 @@ export type PersonCreateOrConnectWithoutEntriesInput = {
   create: Prisma.XOR<Prisma.PersonCreateWithoutEntriesInput, Prisma.PersonUncheckedCreateWithoutEntriesInput>
 }
 
-export type PersonUpsertWithoutWatchContextEntriesInput = {
-  update: Prisma.XOR<Prisma.PersonUpdateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedUpdateWithoutWatchContextEntriesInput>
+export type PersonCreateWithoutWatchContextEntriesInput = {
+  name: string
+  createdAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutPeopleInput
+  entries?: Prisma.UserEntryCreateNestedManyWithoutRecommenderInput
+}
+
+export type PersonUncheckedCreateWithoutWatchContextEntriesInput = {
+  id?: number
+  name: string
+  userId: string
+  createdAt?: Date | string
+  entries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutRecommenderInput
+}
+
+export type PersonCreateOrConnectWithoutWatchContextEntriesInput = {
+  where: Prisma.PersonWhereUniqueInput
   create: Prisma.XOR<Prisma.PersonCreateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedCreateWithoutWatchContextEntriesInput>
-  where?: Prisma.PersonWhereInput
-}
-
-export type PersonUpdateToOneWithWhereWithoutWatchContextEntriesInput = {
-  where?: Prisma.PersonWhereInput
-  data: Prisma.XOR<Prisma.PersonUpdateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedUpdateWithoutWatchContextEntriesInput>
-}
-
-export type PersonUpdateWithoutWatchContextEntriesInput = {
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutPeopleNestedInput
-  entries?: Prisma.UserEntryUpdateManyWithoutRecommenderNestedInput
-}
-
-export type PersonUncheckedUpdateWithoutWatchContextEntriesInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  entries?: Prisma.UserEntryUncheckedUpdateManyWithoutRecommenderNestedInput
 }
 
 export type PersonUpsertWithoutEntriesInput = {
@@ -584,6 +558,32 @@ export type PersonUncheckedUpdateWithoutEntriesInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   watchContextEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutWatchContextPersonNestedInput
+}
+
+export type PersonUpsertWithoutWatchContextEntriesInput = {
+  update: Prisma.XOR<Prisma.PersonUpdateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedUpdateWithoutWatchContextEntriesInput>
+  create: Prisma.XOR<Prisma.PersonCreateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedCreateWithoutWatchContextEntriesInput>
+  where?: Prisma.PersonWhereInput
+}
+
+export type PersonUpdateToOneWithWhereWithoutWatchContextEntriesInput = {
+  where?: Prisma.PersonWhereInput
+  data: Prisma.XOR<Prisma.PersonUpdateWithoutWatchContextEntriesInput, Prisma.PersonUncheckedUpdateWithoutWatchContextEntriesInput>
+}
+
+export type PersonUpdateWithoutWatchContextEntriesInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutPeopleNestedInput
+  entries?: Prisma.UserEntryUpdateManyWithoutRecommenderNestedInput
+}
+
+export type PersonUncheckedUpdateWithoutWatchContextEntriesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  entries?: Prisma.UserEntryUncheckedUpdateManyWithoutRecommenderNestedInput
 }
 
 export type PersonCreateManyUserInput = {

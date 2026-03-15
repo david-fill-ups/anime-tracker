@@ -11,8 +11,18 @@ const SORT_OPTIONS = [
   { value: "completedAt", label: "Date Completed" },
   { value: "score", label: "My Score" },
   { value: "meanScore", label: "Community Score" },
-  { value: "title", label: "Title A–Z" },
+  { value: "title", label: "Title" },
 ];
+
+// Default sort direction per sort field
+const SORT_DEFAULT_ORDER: Record<string, "asc" | "desc"> = {
+  updatedAt: "desc",
+  startedAt: "desc",
+  completedAt: "desc",
+  score: "desc",
+  meanScore: "desc",
+  title: "asc",
+};
 
 const STATUS_TABS: { value: WatchStatus | "ALL"; label: string }[] = [
   { value: "ALL", label: "All" },
@@ -87,6 +97,7 @@ export default function LibraryFilters({
 
   const activeStatus = searchParams.get("status") || "ALL";
   const activeSort = searchParams.get("sort") || "updatedAt";
+  const activeOrder = (searchParams.get("order") as "asc" | "desc") || SORT_DEFAULT_ORDER[activeSort] || "desc";
   const activeSearch = searchParams.get("search") || "";
   const activeFranchise = searchParams.get("franchise") || "";
   const activeFormat = searchParams.get("format") || "";
@@ -96,7 +107,6 @@ export default function LibraryFilters({
   const activeStudio = searchParams.get("studio") || "";
   const activeMinScore = searchParams.get("minScore") || "";
   const activeMaxScore = searchParams.get("maxScore") || "";
-  const activeVerified = searchParams.get("verified") || ""; // TODO[TEMP]: remove after data review
 
   const activeGenreList = activeGenre ? activeGenre.split(",").filter(Boolean) : [];
   const activeStudioList = activeStudio ? activeStudio.split(",").filter(Boolean) : [];
@@ -251,32 +261,53 @@ export default function LibraryFilters({
           )}
         </Link>
 
-        <select
-          value={activeSort}
-          onChange={(e) => set("sort", e.target.value)}
-          className="bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              Sort: {o.label}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center">
+          <select
+            value={activeSort}
+            onChange={(e) => {
+              const newSort = e.target.value;
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("sort", newSort);
+              // Reset to the default direction for the new sort field
+              const defaultOrder = SORT_DEFAULT_ORDER[newSort] ?? "desc";
+              if (defaultOrder === "desc") {
+                params.delete("order");
+              } else {
+                params.set("order", defaultOrder);
+              }
+              params.delete("page");
+              router.push(`${pathname}?${params.toString()}`);
+            }}
+            className="bg-slate-800 text-slate-300 border border-slate-700 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 border-r-0"
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                Sort: {o.label}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              const newOrder = activeOrder === "desc" ? "asc" : "desc";
+              const params = new URLSearchParams(searchParams.toString());
+              const defaultOrder = SORT_DEFAULT_ORDER[activeSort] ?? "desc";
+              if (newOrder === defaultOrder) {
+                params.delete("order");
+              } else {
+                params.set("order", newOrder);
+              }
+              params.delete("page");
+              router.push(`${pathname}?${params.toString()}`);
+            }}
+            title={activeOrder === "desc" ? "Descending — click to sort ascending" : "Ascending — click to sort descending"}
+            className="bg-slate-800 text-slate-300 border border-slate-700 rounded-r-md px-2.5 py-2 text-sm hover:text-white hover:bg-slate-700 transition-colors"
+          >
+            {activeOrder === "desc" ? "↓" : "↑"}
+          </button>
+        </div>
 
       </div>
 
-      {/* TODO[TEMP]: Verified filter — remove after data review */}
-      <div>
-        <select
-          value={activeVerified}
-          onChange={(e) => set("verified", e.target.value)}
-          className="bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
-        >
-          <option value="">All (verified + unverified)</option>
-          <option value="false">Unverified only</option>
-          <option value="true">Verified only</option>
-        </select>
-      </div>
     </div>
   );
 }

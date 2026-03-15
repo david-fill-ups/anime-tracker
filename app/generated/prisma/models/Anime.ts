@@ -35,10 +35,10 @@ export type AnimeAvgAggregateOutputType = {
   seasonYear: number | null
   meanScore: number | null
   nextAiringEp: number | null
-  startYear: number | null
-  startMonth: number | null
-  startDay: number | null
   tmdbId: number | null
+  startDay: number | null
+  startMonth: number | null
+  startYear: number | null
 }
 
 export type AnimeSumAggregateOutputType = {
@@ -50,10 +50,10 @@ export type AnimeSumAggregateOutputType = {
   seasonYear: number | null
   meanScore: number | null
   nextAiringEp: number | null
-  startYear: number | null
-  startMonth: number | null
-  startDay: number | null
   tmdbId: number | null
+  startDay: number | null
+  startMonth: number | null
+  startYear: number | null
 }
 
 export type AnimeMinAggregateOutputType = {
@@ -78,9 +78,6 @@ export type AnimeMinAggregateOutputType = {
   meanScore: number | null
   nextAiringEp: number | null
   nextAiringAt: Date | null
-  startYear: number | null
-  startMonth: number | null
-  startDay: number | null
   lastSyncedAt: Date | null
   tmdbId: number | null
   tmdbMediaType: string | null
@@ -88,6 +85,9 @@ export type AnimeMinAggregateOutputType = {
   streamingCheckedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  startDay: number | null
+  startMonth: number | null
+  startYear: number | null
 }
 
 export type AnimeMaxAggregateOutputType = {
@@ -112,9 +112,6 @@ export type AnimeMaxAggregateOutputType = {
   meanScore: number | null
   nextAiringEp: number | null
   nextAiringAt: Date | null
-  startYear: number | null
-  startMonth: number | null
-  startDay: number | null
   lastSyncedAt: Date | null
   tmdbId: number | null
   tmdbMediaType: string | null
@@ -122,6 +119,9 @@ export type AnimeMaxAggregateOutputType = {
   streamingCheckedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  startDay: number | null
+  startMonth: number | null
+  startYear: number | null
 }
 
 export type AnimeCountAggregateOutputType = {
@@ -146,9 +146,6 @@ export type AnimeCountAggregateOutputType = {
   meanScore: number
   nextAiringEp: number
   nextAiringAt: number
-  startYear: number
-  startMonth: number
-  startDay: number
   lastSyncedAt: number
   tmdbId: number
   tmdbMediaType: number
@@ -156,6 +153,9 @@ export type AnimeCountAggregateOutputType = {
   streamingCheckedAt: number
   createdAt: number
   updatedAt: number
+  startDay: number
+  startMonth: number
+  startYear: number
   _all: number
 }
 
@@ -169,10 +169,10 @@ export type AnimeAvgAggregateInputType = {
   seasonYear?: true
   meanScore?: true
   nextAiringEp?: true
-  startYear?: true
-  startMonth?: true
-  startDay?: true
   tmdbId?: true
+  startDay?: true
+  startMonth?: true
+  startYear?: true
 }
 
 export type AnimeSumAggregateInputType = {
@@ -184,10 +184,10 @@ export type AnimeSumAggregateInputType = {
   seasonYear?: true
   meanScore?: true
   nextAiringEp?: true
-  startYear?: true
-  startMonth?: true
-  startDay?: true
   tmdbId?: true
+  startDay?: true
+  startMonth?: true
+  startYear?: true
 }
 
 export type AnimeMinAggregateInputType = {
@@ -212,9 +212,6 @@ export type AnimeMinAggregateInputType = {
   meanScore?: true
   nextAiringEp?: true
   nextAiringAt?: true
-  startYear?: true
-  startMonth?: true
-  startDay?: true
   lastSyncedAt?: true
   tmdbId?: true
   tmdbMediaType?: true
@@ -222,6 +219,9 @@ export type AnimeMinAggregateInputType = {
   streamingCheckedAt?: true
   createdAt?: true
   updatedAt?: true
+  startDay?: true
+  startMonth?: true
+  startYear?: true
 }
 
 export type AnimeMaxAggregateInputType = {
@@ -246,9 +246,6 @@ export type AnimeMaxAggregateInputType = {
   meanScore?: true
   nextAiringEp?: true
   nextAiringAt?: true
-  startYear?: true
-  startMonth?: true
-  startDay?: true
   lastSyncedAt?: true
   tmdbId?: true
   tmdbMediaType?: true
@@ -256,6 +253,9 @@ export type AnimeMaxAggregateInputType = {
   streamingCheckedAt?: true
   createdAt?: true
   updatedAt?: true
+  startDay?: true
+  startMonth?: true
+  startYear?: true
 }
 
 export type AnimeCountAggregateInputType = {
@@ -280,9 +280,6 @@ export type AnimeCountAggregateInputType = {
   meanScore?: true
   nextAiringEp?: true
   nextAiringAt?: true
-  startYear?: true
-  startMonth?: true
-  startDay?: true
   lastSyncedAt?: true
   tmdbId?: true
   tmdbMediaType?: true
@@ -290,6 +287,9 @@ export type AnimeCountAggregateInputType = {
   streamingCheckedAt?: true
   createdAt?: true
   updatedAt?: true
+  startDay?: true
+  startMonth?: true
+  startYear?: true
   _all?: true
 }
 
@@ -401,9 +401,6 @@ export type AnimeGroupByOutputType = {
   meanScore: number | null
   nextAiringEp: number | null
   nextAiringAt: Date | null
-  startYear: number | null
-  startMonth: number | null
-  startDay: number | null
   lastSyncedAt: Date | null
   tmdbId: number | null
   tmdbMediaType: string | null
@@ -411,6 +408,9 @@ export type AnimeGroupByOutputType = {
   streamingCheckedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  startDay: number | null
+  startMonth: number | null
+  startYear: number | null
   _count: AnimeCountAggregateOutputType | null
   _avg: AnimeAvgAggregateOutputType | null
   _sum: AnimeSumAggregateOutputType | null
@@ -458,9 +458,6 @@ export type AnimeWhereInput = {
   meanScore?: Prisma.IntNullableFilter<"Anime"> | number | null
   nextAiringEp?: Prisma.IntNullableFilter<"Anime"> | number | null
   nextAiringAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
-  startYear?: Prisma.IntNullableFilter<"Anime"> | number | null
-  startMonth?: Prisma.IntNullableFilter<"Anime"> | number | null
-  startDay?: Prisma.IntNullableFilter<"Anime"> | number | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
   tmdbId?: Prisma.IntNullableFilter<"Anime"> | number | null
   tmdbMediaType?: Prisma.StringNullableFilter<"Anime"> | string | null
@@ -468,10 +465,13 @@ export type AnimeWhereInput = {
   streamingCheckedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
-  franchiseEntries?: Prisma.FranchiseEntryListRelationFilter
+  startDay?: Prisma.IntNullableFilter<"Anime"> | number | null
+  startMonth?: Prisma.IntNullableFilter<"Anime"> | number | null
+  startYear?: Prisma.IntNullableFilter<"Anime"> | number | null
   animeStudios?: Prisma.AnimeStudioListRelationFilter
-  streamingLinks?: Prisma.StreamingLinkListRelationFilter
+  franchiseEntries?: Prisma.FranchiseEntryListRelationFilter
   linkedIn?: Prisma.LinkedAnimeListRelationFilter
+  streamingLinks?: Prisma.StreamingLinkListRelationFilter
 }
 
 export type AnimeOrderByWithRelationInput = {
@@ -496,9 +496,6 @@ export type AnimeOrderByWithRelationInput = {
   meanScore?: Prisma.SortOrderInput | Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrderInput | Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  startYear?: Prisma.SortOrderInput | Prisma.SortOrder
-  startMonth?: Prisma.SortOrderInput | Prisma.SortOrder
-  startDay?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tmdbId?: Prisma.SortOrderInput | Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -506,10 +503,13 @@ export type AnimeOrderByWithRelationInput = {
   streamingCheckedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  franchiseEntries?: Prisma.FranchiseEntryOrderByRelationAggregateInput
+  startDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  startMonth?: Prisma.SortOrderInput | Prisma.SortOrder
+  startYear?: Prisma.SortOrderInput | Prisma.SortOrder
   animeStudios?: Prisma.AnimeStudioOrderByRelationAggregateInput
-  streamingLinks?: Prisma.StreamingLinkOrderByRelationAggregateInput
+  franchiseEntries?: Prisma.FranchiseEntryOrderByRelationAggregateInput
   linkedIn?: Prisma.LinkedAnimeOrderByRelationAggregateInput
+  streamingLinks?: Prisma.StreamingLinkOrderByRelationAggregateInput
 }
 
 export type AnimeWhereUniqueInput = Prisma.AtLeast<{
@@ -537,9 +537,6 @@ export type AnimeWhereUniqueInput = Prisma.AtLeast<{
   meanScore?: Prisma.IntNullableFilter<"Anime"> | number | null
   nextAiringEp?: Prisma.IntNullableFilter<"Anime"> | number | null
   nextAiringAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
-  startYear?: Prisma.IntNullableFilter<"Anime"> | number | null
-  startMonth?: Prisma.IntNullableFilter<"Anime"> | number | null
-  startDay?: Prisma.IntNullableFilter<"Anime"> | number | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
   tmdbId?: Prisma.IntNullableFilter<"Anime"> | number | null
   tmdbMediaType?: Prisma.StringNullableFilter<"Anime"> | string | null
@@ -547,10 +544,13 @@ export type AnimeWhereUniqueInput = Prisma.AtLeast<{
   streamingCheckedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Anime"> | Date | string
-  franchiseEntries?: Prisma.FranchiseEntryListRelationFilter
+  startDay?: Prisma.IntNullableFilter<"Anime"> | number | null
+  startMonth?: Prisma.IntNullableFilter<"Anime"> | number | null
+  startYear?: Prisma.IntNullableFilter<"Anime"> | number | null
   animeStudios?: Prisma.AnimeStudioListRelationFilter
-  streamingLinks?: Prisma.StreamingLinkListRelationFilter
+  franchiseEntries?: Prisma.FranchiseEntryListRelationFilter
   linkedIn?: Prisma.LinkedAnimeListRelationFilter
+  streamingLinks?: Prisma.StreamingLinkListRelationFilter
 }, "id" | "anilistId">
 
 export type AnimeOrderByWithAggregationInput = {
@@ -575,9 +575,6 @@ export type AnimeOrderByWithAggregationInput = {
   meanScore?: Prisma.SortOrderInput | Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrderInput | Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  startYear?: Prisma.SortOrderInput | Prisma.SortOrder
-  startMonth?: Prisma.SortOrderInput | Prisma.SortOrder
-  startDay?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tmdbId?: Prisma.SortOrderInput | Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -585,6 +582,9 @@ export type AnimeOrderByWithAggregationInput = {
   streamingCheckedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  startDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  startMonth?: Prisma.SortOrderInput | Prisma.SortOrder
+  startYear?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AnimeCountOrderByAggregateInput
   _avg?: Prisma.AnimeAvgOrderByAggregateInput
   _max?: Prisma.AnimeMaxOrderByAggregateInput
@@ -617,9 +617,6 @@ export type AnimeScalarWhereWithAggregatesInput = {
   meanScore?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
   nextAiringEp?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
   nextAiringAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Anime"> | Date | string | null
-  startYear?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
-  startMonth?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
-  startDay?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
   lastSyncedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Anime"> | Date | string | null
   tmdbId?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
   tmdbMediaType?: Prisma.StringNullableWithAggregatesFilter<"Anime"> | string | null
@@ -627,6 +624,9 @@ export type AnimeScalarWhereWithAggregatesInput = {
   streamingCheckedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Anime"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Anime"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Anime"> | Date | string
+  startDay?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
+  startMonth?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
+  startYear?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
 }
 
 export type AnimeCreateInput = {
@@ -650,9 +650,6 @@ export type AnimeCreateInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -660,10 +657,13 @@ export type AnimeCreateInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
+  franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
+  streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
 }
 
 export type AnimeUncheckedCreateInput = {
@@ -688,9 +688,6 @@ export type AnimeUncheckedCreateInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -698,10 +695,13 @@ export type AnimeUncheckedCreateInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
+  franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
+  streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
 }
 
 export type AnimeUpdateInput = {
@@ -725,9 +725,6 @@ export type AnimeUpdateInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -735,10 +732,13 @@ export type AnimeUpdateInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
+  franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
+  streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
 }
 
 export type AnimeUncheckedUpdateInput = {
@@ -763,9 +763,6 @@ export type AnimeUncheckedUpdateInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -773,10 +770,13 @@ export type AnimeUncheckedUpdateInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
+  franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
+  streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
 }
 
 export type AnimeCreateManyInput = {
@@ -801,9 +801,6 @@ export type AnimeCreateManyInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -811,6 +808,9 @@ export type AnimeCreateManyInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
 }
 
 export type AnimeUpdateManyMutationInput = {
@@ -834,9 +834,6 @@ export type AnimeUpdateManyMutationInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -844,6 +841,9 @@ export type AnimeUpdateManyMutationInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type AnimeUncheckedUpdateManyInput = {
@@ -868,9 +868,6 @@ export type AnimeUncheckedUpdateManyInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -878,6 +875,9 @@ export type AnimeUncheckedUpdateManyInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type AnimeScalarRelationFilter = {
@@ -907,9 +907,6 @@ export type AnimeCountOrderByAggregateInput = {
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrder
-  startYear?: Prisma.SortOrder
-  startMonth?: Prisma.SortOrder
-  startDay?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrder
@@ -917,6 +914,9 @@ export type AnimeCountOrderByAggregateInput = {
   streamingCheckedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
 }
 
 export type AnimeAvgOrderByAggregateInput = {
@@ -928,10 +928,10 @@ export type AnimeAvgOrderByAggregateInput = {
   seasonYear?: Prisma.SortOrder
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
-  startYear?: Prisma.SortOrder
-  startMonth?: Prisma.SortOrder
-  startDay?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
 }
 
 export type AnimeMaxOrderByAggregateInput = {
@@ -956,9 +956,6 @@ export type AnimeMaxOrderByAggregateInput = {
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrder
-  startYear?: Prisma.SortOrder
-  startMonth?: Prisma.SortOrder
-  startDay?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrder
@@ -966,6 +963,9 @@ export type AnimeMaxOrderByAggregateInput = {
   streamingCheckedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
 }
 
 export type AnimeMinOrderByAggregateInput = {
@@ -990,9 +990,6 @@ export type AnimeMinOrderByAggregateInput = {
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrder
-  startYear?: Prisma.SortOrder
-  startMonth?: Prisma.SortOrder
-  startDay?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrder
@@ -1000,6 +997,9 @@ export type AnimeMinOrderByAggregateInput = {
   streamingCheckedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
 }
 
 export type AnimeSumOrderByAggregateInput = {
@@ -1011,10 +1011,10 @@ export type AnimeSumOrderByAggregateInput = {
   seasonYear?: Prisma.SortOrder
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
-  startYear?: Prisma.SortOrder
-  startMonth?: Prisma.SortOrder
-  startDay?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
 }
 
 export type AnimeCreateNestedOneWithoutFranchiseEntriesInput = {
@@ -1114,9 +1114,6 @@ export type AnimeCreateWithoutFranchiseEntriesInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1124,9 +1121,12 @@ export type AnimeCreateWithoutFranchiseEntriesInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
+  streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
 }
 
 export type AnimeUncheckedCreateWithoutFranchiseEntriesInput = {
@@ -1151,9 +1151,6 @@ export type AnimeUncheckedCreateWithoutFranchiseEntriesInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1161,9 +1158,12 @@ export type AnimeUncheckedCreateWithoutFranchiseEntriesInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
+  streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
 }
 
 export type AnimeCreateOrConnectWithoutFranchiseEntriesInput = {
@@ -1203,9 +1203,6 @@ export type AnimeUpdateWithoutFranchiseEntriesInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1213,9 +1210,12 @@ export type AnimeUpdateWithoutFranchiseEntriesInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
+  streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
 }
 
 export type AnimeUncheckedUpdateWithoutFranchiseEntriesInput = {
@@ -1240,9 +1240,6 @@ export type AnimeUncheckedUpdateWithoutFranchiseEntriesInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1250,9 +1247,12 @@ export type AnimeUncheckedUpdateWithoutFranchiseEntriesInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
+  streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
 }
 
 export type AnimeCreateWithoutAnimeStudiosInput = {
@@ -1276,9 +1276,6 @@ export type AnimeCreateWithoutAnimeStudiosInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1286,9 +1283,12 @@ export type AnimeCreateWithoutAnimeStudiosInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
+  streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
 }
 
 export type AnimeUncheckedCreateWithoutAnimeStudiosInput = {
@@ -1313,9 +1313,6 @@ export type AnimeUncheckedCreateWithoutAnimeStudiosInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1323,9 +1320,12 @@ export type AnimeUncheckedCreateWithoutAnimeStudiosInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
+  streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
 }
 
 export type AnimeCreateOrConnectWithoutAnimeStudiosInput = {
@@ -1365,9 +1365,6 @@ export type AnimeUpdateWithoutAnimeStudiosInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1375,9 +1372,12 @@ export type AnimeUpdateWithoutAnimeStudiosInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
+  streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
 }
 
 export type AnimeUncheckedUpdateWithoutAnimeStudiosInput = {
@@ -1402,9 +1402,6 @@ export type AnimeUncheckedUpdateWithoutAnimeStudiosInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1412,9 +1409,12 @@ export type AnimeUncheckedUpdateWithoutAnimeStudiosInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
-  streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
+  streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
 }
 
 export type AnimeCreateWithoutLinkedInInput = {
@@ -1438,9 +1438,6 @@ export type AnimeCreateWithoutLinkedInInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1448,8 +1445,11 @@ export type AnimeCreateWithoutLinkedInInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
+  franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkCreateNestedManyWithoutAnimeInput
 }
 
@@ -1475,9 +1475,6 @@ export type AnimeUncheckedCreateWithoutLinkedInInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1485,8 +1482,11 @@ export type AnimeUncheckedCreateWithoutLinkedInInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
+  franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
   streamingLinks?: Prisma.StreamingLinkUncheckedCreateNestedManyWithoutAnimeInput
 }
 
@@ -1527,9 +1527,6 @@ export type AnimeUpdateWithoutLinkedInInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1537,8 +1534,11 @@ export type AnimeUpdateWithoutLinkedInInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
+  franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUpdateManyWithoutAnimeNestedInput
 }
 
@@ -1564,9 +1564,6 @@ export type AnimeUncheckedUpdateWithoutLinkedInInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1574,8 +1571,11 @@ export type AnimeUncheckedUpdateWithoutLinkedInInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
+  franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
   streamingLinks?: Prisma.StreamingLinkUncheckedUpdateManyWithoutAnimeNestedInput
 }
 
@@ -1600,9 +1600,6 @@ export type AnimeCreateWithoutStreamingLinksInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1610,8 +1607,11 @@ export type AnimeCreateWithoutStreamingLinksInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   animeStudios?: Prisma.AnimeStudioCreateNestedManyWithoutAnimeInput
+  franchiseEntries?: Prisma.FranchiseEntryCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeCreateNestedManyWithoutAnimeInput
 }
 
@@ -1637,9 +1637,6 @@ export type AnimeUncheckedCreateWithoutStreamingLinksInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
-  startYear?: number | null
-  startMonth?: number | null
-  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1647,8 +1644,11 @@ export type AnimeUncheckedCreateWithoutStreamingLinksInput = {
   streamingCheckedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
+  startDay?: number | null
+  startMonth?: number | null
+  startYear?: number | null
   animeStudios?: Prisma.AnimeStudioUncheckedCreateNestedManyWithoutAnimeInput
+  franchiseEntries?: Prisma.FranchiseEntryUncheckedCreateNestedManyWithoutAnimeInput
   linkedIn?: Prisma.LinkedAnimeUncheckedCreateNestedManyWithoutAnimeInput
 }
 
@@ -1689,9 +1689,6 @@ export type AnimeUpdateWithoutStreamingLinksInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1699,8 +1696,11 @@ export type AnimeUpdateWithoutStreamingLinksInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   animeStudios?: Prisma.AnimeStudioUpdateManyWithoutAnimeNestedInput
+  franchiseEntries?: Prisma.FranchiseEntryUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUpdateManyWithoutAnimeNestedInput
 }
 
@@ -1726,9 +1726,6 @@ export type AnimeUncheckedUpdateWithoutStreamingLinksInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1736,8 +1733,11 @@ export type AnimeUncheckedUpdateWithoutStreamingLinksInput = {
   streamingCheckedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   animeStudios?: Prisma.AnimeStudioUncheckedUpdateManyWithoutAnimeNestedInput
+  franchiseEntries?: Prisma.FranchiseEntryUncheckedUpdateManyWithoutAnimeNestedInput
   linkedIn?: Prisma.LinkedAnimeUncheckedUpdateManyWithoutAnimeNestedInput
 }
 
@@ -1747,17 +1747,17 @@ export type AnimeUncheckedUpdateWithoutStreamingLinksInput = {
  */
 
 export type AnimeCountOutputType = {
-  franchiseEntries: number
   animeStudios: number
-  streamingLinks: number
+  franchiseEntries: number
   linkedIn: number
+  streamingLinks: number
 }
 
 export type AnimeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  franchiseEntries?: boolean | AnimeCountOutputTypeCountFranchiseEntriesArgs
   animeStudios?: boolean | AnimeCountOutputTypeCountAnimeStudiosArgs
-  streamingLinks?: boolean | AnimeCountOutputTypeCountStreamingLinksArgs
+  franchiseEntries?: boolean | AnimeCountOutputTypeCountFranchiseEntriesArgs
   linkedIn?: boolean | AnimeCountOutputTypeCountLinkedInArgs
+  streamingLinks?: boolean | AnimeCountOutputTypeCountStreamingLinksArgs
 }
 
 /**
@@ -1773,13 +1773,6 @@ export type AnimeCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extens
 /**
  * AnimeCountOutputType without action
  */
-export type AnimeCountOutputTypeCountFranchiseEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.FranchiseEntryWhereInput
-}
-
-/**
- * AnimeCountOutputType without action
- */
 export type AnimeCountOutputTypeCountAnimeStudiosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AnimeStudioWhereInput
 }
@@ -1787,8 +1780,8 @@ export type AnimeCountOutputTypeCountAnimeStudiosArgs<ExtArgs extends runtime.Ty
 /**
  * AnimeCountOutputType without action
  */
-export type AnimeCountOutputTypeCountStreamingLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.StreamingLinkWhereInput
+export type AnimeCountOutputTypeCountFranchiseEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FranchiseEntryWhereInput
 }
 
 /**
@@ -1796,6 +1789,13 @@ export type AnimeCountOutputTypeCountStreamingLinksArgs<ExtArgs extends runtime.
  */
 export type AnimeCountOutputTypeCountLinkedInArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LinkedAnimeWhereInput
+}
+
+/**
+ * AnimeCountOutputType without action
+ */
+export type AnimeCountOutputTypeCountStreamingLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StreamingLinkWhereInput
 }
 
 
@@ -1821,9 +1821,6 @@ export type AnimeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   meanScore?: boolean
   nextAiringEp?: boolean
   nextAiringAt?: boolean
-  startYear?: boolean
-  startMonth?: boolean
-  startDay?: boolean
   lastSyncedAt?: boolean
   tmdbId?: boolean
   tmdbMediaType?: boolean
@@ -1831,10 +1828,13 @@ export type AnimeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   streamingCheckedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  franchiseEntries?: boolean | Prisma.Anime$franchiseEntriesArgs<ExtArgs>
+  startDay?: boolean
+  startMonth?: boolean
+  startYear?: boolean
   animeStudios?: boolean | Prisma.Anime$animeStudiosArgs<ExtArgs>
-  streamingLinks?: boolean | Prisma.Anime$streamingLinksArgs<ExtArgs>
+  franchiseEntries?: boolean | Prisma.Anime$franchiseEntriesArgs<ExtArgs>
   linkedIn?: boolean | Prisma.Anime$linkedInArgs<ExtArgs>
+  streamingLinks?: boolean | Prisma.Anime$streamingLinksArgs<ExtArgs>
   _count?: boolean | Prisma.AnimeCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["anime"]>
 
@@ -1860,9 +1860,6 @@ export type AnimeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   meanScore?: boolean
   nextAiringEp?: boolean
   nextAiringAt?: boolean
-  startYear?: boolean
-  startMonth?: boolean
-  startDay?: boolean
   lastSyncedAt?: boolean
   tmdbId?: boolean
   tmdbMediaType?: boolean
@@ -1870,6 +1867,9 @@ export type AnimeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   streamingCheckedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  startDay?: boolean
+  startMonth?: boolean
+  startYear?: boolean
 }, ExtArgs["result"]["anime"]>
 
 export type AnimeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1894,9 +1894,6 @@ export type AnimeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   meanScore?: boolean
   nextAiringEp?: boolean
   nextAiringAt?: boolean
-  startYear?: boolean
-  startMonth?: boolean
-  startDay?: boolean
   lastSyncedAt?: boolean
   tmdbId?: boolean
   tmdbMediaType?: boolean
@@ -1904,6 +1901,9 @@ export type AnimeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   streamingCheckedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  startDay?: boolean
+  startMonth?: boolean
+  startYear?: boolean
 }, ExtArgs["result"]["anime"]>
 
 export type AnimeSelectScalar = {
@@ -1928,9 +1928,6 @@ export type AnimeSelectScalar = {
   meanScore?: boolean
   nextAiringEp?: boolean
   nextAiringAt?: boolean
-  startYear?: boolean
-  startMonth?: boolean
-  startDay?: boolean
   lastSyncedAt?: boolean
   tmdbId?: boolean
   tmdbMediaType?: boolean
@@ -1938,14 +1935,17 @@ export type AnimeSelectScalar = {
   streamingCheckedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  startDay?: boolean
+  startMonth?: boolean
+  startYear?: boolean
 }
 
-export type AnimeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "anilistId" | "source" | "titleEnglish" | "titleRomaji" | "titleNative" | "coverImageUrl" | "synopsis" | "genres" | "totalEpisodes" | "totalSeasons" | "episodesPerSeason" | "durationMins" | "airingStatus" | "displayFormat" | "sourceMaterial" | "season" | "seasonYear" | "meanScore" | "nextAiringEp" | "nextAiringAt" | "startYear" | "startMonth" | "startDay" | "lastSyncedAt" | "tmdbId" | "tmdbMediaType" | "externalUrl" | "streamingCheckedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["anime"]>
+export type AnimeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "anilistId" | "source" | "titleEnglish" | "titleRomaji" | "titleNative" | "coverImageUrl" | "synopsis" | "genres" | "totalEpisodes" | "totalSeasons" | "episodesPerSeason" | "durationMins" | "airingStatus" | "displayFormat" | "sourceMaterial" | "season" | "seasonYear" | "meanScore" | "nextAiringEp" | "nextAiringAt" | "lastSyncedAt" | "tmdbId" | "tmdbMediaType" | "externalUrl" | "streamingCheckedAt" | "createdAt" | "updatedAt" | "startDay" | "startMonth" | "startYear", ExtArgs["result"]["anime"]>
 export type AnimeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  franchiseEntries?: boolean | Prisma.Anime$franchiseEntriesArgs<ExtArgs>
   animeStudios?: boolean | Prisma.Anime$animeStudiosArgs<ExtArgs>
-  streamingLinks?: boolean | Prisma.Anime$streamingLinksArgs<ExtArgs>
+  franchiseEntries?: boolean | Prisma.Anime$franchiseEntriesArgs<ExtArgs>
   linkedIn?: boolean | Prisma.Anime$linkedInArgs<ExtArgs>
+  streamingLinks?: boolean | Prisma.Anime$streamingLinksArgs<ExtArgs>
   _count?: boolean | Prisma.AnimeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AnimeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1954,10 +1954,10 @@ export type AnimeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type $AnimePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Anime"
   objects: {
-    franchiseEntries: Prisma.$FranchiseEntryPayload<ExtArgs>[]
     animeStudios: Prisma.$AnimeStudioPayload<ExtArgs>[]
-    streamingLinks: Prisma.$StreamingLinkPayload<ExtArgs>[]
+    franchiseEntries: Prisma.$FranchiseEntryPayload<ExtArgs>[]
     linkedIn: Prisma.$LinkedAnimePayload<ExtArgs>[]
+    streamingLinks: Prisma.$StreamingLinkPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1981,9 +1981,6 @@ export type $AnimePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     meanScore: number | null
     nextAiringEp: number | null
     nextAiringAt: Date | null
-    startYear: number | null
-    startMonth: number | null
-    startDay: number | null
     lastSyncedAt: Date | null
     tmdbId: number | null
     tmdbMediaType: string | null
@@ -1991,6 +1988,9 @@ export type $AnimePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     streamingCheckedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    startDay: number | null
+    startMonth: number | null
+    startYear: number | null
   }, ExtArgs["result"]["anime"]>
   composites: {}
 }
@@ -2385,10 +2385,10 @@ readonly fields: AnimeFieldRefs;
  */
 export interface Prisma__AnimeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  franchiseEntries<T extends Prisma.Anime$franchiseEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$franchiseEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FranchiseEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   animeStudios<T extends Prisma.Anime$animeStudiosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$animeStudiosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnimeStudioPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  streamingLinks<T extends Prisma.Anime$streamingLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$streamingLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StreamingLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  franchiseEntries<T extends Prisma.Anime$franchiseEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$franchiseEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FranchiseEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   linkedIn<T extends Prisma.Anime$linkedInArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$linkedInArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LinkedAnimePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  streamingLinks<T extends Prisma.Anime$streamingLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Anime$streamingLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StreamingLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2439,9 +2439,6 @@ export interface AnimeFieldRefs {
   readonly meanScore: Prisma.FieldRef<"Anime", 'Int'>
   readonly nextAiringEp: Prisma.FieldRef<"Anime", 'Int'>
   readonly nextAiringAt: Prisma.FieldRef<"Anime", 'DateTime'>
-  readonly startYear: Prisma.FieldRef<"Anime", 'Int'>
-  readonly startMonth: Prisma.FieldRef<"Anime", 'Int'>
-  readonly startDay: Prisma.FieldRef<"Anime", 'Int'>
   readonly lastSyncedAt: Prisma.FieldRef<"Anime", 'DateTime'>
   readonly tmdbId: Prisma.FieldRef<"Anime", 'Int'>
   readonly tmdbMediaType: Prisma.FieldRef<"Anime", 'String'>
@@ -2449,6 +2446,9 @@ export interface AnimeFieldRefs {
   readonly streamingCheckedAt: Prisma.FieldRef<"Anime", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Anime", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Anime", 'DateTime'>
+  readonly startDay: Prisma.FieldRef<"Anime", 'Int'>
+  readonly startMonth: Prisma.FieldRef<"Anime", 'Int'>
+  readonly startYear: Prisma.FieldRef<"Anime", 'Int'>
 }
     
 
@@ -2837,30 +2837,6 @@ export type AnimeDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
- * Anime.franchiseEntries
- */
-export type Anime$franchiseEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the FranchiseEntry
-   */
-  select?: Prisma.FranchiseEntrySelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the FranchiseEntry
-   */
-  omit?: Prisma.FranchiseEntryOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.FranchiseEntryInclude<ExtArgs> | null
-  where?: Prisma.FranchiseEntryWhereInput
-  orderBy?: Prisma.FranchiseEntryOrderByWithRelationInput | Prisma.FranchiseEntryOrderByWithRelationInput[]
-  cursor?: Prisma.FranchiseEntryWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.FranchiseEntryScalarFieldEnum | Prisma.FranchiseEntryScalarFieldEnum[]
-}
-
-/**
  * Anime.animeStudios
  */
 export type Anime$animeStudiosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2885,27 +2861,27 @@ export type Anime$animeStudiosArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
- * Anime.streamingLinks
+ * Anime.franchiseEntries
  */
-export type Anime$streamingLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Anime$franchiseEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the StreamingLink
+   * Select specific fields to fetch from the FranchiseEntry
    */
-  select?: Prisma.StreamingLinkSelect<ExtArgs> | null
+  select?: Prisma.FranchiseEntrySelect<ExtArgs> | null
   /**
-   * Omit specific fields from the StreamingLink
+   * Omit specific fields from the FranchiseEntry
    */
-  omit?: Prisma.StreamingLinkOmit<ExtArgs> | null
+  omit?: Prisma.FranchiseEntryOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.StreamingLinkInclude<ExtArgs> | null
-  where?: Prisma.StreamingLinkWhereInput
-  orderBy?: Prisma.StreamingLinkOrderByWithRelationInput | Prisma.StreamingLinkOrderByWithRelationInput[]
-  cursor?: Prisma.StreamingLinkWhereUniqueInput
+  include?: Prisma.FranchiseEntryInclude<ExtArgs> | null
+  where?: Prisma.FranchiseEntryWhereInput
+  orderBy?: Prisma.FranchiseEntryOrderByWithRelationInput | Prisma.FranchiseEntryOrderByWithRelationInput[]
+  cursor?: Prisma.FranchiseEntryWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.StreamingLinkScalarFieldEnum | Prisma.StreamingLinkScalarFieldEnum[]
+  distinct?: Prisma.FranchiseEntryScalarFieldEnum | Prisma.FranchiseEntryScalarFieldEnum[]
 }
 
 /**
@@ -2930,6 +2906,30 @@ export type Anime$linkedInArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.LinkedAnimeScalarFieldEnum | Prisma.LinkedAnimeScalarFieldEnum[]
+}
+
+/**
+ * Anime.streamingLinks
+ */
+export type Anime$streamingLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StreamingLink
+   */
+  select?: Prisma.StreamingLinkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StreamingLink
+   */
+  omit?: Prisma.StreamingLinkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StreamingLinkInclude<ExtArgs> | null
+  where?: Prisma.StreamingLinkWhereInput
+  orderBy?: Prisma.StreamingLinkOrderByWithRelationInput | Prisma.StreamingLinkOrderByWithRelationInput[]
+  cursor?: Prisma.StreamingLinkWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StreamingLinkScalarFieldEnum | Prisma.StreamingLinkScalarFieldEnum[]
 }
 
 /**

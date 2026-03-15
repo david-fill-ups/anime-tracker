@@ -3,19 +3,35 @@ import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
 import { CreatePersonSchema, parseBody, wrapHandler } from "@/lib/validation";
 
-export async function GET() {
+const MAX_LIMIT = 200;
+const DEFAULT_LIMIT = 100;
+
+export async function GET(req: NextRequest) {
   return wrapHandler(async () => {
     const userId = await requireUserId();
-    const people = await db.person.findMany({
-      where: { userId },
-      include: {
-        entries: {
-          where: { watchStatus: "COMPLETED", userId },
-          select: { score: true },
+    const { searchParams } = new URL(req.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+    const limit = Math.min(
+      MAX_LIMIT,
+      Math.max(1, parseInt(searchParams.get("limit") ?? String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT)
+    );
+    const skip = (page - 1) * limit;
+
+    const [people, total] = await Promise.all([
+      db.person.findMany({
+        where: { userId },
+        include: {
+          entries: {
+            where: { watchStatus: "COMPLETED", userId },
+            select: { score: true },
+          },
         },
-      },
-      orderBy: { name: "asc" },
-    });
+        orderBy: { name: "asc" },
+        skip,
+        take: limit,
+      }),
+      db.person.count({ where: { userId } }),
+    ]);
 
     // Compute recommendation quality per person
     const result = people.map((person) => {
@@ -32,7 +48,7 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json({ data: result, total, page, limit, pages: Math.ceil(total / limit) });
   });
 }
 

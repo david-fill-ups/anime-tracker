@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import NavLinks from "./NavLinks";
 import { useSpotlight } from "./SpotlightContext";
 import { signOutAction } from "@/app/actions/auth";
@@ -11,6 +12,12 @@ import type { Session } from "next-auth";
 export default function SidebarShell({ user }: { user: Session["user"] }) {
   const { spotlight: anime, setSpotlight } = useSpotlight();
   const [shuffling, setShuffling] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   async function shuffle() {
     setShuffling(true);
@@ -23,7 +30,27 @@ export default function SidebarShell({ user }: { user: Session["user"] }) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-56 bg-slate-950 border-r border-slate-800 flex flex-col overflow-hidden">
+    <>
+      {/* Mobile hamburger button */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+        aria-label="Open menu"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/60"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+    <aside className={`fixed left-0 top-0 h-full w-56 bg-slate-950 border-r border-slate-800 flex flex-col overflow-hidden z-50 transition-transform duration-200 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}>
 
       {/* Atmospheric blurred background */}
       {anime && (
@@ -115,5 +142,6 @@ export default function SidebarShell({ user }: { user: Session["user"] }) {
         </div>
       </div>
     </aside>
+    </>
   );
 }

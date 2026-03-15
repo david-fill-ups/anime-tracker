@@ -220,8 +220,8 @@ export type LinkedAnimeWhereInput = {
   linkId?: Prisma.IntFilter<"LinkedAnime"> | number
   animeId?: Prisma.IntFilter<"LinkedAnime"> | number
   order?: Prisma.IntFilter<"LinkedAnime"> | number
-  link?: Prisma.XOR<Prisma.LinkScalarRelationFilter, Prisma.LinkWhereInput>
   anime?: Prisma.XOR<Prisma.AnimeScalarRelationFilter, Prisma.AnimeWhereInput>
+  link?: Prisma.XOR<Prisma.LinkScalarRelationFilter, Prisma.LinkWhereInput>
 }
 
 export type LinkedAnimeOrderByWithRelationInput = {
@@ -229,8 +229,8 @@ export type LinkedAnimeOrderByWithRelationInput = {
   linkId?: Prisma.SortOrder
   animeId?: Prisma.SortOrder
   order?: Prisma.SortOrder
-  link?: Prisma.LinkOrderByWithRelationInput
   anime?: Prisma.AnimeOrderByWithRelationInput
+  link?: Prisma.LinkOrderByWithRelationInput
 }
 
 export type LinkedAnimeWhereUniqueInput = Prisma.AtLeast<{
@@ -242,8 +242,8 @@ export type LinkedAnimeWhereUniqueInput = Prisma.AtLeast<{
   linkId?: Prisma.IntFilter<"LinkedAnime"> | number
   animeId?: Prisma.IntFilter<"LinkedAnime"> | number
   order?: Prisma.IntFilter<"LinkedAnime"> | number
-  link?: Prisma.XOR<Prisma.LinkScalarRelationFilter, Prisma.LinkWhereInput>
   anime?: Prisma.XOR<Prisma.AnimeScalarRelationFilter, Prisma.AnimeWhereInput>
+  link?: Prisma.XOR<Prisma.LinkScalarRelationFilter, Prisma.LinkWhereInput>
 }, "id" | "linkId_animeId">
 
 export type LinkedAnimeOrderByWithAggregationInput = {
@@ -270,8 +270,8 @@ export type LinkedAnimeScalarWhereWithAggregatesInput = {
 
 export type LinkedAnimeCreateInput = {
   order?: number
-  link: Prisma.LinkCreateNestedOneWithoutLinkedAnimeInput
   anime: Prisma.AnimeCreateNestedOneWithoutLinkedInInput
+  link: Prisma.LinkCreateNestedOneWithoutLinkedAnimeInput
 }
 
 export type LinkedAnimeUncheckedCreateInput = {
@@ -283,8 +283,8 @@ export type LinkedAnimeUncheckedCreateInput = {
 
 export type LinkedAnimeUpdateInput = {
   order?: Prisma.IntFieldUpdateOperationsInput | number
-  link?: Prisma.LinkUpdateOneRequiredWithoutLinkedAnimeNestedInput
   anime?: Prisma.AnimeUpdateOneRequiredWithoutLinkedInNestedInput
+  link?: Prisma.LinkUpdateOneRequiredWithoutLinkedAnimeNestedInput
 }
 
 export type LinkedAnimeUncheckedUpdateInput = {
@@ -583,8 +583,8 @@ export type LinkedAnimeSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   linkId?: boolean
   animeId?: boolean
   order?: boolean
-  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["linkedAnime"]>
 
 export type LinkedAnimeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -592,8 +592,8 @@ export type LinkedAnimeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   linkId?: boolean
   animeId?: boolean
   order?: boolean
-  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["linkedAnime"]>
 
 export type LinkedAnimeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -601,8 +601,8 @@ export type LinkedAnimeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   linkId?: boolean
   animeId?: boolean
   order?: boolean
-  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["linkedAnime"]>
 
 export type LinkedAnimeSelectScalar = {
@@ -614,23 +614,23 @@ export type LinkedAnimeSelectScalar = {
 
 export type LinkedAnimeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "linkId" | "animeId" | "order", ExtArgs["result"]["linkedAnime"]>
 export type LinkedAnimeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
 }
 export type LinkedAnimeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
 }
 export type LinkedAnimeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
   anime?: boolean | Prisma.AnimeDefaultArgs<ExtArgs>
+  link?: boolean | Prisma.LinkDefaultArgs<ExtArgs>
 }
 
 export type $LinkedAnimePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LinkedAnime"
   objects: {
-    link: Prisma.$LinkPayload<ExtArgs>
     anime: Prisma.$AnimePayload<ExtArgs>
+    link: Prisma.$LinkPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1031,8 +1031,8 @@ readonly fields: LinkedAnimeFieldRefs;
  */
 export interface Prisma__LinkedAnimeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  link<T extends Prisma.LinkDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LinkDefaultArgs<ExtArgs>>): Prisma.Prisma__LinkClient<runtime.Types.Result.GetResult<Prisma.$LinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   anime<T extends Prisma.AnimeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AnimeDefaultArgs<ExtArgs>>): Prisma.Prisma__AnimeClient<runtime.Types.Result.GetResult<Prisma.$AnimePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  link<T extends Prisma.LinkDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LinkDefaultArgs<ExtArgs>>): Prisma.Prisma__LinkClient<runtime.Types.Result.GetResult<Prisma.$LinkPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

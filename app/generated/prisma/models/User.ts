@@ -199,11 +199,11 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   accounts?: Prisma.AccountListRelationFilter
+  franchises?: Prisma.FranchiseListRelationFilter
+  links?: Prisma.LinkListRelationFilter
+  people?: Prisma.PersonListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   userEntries?: Prisma.UserEntryListRelationFilter
-  links?: Prisma.LinkListRelationFilter
-  franchises?: Prisma.FranchiseListRelationFilter
-  people?: Prisma.PersonListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -215,11 +215,11 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   accounts?: Prisma.AccountOrderByRelationAggregateInput
+  franchises?: Prisma.FranchiseOrderByRelationAggregateInput
+  links?: Prisma.LinkOrderByRelationAggregateInput
+  people?: Prisma.PersonOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   userEntries?: Prisma.UserEntryOrderByRelationAggregateInput
-  links?: Prisma.LinkOrderByRelationAggregateInput
-  franchises?: Prisma.FranchiseOrderByRelationAggregateInput
-  people?: Prisma.PersonOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -234,11 +234,11 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   accounts?: Prisma.AccountListRelationFilter
+  franchises?: Prisma.FranchiseListRelationFilter
+  links?: Prisma.LinkListRelationFilter
+  people?: Prisma.PersonListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   userEntries?: Prisma.UserEntryListRelationFilter
-  links?: Prisma.LinkListRelationFilter
-  franchises?: Prisma.FranchiseListRelationFilter
-  people?: Prisma.PersonListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -276,11 +276,11 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
+  people?: Prisma.PersonCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkCreateNestedManyWithoutUserInput
-  franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
-  people?: Prisma.PersonCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -292,11 +292,11 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
+  people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
-  franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
-  people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -308,11 +308,11 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
+  people?: Prisma.PersonUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
-  franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
-  people?: Prisma.PersonUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -324,11 +324,11 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
+  people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
-  franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
-  people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -504,11 +504,11 @@ export type UserCreateWithoutAccountsInput = {
   image?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
+  people?: Prisma.PersonCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkCreateNestedManyWithoutUserInput
-  franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
-  people?: Prisma.PersonCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -519,11 +519,11 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   image?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
+  people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
-  franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
-  people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -550,11 +550,11 @@ export type UserUpdateWithoutAccountsInput = {
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
+  people?: Prisma.PersonUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
-  franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
-  people?: Prisma.PersonUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -565,11 +565,11 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
+  people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
-  franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
-  people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -581,10 +581,10 @@ export type UserCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   people?: Prisma.PersonCreateNestedManyWithoutUserInput
+  userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -596,10 +596,10 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
+  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -627,10 +627,10 @@ export type UserUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUpdateManyWithoutUserNestedInput
+  userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -642,10 +642,10 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
+  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPeopleInput = {
@@ -657,10 +657,10 @@ export type UserCreateWithoutPeopleInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkCreateNestedManyWithoutUserInput
-  franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPeopleInput = {
@@ -672,10 +672,10 @@ export type UserUncheckedCreateWithoutPeopleInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
-  franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPeopleInput = {
@@ -703,10 +703,10 @@ export type UserUpdateWithoutPeopleInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
-  franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPeopleInput = {
@@ -718,10 +718,10 @@ export type UserUncheckedUpdateWithoutPeopleInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
-  franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFranchisesInput = {
@@ -733,10 +733,10 @@ export type UserCreateWithoutFranchisesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
   links?: Prisma.LinkCreateNestedManyWithoutUserInput
   people?: Prisma.PersonCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFranchisesInput = {
@@ -748,10 +748,10 @@ export type UserUncheckedCreateWithoutFranchisesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
   links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFranchisesInput = {
@@ -779,10 +779,10 @@ export type UserUpdateWithoutFranchisesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
   links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFranchisesInput = {
@@ -794,10 +794,10 @@ export type UserUncheckedUpdateWithoutFranchisesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
   links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLinksInput = {
@@ -809,10 +809,10 @@ export type UserCreateWithoutLinksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
   people?: Prisma.PersonCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userEntries?: Prisma.UserEntryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLinksInput = {
@@ -824,10 +824,10 @@ export type UserUncheckedCreateWithoutLinksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
   people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userEntries?: Prisma.UserEntryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLinksInput = {
@@ -855,10 +855,10 @@ export type UserUpdateWithoutLinksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userEntries?: Prisma.UserEntryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLinksInput = {
@@ -870,10 +870,10 @@ export type UserUncheckedUpdateWithoutLinksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userEntries?: Prisma.UserEntryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUserEntriesInput = {
@@ -885,10 +885,10 @@ export type UserCreateWithoutUserEntriesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkCreateNestedManyWithoutUserInput
   people?: Prisma.PersonCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUserEntriesInput = {
@@ -900,10 +900,10 @@ export type UserUncheckedCreateWithoutUserEntriesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
-  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   franchises?: Prisma.FranchiseUncheckedCreateNestedManyWithoutUserInput
+  links?: Prisma.LinkUncheckedCreateNestedManyWithoutUserInput
   people?: Prisma.PersonUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUserEntriesInput = {
@@ -931,10 +931,10 @@ export type UserUpdateWithoutUserEntriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserEntriesInput = {
@@ -946,10 +946,10 @@ export type UserUncheckedUpdateWithoutUserEntriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
-  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   franchises?: Prisma.FranchiseUncheckedUpdateManyWithoutUserNestedInput
+  links?: Prisma.LinkUncheckedUpdateManyWithoutUserNestedInput
   people?: Prisma.PersonUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -959,20 +959,20 @@ export type UserUncheckedUpdateWithoutUserEntriesInput = {
 
 export type UserCountOutputType = {
   accounts: number
+  franchises: number
+  links: number
+  people: number
   sessions: number
   userEntries: number
-  links: number
-  franchises: number
-  people: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
+  franchises?: boolean | UserCountOutputTypeCountFranchisesArgs
+  links?: boolean | UserCountOutputTypeCountLinksArgs
+  people?: boolean | UserCountOutputTypeCountPeopleArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   userEntries?: boolean | UserCountOutputTypeCountUserEntriesArgs
-  links?: boolean | UserCountOutputTypeCountLinksArgs
-  franchises?: boolean | UserCountOutputTypeCountFranchisesArgs
-  people?: boolean | UserCountOutputTypeCountPeopleArgs
 }
 
 /**
@@ -995,15 +995,8 @@ export type UserCountOutputTypeCountAccountsArgs<ExtArgs extends runtime.Types.E
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.SessionWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountUserEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.UserEntryWhereInput
+export type UserCountOutputTypeCountFranchisesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FranchiseWhereInput
 }
 
 /**
@@ -1016,15 +1009,22 @@ export type UserCountOutputTypeCountLinksArgs<ExtArgs extends runtime.Types.Exte
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountFranchisesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.FranchiseWhereInput
+export type UserCountOutputTypeCountPeopleArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PersonWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountPeopleArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.PersonWhereInput
+export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SessionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountUserEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserEntryWhereInput
 }
 
 
@@ -1037,11 +1037,11 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
+  franchises?: boolean | Prisma.User$franchisesArgs<ExtArgs>
+  links?: boolean | Prisma.User$linksArgs<ExtArgs>
+  people?: boolean | Prisma.User$peopleArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   userEntries?: boolean | Prisma.User$userEntriesArgs<ExtArgs>
-  links?: boolean | Prisma.User$linksArgs<ExtArgs>
-  franchises?: boolean | Prisma.User$franchisesArgs<ExtArgs>
-  people?: boolean | Prisma.User$peopleArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1078,11 +1078,11 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
+  franchises?: boolean | Prisma.User$franchisesArgs<ExtArgs>
+  links?: boolean | Prisma.User$linksArgs<ExtArgs>
+  people?: boolean | Prisma.User$peopleArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   userEntries?: boolean | Prisma.User$userEntriesArgs<ExtArgs>
-  links?: boolean | Prisma.User$linksArgs<ExtArgs>
-  franchises?: boolean | Prisma.User$franchisesArgs<ExtArgs>
-  people?: boolean | Prisma.User$peopleArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1092,11 +1092,11 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     accounts: Prisma.$AccountPayload<ExtArgs>[]
+    franchises: Prisma.$FranchisePayload<ExtArgs>[]
+    links: Prisma.$LinkPayload<ExtArgs>[]
+    people: Prisma.$PersonPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     userEntries: Prisma.$UserEntryPayload<ExtArgs>[]
-    links: Prisma.$LinkPayload<ExtArgs>[]
-    franchises: Prisma.$FranchisePayload<ExtArgs>[]
-    people: Prisma.$PersonPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1501,11 +1501,11 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  franchises<T extends Prisma.User$franchisesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$franchisesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FranchisePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  links<T extends Prisma.User$linksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$linksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  people<T extends Prisma.User$peopleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$peopleArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PersonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userEntries<T extends Prisma.User$userEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  links<T extends Prisma.User$linksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$linksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  franchises<T extends Prisma.User$franchisesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$franchisesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FranchisePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  people<T extends Prisma.User$peopleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$peopleArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PersonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1954,6 +1954,78 @@ export type User$accountsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 }
 
 /**
+ * User.franchises
+ */
+export type User$franchisesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Franchise
+   */
+  select?: Prisma.FranchiseSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Franchise
+   */
+  omit?: Prisma.FranchiseOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FranchiseInclude<ExtArgs> | null
+  where?: Prisma.FranchiseWhereInput
+  orderBy?: Prisma.FranchiseOrderByWithRelationInput | Prisma.FranchiseOrderByWithRelationInput[]
+  cursor?: Prisma.FranchiseWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FranchiseScalarFieldEnum | Prisma.FranchiseScalarFieldEnum[]
+}
+
+/**
+ * User.links
+ */
+export type User$linksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Link
+   */
+  select?: Prisma.LinkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Link
+   */
+  omit?: Prisma.LinkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LinkInclude<ExtArgs> | null
+  where?: Prisma.LinkWhereInput
+  orderBy?: Prisma.LinkOrderByWithRelationInput | Prisma.LinkOrderByWithRelationInput[]
+  cursor?: Prisma.LinkWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LinkScalarFieldEnum | Prisma.LinkScalarFieldEnum[]
+}
+
+/**
+ * User.people
+ */
+export type User$peopleArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Person
+   */
+  select?: Prisma.PersonSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Person
+   */
+  omit?: Prisma.PersonOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PersonInclude<ExtArgs> | null
+  where?: Prisma.PersonWhereInput
+  orderBy?: Prisma.PersonOrderByWithRelationInput | Prisma.PersonOrderByWithRelationInput[]
+  cursor?: Prisma.PersonWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PersonScalarFieldEnum | Prisma.PersonScalarFieldEnum[]
+}
+
+/**
  * User.sessions
  */
 export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1999,78 +2071,6 @@ export type User$userEntriesArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.UserEntryScalarFieldEnum | Prisma.UserEntryScalarFieldEnum[]
-}
-
-/**
- * User.links
- */
-export type User$linksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Link
-   */
-  select?: Prisma.LinkSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Link
-   */
-  omit?: Prisma.LinkOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.LinkInclude<ExtArgs> | null
-  where?: Prisma.LinkWhereInput
-  orderBy?: Prisma.LinkOrderByWithRelationInput | Prisma.LinkOrderByWithRelationInput[]
-  cursor?: Prisma.LinkWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.LinkScalarFieldEnum | Prisma.LinkScalarFieldEnum[]
-}
-
-/**
- * User.franchises
- */
-export type User$franchisesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Franchise
-   */
-  select?: Prisma.FranchiseSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Franchise
-   */
-  omit?: Prisma.FranchiseOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.FranchiseInclude<ExtArgs> | null
-  where?: Prisma.FranchiseWhereInput
-  orderBy?: Prisma.FranchiseOrderByWithRelationInput | Prisma.FranchiseOrderByWithRelationInput[]
-  cursor?: Prisma.FranchiseWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.FranchiseScalarFieldEnum | Prisma.FranchiseScalarFieldEnum[]
-}
-
-/**
- * User.people
- */
-export type User$peopleArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Person
-   */
-  select?: Prisma.PersonSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Person
-   */
-  omit?: Prisma.PersonOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PersonInclude<ExtArgs> | null
-  where?: Prisma.PersonWhereInput
-  orderBy?: Prisma.PersonOrderByWithRelationInput | Prisma.PersonOrderByWithRelationInput[]
-  cursor?: Prisma.PersonWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.PersonScalarFieldEnum | Prisma.PersonScalarFieldEnum[]
 }
 
 /**
