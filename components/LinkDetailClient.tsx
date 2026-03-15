@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import type { AiringStatus, UserEntry, Person, Franchise, Anime, StreamingLink } from "@/app/generated/prisma";
+import type { AiringStatus, DisplayFormat, Season, UserEntry, Person, Franchise, Anime, StreamingLink } from "@/app/generated/prisma";
 import LinkOverview, { type LinkedAnimeCard } from "./LinkOverview";
 import AnimeEditForm from "./AnimeEditForm";
+import AnimeMetaEdit from "./AnimeMetaEdit";
 import StatusBadge from "./StatusBadge";
 import WhereToWatch from "./WhereToWatch";
 import StreamingAutoRefresh from "./StreamingAutoRefresh";
@@ -23,14 +24,17 @@ type LinkedAnimeDetail = {
     episodesPerSeason: string | null;
     meanScore: number | null;
     airingStatus: AiringStatus;
-    season: string | null;
+    season: Season | null;
     seasonYear: number | null;
-    displayFormat: string;
+    displayFormat: DisplayFormat;
     anilistId: number | null;
     tmdbId: number | null;
     tmdbMediaType: string | null;
     externalUrl: string | null;
     genres: string;
+    startYear: number | null;
+    startMonth: number | null;
+    startDay: number | null;
   };
 };
 
@@ -54,6 +58,8 @@ type Props = {
   streamingCheckedAt: Date | string | null;
   source: string | null;
   lastSyncedAt: Date | string | null;
+  relatedAnimeSlot?: React.ReactNode;
+  streamingLastUpdatedSlot?: React.ReactNode;
 };
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
@@ -64,7 +70,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   NOT_YET_RELEASED: { label: "Not Yet Released",  className: "bg-slate-700/50 text-slate-400 border border-slate-600" },
 };
 
-export default function LinkDetailClient({ link, primaryAnime, people, franchises, streamingLinks, streamingCheckedAt, source, lastSyncedAt }: Props) {
+export default function LinkDetailClient({ link, primaryAnime, people, franchises, streamingLinks, streamingCheckedAt, source, lastSyncedAt, relatedAnimeSlot, streamingLastUpdatedSlot }: Props) {
   const [selectedAnimeId, setSelectedAnimeId] = useState<number | null>(null);
 
   const sorted = [...link.linkedAnime].sort((a, b) => a.order - b.order);
@@ -136,6 +142,8 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
           {/* Where to Watch */}
           <StreamingAutoRefresh animeId={primaryAnime.id} source={source} streamingCheckedAt={streamingCheckedAt} lastSyncedAt={lastSyncedAt} />
           <WhereToWatch animeId={primaryAnime.id} initialLinks={streamingLinks} />
+
+          {relatedAnimeSlot}
 
           {/* Your Review (overview only, link-level) */}
           <div>
@@ -212,12 +220,15 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
             </div>
 
             {/* Synopsis */}
-            {selectedLinked.anime.synopsis && (
-              <div>
-                <h3 className="text-sm font-semibold text-slate-300 mb-2">Synopsis</h3>
-                <p className="text-sm text-slate-400 leading-relaxed line-clamp-6">{selectedLinked.anime.synopsis}</p>
-              </div>
-            )}
+            <div>
+              {selectedLinked.anime.synopsis && (
+                <>
+                  <h3 className="text-sm font-semibold text-slate-300 mb-2">Synopsis</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed line-clamp-6 whitespace-pre-line">{selectedLinked.anime.synopsis.replace(/<br\s*\/?>/gi, '\n').trim()}</p>
+                </>
+              )}
+              <AnimeMetaEdit anime={selectedLinked.anime} />
+            </div>
 
             {/* External links */}
             {(selectedLinked.anime.anilistId || selectedLinked.anime.tmdbId || selectedLinked.anime.externalUrl) && (
@@ -254,6 +265,7 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
           </div>
         )
       )}
+      {streamingLastUpdatedSlot}
     </div>
   );
 }

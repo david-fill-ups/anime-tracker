@@ -4,6 +4,25 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { AiringStatus, Season } from "@/app/generated/prisma";
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  rectSortingStrategy,
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export type LinkedAnimeCard = {
   id: number; // LinkedAnime.id
@@ -20,6 +39,9 @@ export type LinkedAnimeCard = {
     seasonYear: number | null;
     displayFormat: string;
     anilistId: number | null;
+    startYear: number | null;
+    startMonth: number | null;
+    startDay: number | null;
   };
 };
 
@@ -76,6 +98,85 @@ function resultMeta(r: SearchResult) {
   return yearStr + epsStr;
 }
 
+// Shared card visual — used by both SortableAnimeCard and DragOverlay
+function AnimeCardContent({ la, dimmed }: { la: LinkedAnimeCard; dimmed?: boolean }) {
+  const title = la.anime.titleEnglish ?? la.anime.titleRomaji;
+  const statusCfg = STATUS_CONFIG[la.anime.airingStatus] ?? { label: la.anime.airingStatus, className: "text-slate-400" };
+  const seasonStr = la.anime.season && la.anime.seasonYear
+    ? `${la.anime.season.charAt(0) + la.anime.season.slice(1).toLowerCase()} ${la.anime.seasonYear}`
+    : la.anime.seasonYear ? String(la.anime.seasonYear) : null;
+
+  return (
+    <div className={`flex flex-col bg-slate-800 rounded-xl overflow-hidden text-left w-48 ${dimmed ? "opacity-40" : ""}`}>
+      <div className="relative w-48 h-52 bg-slate-700">
+        {la.anime.coverImageUrl ? (
+          <Image src={la.anime.coverImageUrl} alt={title} fill className="object-cover" unoptimized />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs text-center px-2">No cover</div>
+        )}
+      </div>
+      <div className="p-2 space-y-1 flex-1">
+        <p title={title} className="text-xs font-medium text-white leading-tight line-clamp-3">{title}</p>
+        {(() => {
+          if (la.anime.airingStatus === "NOT_YET_RELEASED" && la.anime.startMonth) {
+            const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+            const m = months[la.anime.startMonth - 1];
+            const y = la.anime.startYear ?? la.anime.seasonYear;
+            const label = la.anime.startDay ? `${m} ${la.anime.startDay}, ${y}` : `${m} ${y}`;
+            return <p className="text-xs text-slate-500">{label}</p>;
+          }
+          return seasonStr ? <p className="text-xs text-slate-500">{seasonStr}</p> : null;
+        })()}
+        <div className="flex items-center justify-between gap-1">
+          {la.anime.totalEpisodes && <span className="text-xs text-slate-400">{la.anime.totalEpisodes} eps</span>}
+          {la.anime.meanScore && <span className="text-xs text-slate-400">{la.anime.meanScore}%</span>}
+        </div>
+        <p className={`text-xs ${statusCfg.className}`}>{statusCfg.label}</p>
+      </div>
+    </div>
+  );
+}
+
+type SortableAnimeCardProps = {
+  la: LinkedAnimeCard;
+  isDraggingOverlay?: boolean;
+  removingAnimeId: number | null;
+  onSelect: (animeId: number) => void;
+  onRemove: (animeId: number) => void;
+};
+
+function SortableAnimeCard({ la, removingAnimeId, onSelect, onRemove }: SortableAnimeCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: la.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative flex-shrink-0 group">
+      <button
+        {...attributes}
+        {...listeners}
+        onClick={() => onSelect(la.anime.id)}
+        className={`cursor-grab active:cursor-grabbing select-none hover:brightness-110 transition-[filter] rounded-xl ${removingAnimeId === la.anime.id ? "opacity-40" : ""}`}
+        suppressHydrationWarning
+      >
+        <AnimeCardContent la={la} dimmed={isDragging} />
+      </button>
+      {/* Remove button */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onRemove(la.anime.id); }}
+        disabled={removingAnimeId === la.anime.id}
+        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50"
+        title="Remove anime"
+      >
+        ✕
+      </button>
+    </div>
+  );
+}
+
 export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAnime }: LinkOverviewProps) {
   const router = useRouter();
   const [editingName, setEditingName] = useState(false);
@@ -84,10 +185,15 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
 
   // Local ordered list for optimistic DnD reordering
   const [localAnime, setLocalAnime] = useState(() => [...linkedAnime].sort((a, b) => a.order - b.order));
-  const draggingIdRef = useRef<number | null>(null);
-  const dragOverIdRef = useRef<number | null>(null);
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const preDropOrderRef = useRef<LinkedAnimeCard[]>(localAnime);
 
-  // Sync from props when server data changes (after router.refresh())
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  // Sync from props when server data changes (e.g. after an anime is removed)
   const animeKey = linkedAnime.map((la) => `${la.id}:${la.order}`).join(",");
   useEffect(() => {
     setLocalAnime([...linkedAnime].sort((a, b) => a.order - b.order));
@@ -113,7 +219,8 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
       if (isOnlyAnime) {
         router.push("/");
       } else {
-        router.refresh();
+        const remaining = localAnime.filter((la) => la.anime.id !== animeId);
+        router.push(`/anime/${remaining[0].anime.id}`);
       }
     } finally {
       setRemovingAnimeId(null);
@@ -127,6 +234,9 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
   const [addSearching, setAddSearching] = useState(false);
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualTitle, setManualTitle] = useState("");
+  const [manualEpisodes, setManualEpisodes] = useState("");
 
   async function handleSaveName() {
     setSavingName(true);
@@ -163,7 +273,10 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
         { id: number; title: { english: string | null; romaji: string }; season: string | null; seasonYear: number | null; episodes: number | null; status: AiringStatus }[]
       ] = await Promise.all([libRes.json(), alRes.json()]);
 
-      const libraryResults: LibraryResult[] = lib.map((r) => ({ ...r, source: "library" as const }));
+      const linkedAnimeIds = new Set(localAnime.map((la) => la.anime.id));
+      const libraryResults: LibraryResult[] = lib
+        .map((r) => ({ ...r, source: "library" as const }))
+        .filter((r) => !linkedAnimeIds.has(r.id));
       // Exclude AniList results already linked (library search excludes them, so libAnilistIds
       // won't contain them — use the linked anime prop directly instead).
       const linkedAnilistIds = new Set(linkedAnime.map((la) => la.anime.anilistId).filter(Boolean));
@@ -210,16 +323,66 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
     }
   }
 
+  async function handleManualAdd() {
+    const title = manualTitle.trim();
+    if (!title) return;
+    const eps = manualEpisodes ? parseInt(manualEpisodes, 10) : undefined;
+    setAdding(true);
+    setAddError(null);
+    try {
+      const res = await fetch(`/api/links/${linkId}/anime`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ manual: { title, ...(eps && eps > 0 ? { totalEpisodes: eps } : {}) } }),
+      });
+      if (!res.ok) {
+        const { error: msg } = await res.json();
+        setAddError(msg ?? "Failed to add");
+      } else {
+        setAddOpen(false);
+        setAddQuery("");
+        setAddResults([]);
+        setShowManualForm(false);
+        setManualTitle("");
+        setManualEpisodes("");
+        router.refresh();
+      }
+    } finally {
+      setAdding(false);
+    }
+  }
+
   async function saveOrder(ordered: LinkedAnimeCard[]) {
-    await fetch(`/api/links/${linkId}/order`, {
+    const res = await fetch(`/api/links/${linkId}/order`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ orderedAnimeIds: ordered.map((la) => la.anime.id) }),
     });
-    router.refresh();
+    if (!res.ok) {
+      setLocalAnime(preDropOrderRef.current);
+    } else {
+      router.refresh();
+    }
   }
 
-  const showAddResults = addQuery.trim().length >= 2 && (addSearching || addResults.length > 0);
+  function handleDragStart({ active }: DragStartEvent) {
+    setActiveId(active.id as number);
+    preDropOrderRef.current = localAnime;
+  }
+
+  function handleDragEnd({ active, over }: DragEndEvent) {
+    setActiveId(null);
+    if (!over || active.id === over.id) return;
+    const oldIndex = localAnime.findIndex((la) => la.id === active.id);
+    const newIndex = localAnime.findIndex((la) => la.id === over.id);
+    const reordered = arrayMove(localAnime, oldIndex, newIndex);
+    setLocalAnime(reordered);
+    saveOrder(reordered);
+  }
+
+  const activeAnime = activeId ? localAnime.find((la) => la.id === activeId) ?? null : null;
+
+  const showAddSearch = addQuery.trim().length >= 2;
   const libraryResults = addResults.filter((r): r is LibraryResult => r.source === "library");
   const anilistResults = addResults.filter((r): r is AniListResult => r.source === "anilist");
 
@@ -261,93 +424,45 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
       </div>
 
       {/* Swimlane */}
-      <div className="flex flex-wrap gap-4">
-        {localAnime.map((la) => {
-          const title = la.anime.titleEnglish ?? la.anime.titleRomaji;
-          const statusCfg = STATUS_CONFIG[la.anime.airingStatus] ?? { label: la.anime.airingStatus, className: "text-slate-400" };
-          const seasonStr = la.anime.season && la.anime.seasonYear
-            ? `${la.anime.season.charAt(0) + la.anime.season.slice(1).toLowerCase()} ${la.anime.seasonYear}`
-            : la.anime.seasonYear ? String(la.anime.seasonYear) : null;
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={localAnime.map((la) => la.id)} strategy={rectSortingStrategy}>
+          <div className="flex flex-wrap gap-4">
+            {localAnime.map((la) => (
+              <SortableAnimeCard
+                key={la.id}
+                la={la}
+                removingAnimeId={removingAnimeId}
+                onSelect={onSelectAnime}
+                onRemove={handleRemoveAnime}
+              />
+            ))}
 
-          return (
-            <div
-              key={la.id}
-              className="relative flex-shrink-0 group"
-            >
-              <button
-                draggable
-                onDragStart={(e) => {
-                  draggingIdRef.current = la.id;
-                  e.dataTransfer.effectAllowed = "move";
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.dataTransfer.dropEffect = "move";
-                  if (draggingIdRef.current === null || draggingIdRef.current === la.id) return;
-                  if (dragOverIdRef.current === la.id) return;
-                  dragOverIdRef.current = la.id;
-                  setLocalAnime((prev) => {
-                    const from = prev.findIndex((x) => x.id === draggingIdRef.current);
-                    const to = prev.findIndex((x) => x.id === la.id);
-                    if (from === -1 || to === -1 || from === to) return prev;
-                    const next = [...prev];
-                    const [moved] = next.splice(from, 1);
-                    next.splice(to, 0, moved);
-                    return next;
-                  });
-                }}
-                onDragEnd={() => {
-                  draggingIdRef.current = null;
-                  dragOverIdRef.current = null;
-                  setLocalAnime((current) => {
-                    saveOrder(current);
-                    return current;
-                  });
-                }}
-                onClick={() => onSelectAnime(la.anime.id)}
-                className={`flex flex-col bg-slate-800 rounded-xl overflow-hidden hover:bg-slate-700 transition-colors text-left w-36 cursor-grab active:cursor-grabbing select-none ${removingAnimeId === la.anime.id ? "opacity-40" : ""}`}
-              >
-              <div className="relative w-36 h-52 bg-slate-700">
-                {la.anime.coverImageUrl ? (
-                  <Image src={la.anime.coverImageUrl} alt={title} fill className="object-cover" unoptimized />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs text-center px-2">No cover</div>
-                )}
-              </div>
-              <div className="p-2 space-y-1 flex-1">
-                <p className="text-xs font-medium text-white leading-tight line-clamp-2 group-hover:text-indigo-300 transition-colors">{title}</p>
-                {seasonStr && <p className="text-xs text-slate-500">{seasonStr}</p>}
-                <div className="flex items-center justify-between gap-1">
-                  {la.anime.totalEpisodes && <span className="text-xs text-slate-400">{la.anime.totalEpisodes} eps</span>}
-                  {la.anime.meanScore && <span className="text-xs text-slate-400">{la.anime.meanScore}%</span>}
-                </div>
-                <p className={`text-xs ${statusCfg.className}`}>{statusCfg.label}</p>
-              </div>
-            </button>
-            {/* Remove button */}
+            {/* Add card */}
             <button
-              onClick={(e) => { e.stopPropagation(); handleRemoveAnime(la.anime.id); }}
-              disabled={removingAnimeId === la.anime.id}
-              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 disabled:opacity-50"
-              title="Remove anime"
+              onClick={() => { setAddOpen((o) => !o); setAddQuery(""); setAddResults([]); setAddError(null); }}
+              className="flex flex-col bg-slate-800 border-2 border-dashed border-slate-700 rounded-xl hover:border-indigo-500 transition-colors w-48 flex-shrink-0 items-center justify-center"
+              style={{ minHeight: "264px" }}
+              title="Add linked anime"
             >
-              ✕
+              <span className="text-3xl text-slate-600">+</span>
+              <span className="text-xs text-slate-600 mt-1">Add</span>
             </button>
           </div>
-          );
-        })}
+        </SortableContext>
 
-        {/* Add card */}
-        <button
-          onClick={() => { setAddOpen((o) => !o); setAddQuery(""); setAddResults([]); setAddError(null); }}
-          className="flex flex-col bg-slate-800 border-2 border-dashed border-slate-700 rounded-xl hover:border-indigo-500 transition-colors w-36 flex-shrink-0 items-center justify-center"
-          style={{ minHeight: "264px" }}
-          title="Add linked anime"
-        >
-          <span className="text-3xl text-slate-600">+</span>
-          <span className="text-xs text-slate-600 mt-1">Add</span>
-        </button>
-      </div>
+        <DragOverlay>
+          {activeAnime ? (
+            <div className="rotate-2 shadow-2xl shadow-black/50 rounded-xl">
+              <AnimeCardContent la={activeAnime} />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Inline add search */}
       {addOpen && (
@@ -362,17 +477,16 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
               className="flex-1 text-sm bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500"
             />
             <button
-              onClick={() => { setAddOpen(false); setAddQuery(""); setAddResults([]); }}
+              onClick={() => { setAddOpen(false); setAddQuery(""); setAddResults([]); setShowManualForm(false); setManualTitle(""); setManualEpisodes(""); }}
               className="text-sm text-slate-500 hover:text-slate-300 px-2"
             >
               ✕
             </button>
           </div>
 
-          {showAddResults && (
+          {showAddSearch && addResults.length > 0 && (
             <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-              {addSearching && addResults.length === 0 && <p className="text-xs text-slate-500 px-3 py-2">Searching…</p>}
-              {!addSearching && addResults.length === 0 && <p className="text-xs text-slate-500 px-3 py-2">No results found</p>}
+              {addSearching && <p className="text-xs text-slate-500 px-3 py-2">Searching…</p>}
 
               {libraryResults.length > 0 && (
                 <>
@@ -409,6 +523,56 @@ export default function LinkOverview({ linkId, linkName, linkedAnime, onSelectAn
               )}
 
               {adding && <p className="text-xs text-slate-500 px-3 py-2">Adding…</p>}
+            </div>
+          )}
+
+          {showAddSearch && !showManualForm && (
+            <div className="flex items-center justify-between bg-slate-800 border border-slate-700 rounded-lg px-3 py-2">
+              <span className="text-xs text-slate-500">
+                {addSearching && addResults.length === 0 ? "Searching…" : addResults.length === 0 ? "No results found." : "Not what you're looking for?"}
+              </span>
+              <button
+                onClick={() => { setManualTitle(addQuery.trim()); setShowManualForm(true); }}
+                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+              >
+                + Add manually
+              </button>
+            </div>
+          )}
+
+          {showAddSearch && showManualForm && (
+            <div className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-3 space-y-2">
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Manual Entry</p>
+              <input
+                type="text"
+                value={manualTitle}
+                onChange={(e) => setManualTitle(e.target.value)}
+                placeholder="Title"
+                className="w-full text-sm bg-slate-700 border border-slate-600 text-white placeholder-slate-500 rounded px-2 py-1 focus:outline-none focus:border-indigo-500"
+              />
+              <input
+                type="number"
+                value={manualEpisodes}
+                onChange={(e) => setManualEpisodes(e.target.value)}
+                placeholder="Episodes (optional)"
+                min={1}
+                className="w-full text-sm bg-slate-700 border border-slate-600 text-white placeholder-slate-500 rounded px-2 py-1 focus:outline-none focus:border-indigo-500"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleManualAdd}
+                  disabled={!manualTitle.trim() || adding}
+                  className="text-sm bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded px-3 py-1 transition-colors"
+                >
+                  {adding ? "Adding…" : "Add"}
+                </button>
+                <button
+                  onClick={() => setShowManualForm(false)}
+                  className="text-sm text-slate-500 hover:text-slate-300 px-2"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
 

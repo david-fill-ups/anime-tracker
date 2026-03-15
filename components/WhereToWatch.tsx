@@ -12,6 +12,38 @@ type ServiceMeta = {
   label: string;
 };
 
+const ANDROID_PACKAGES: Record<string, string> = {
+  NETFLIX:      "com.netflix.mediaclient",
+  HULU:         "com.hulu.plus",
+  DISNEY_PLUS:  "com.disney.disneyplus",
+  HBO:          "com.wbd.stream",
+  CRUNCHYROLL:  "com.crunchyroll.crunchyroid",
+  AMAZON_PRIME: "com.amazon.avod.thirdpartyclient",
+  HIDIVE:       "com.hidive.hidiveapp",
+};
+
+function buildIntentUrl(webUrl: string, androidPackage: string): string {
+  const u = new URL(webUrl);
+  const host = u.host + u.pathname + u.search;
+  const fallback = encodeURIComponent(webUrl);
+  return `intent://${host}#Intent;scheme=https;package=${androidPackage};S.browser_fallback_url=${fallback};end`;
+}
+
+const SERVICE_ORDER: Record<string, number> = {
+  CRUNCHYROLL: 0,
+  NETFLIX: 1,
+  HULU: 2,
+};
+
+function sortLinks(links: StreamingLink[]): StreamingLink[] {
+  return [...links].sort((a, b) => {
+    const ao = SERVICE_ORDER[a.service] ?? 99;
+    const bo = SERVICE_ORDER[b.service] ?? 99;
+    if (ao !== bo) return ao - bo;
+    return a.service.localeCompare(b.service);
+  });
+}
+
 const SERVICES: Record<string, ServiceMeta> = {
   NETFLIX: { name: "Netflix", bg: "#E50914", text: "#ffffff", label: "N" },
   HULU: { name: "Hulu", bg: "#1CE783", text: "#000000", label: "hulu" },
@@ -35,6 +67,7 @@ function ServiceIcon({ service }: { service: string }) {
   );
 }
 
+
 type Props = {
   animeId: number;
   initialLinks: StreamingLink[];
@@ -42,17 +75,25 @@ type Props = {
 
 export default function WhereToWatch({ animeId, initialLinks }: Props) {
   const router = useRouter();
-  const [links, setLinks] = useState<StreamingLink[]>(initialLinks);
+  const [links, setLinks] = useState<StreamingLink[]>(() => sortLinks(initialLinks));
 
   useEffect(() => {
-    setLinks(initialLinks);
+    setLinks(sortLinks(initialLinks));
   }, [initialLinks]);
+
+  const [platform, setPlatform] = useState<"ios" | "android" | "desktop">("desktop");
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    if (/iPad|iPhone|iPod/.test(ua)) setPlatform("ios");
+    else if (/Android/.test(ua)) setPlatform("android");
+  }, []);
+
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ service: "", url: "" });
   const [saving, setSaving] = useState(false);
   const [removing, setRemoving] = useState<number | null>(null);
   const [error, setError] = useState("");
-
   const usedServices = new Set(links.map((l) => l.service));
   const availableServices = Object.keys(SERVICES).filter((s) => !usedServices.has(s as never));
 
@@ -70,7 +111,7 @@ export default function WhereToWatch({ animeId, initialLinks }: Props) {
     });
     if (res.ok) {
       const newLink: StreamingLink = await res.json();
-      setLinks((prev) => [...prev, newLink].sort((a, b) => a.service.localeCompare(b.service)));
+      setLinks((prev) => sortLinks([...prev, newLink]));
       setForm({ service: "", url: "" });
       setAdding(false);
       router.refresh();
@@ -112,11 +153,14 @@ export default function WhereToWatch({ animeId, initialLinks }: Props) {
         <div className="flex flex-wrap gap-3">
           {links.map((link) => {
             const meta = SERVICES[link.service];
+            const pkg = platform === "android" ? ANDROID_PACKAGES[link.service] : undefined;
+            const href = pkg ? buildIntentUrl(link.url, pkg) : link.url;
+            const target = platform === "desktop" ? "_blank" : "_self";
             return (
               <div key={link.id} className="group relative">
                 <a
-                  href={link.url}
-                  target="_blank"
+                  href={href}
+                  target={target}
                   rel="noopener noreferrer"
                   title={meta?.name ?? link.service}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-700 hover:border-slate-500 bg-slate-800 hover:bg-slate-750 transition-colors"
@@ -177,6 +221,7 @@ export default function WhereToWatch({ animeId, initialLinks }: Props) {
           </div>
         </div>
       )}
+
     </div>
   );
 }

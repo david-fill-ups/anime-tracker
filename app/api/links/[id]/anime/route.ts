@@ -11,6 +11,7 @@ type Params = { params: Promise<{ id: string }> };
 const AddAnimeSchema = z.union([
   z.object({ animeId: z.number().int().positive() }),
   z.object({ anilistId: z.number().int().positive() }),
+  z.object({ manual: z.object({ title: z.string().min(1).max(500), totalEpisodes: z.number().int().positive().optional() }) }),
 ]);
 
 // POST { animeId } or { anilistId } — add an anime to this link
@@ -38,13 +39,15 @@ export async function POST(req: NextRequest, { params }: Params) {
     let anime =
       "animeId" in body.data
         ? await db.anime.findUnique({ where: { id: body.data.animeId } })
-        : await db.anime.findUnique({ where: { anilistId: body.data.anilistId } });
+        : "anilistId" in body.data
+        ? await db.anime.findUnique({ where: { anilistId: body.data.anilistId } })
+        : null;
 
     if (!anime && "animeId" in body.data) {
       return NextResponse.json({ error: "Anime not found" }, { status: 404 });
     }
 
-    if (!anime) {
+    if (!anime && "anilistId" in body.data) {
       const anilistId = (body.data as { anilistId: number }).anilistId;
       const data = await fetchAniListById(anilistId);
       if (!data) {
@@ -69,6 +72,18 @@ export async function POST(req: NextRequest, { params }: Params) {
           seasonYear: data.seasonYear ?? null,
           meanScore: data.meanScore ?? null,
           lastSyncedAt: new Date(),
+        },
+      });
+    }
+
+    if (!anime && "manual" in body.data) {
+      const { title, totalEpisodes } = body.data.manual;
+      anime = await db.anime.create({
+        data: {
+          source: "MANUAL",
+          titleRomaji: title,
+          airingStatus: "FINISHED",
+          totalEpisodes: totalEpisodes ?? null,
         },
       });
     }

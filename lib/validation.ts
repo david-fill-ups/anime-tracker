@@ -8,10 +8,10 @@ export const URLIdSchema = z.coerce.number().int().positive();
 // ── Enum schemas ──────────────────────────────────────────────────────────────
 
 export const WatchStatusSchema = z.enum([
+  "PLAN_TO_WATCH",
   "WATCHING",
   "COMPLETED",
   "DROPPED",
-  "PLAN_TO_WATCH",
   "NOT_INTERESTED",
 ]);
 

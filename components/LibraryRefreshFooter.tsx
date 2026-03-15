@@ -40,7 +40,7 @@ export default function LibraryRefreshFooter({ lastSyncedAt }: { lastSyncedAt: s
 
   return (
     <div className="mt-8 flex items-center gap-2 text-xs text-slate-600">
-      <span>Last updated {formatRelative(lastSyncedAt)}</span>
+      <span suppressHydrationWarning>Last updated {formatRelative(lastSyncedAt)}</span>
       <button
         onClick={handleRefresh}
         disabled={refreshing}

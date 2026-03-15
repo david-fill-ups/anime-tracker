@@ -7,6 +7,201 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String      @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  accounts      Account[]
+  franchises    Franchise[]
+  links         Link[]
+  people        Person[]
+  sessions      Session[]
+  userEntries   UserEntry[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Person {
+  id                  Int         @id @default(autoincrement())
+  name                String
+  userId              String
+  createdAt           DateTime    @default(now())
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries             UserEntry[] @relation("Recommender")
+  watchContextEntries UserEntry[] @relation("WatchContextPerson")
+
+  @@unique([name, userId])
+}
+
+model Franchise {
+  id          Int              @id @default(autoincrement())
+  name        String
+  userId      String
+  description String?
+  createdAt   DateTime         @default(now())
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries     FranchiseEntry[]
+
+  @@unique([name, userId])
+}
+
+model FranchiseEntry {
+  id          Int                @id @default(autoincrement())
+  franchiseId Int
+  animeId     Int
+  order       Int
+  entryType   FranchiseEntryType @default(MAIN)
+  anime       Anime              @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  franchise   Franchise          @relation(fields: [franchiseId], references: [id], onDelete: Cascade)
+
+  @@unique([franchiseId, animeId])
+  @@unique([franchiseId, order])
+}
+
+model Studio {
+  id              Int           @id @default(autoincrement())
+  name            String        @unique
+  anilistStudioId Int?          @unique
+  animeStudios    AnimeStudio[]
+}
+
+model AnimeStudio {
+  animeId      Int
+  studioId     Int
+  isMainStudio Boolean @default(false)
+  anime        Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  studio       Studio  @relation(fields: [studioId], references: [id])
+
+  @@id([animeId, studioId])
+}
+
+model Anime {
+  id                 Int              @id @default(autoincrement())
+  anilistId          Int?             @unique
+  source             AnimeSource      @default(ANILIST)
+  titleEnglish       String?
+  titleRomaji        String
+  titleNative        String?
+  coverImageUrl      String?
+  synopsis           String?
+  genres             String           @default("[]")
+  totalEpisodes      Int?
+  totalSeasons       Int?
+  episodesPerSeason  String?
+  durationMins       Int?
+  airingStatus       AiringStatus     @default(FINISHED)
+  displayFormat      DisplayFormat    @default(SERIES)
+  sourceMaterial     SourceMaterial?
+  season             Season?
+  seasonYear         Int?
+  meanScore          Int?
+  nextAiringEp       Int?
+  nextAiringAt       DateTime?
+  lastSyncedAt       DateTime?
+  tmdbId             Int?
+  tmdbMediaType      String?
+  externalUrl        String?
+  streamingCheckedAt DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  startDay           Int?
+  startMonth         Int?
+  startYear          Int?
+  animeStudios       AnimeStudio[]
+  franchiseEntries   FranchiseEntry[]
+  linkedIn           LinkedAnime[]
+  streamingLinks     StreamingLink[]
+}
+
+model Link {
+  id          Int           @id @default(autoincrement())
+  name        String?
+  userId      String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  linkedAnime LinkedAnime[]
+  userEntry   UserEntry?
+}
+
+model LinkedAnime {
+  id      Int   @id @default(autoincrement())
+  linkId  Int
+  animeId Int
+  order   Int   @default(0)
+  anime   Anime @relation(fields: [animeId], references: [id])
+  link    Link  @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@unique([linkId, animeId])
+}
+
+model StreamingLink {
+  id      Int              @id @default(autoincrement())
+  animeId Int
+  service StreamingService
+  url     String
+  anime   Anime            @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([animeId, service])
+}
+
+model UserEntry {
+  id                   Int            @id @default(autoincrement())
+  userId               String
+  watchStatus          WatchStatus    @default(PLAN_TO_WATCH)
+  currentEpisode       Int            @default(0)
+  score                Float?
+  notes                String?
+  watchContextPersonId Int?
+  recommenderId        Int?
+  startedAt            DateTime?
+  completedAt          DateTime?
+  verified             Boolean        @default(false)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  discoverySource      String?
+  discoveryType        DiscoveryType?
+  linkId               Int?           @unique
+  link                 Link?          @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  recommender          Person?        @relation("Recommender", fields: [recommenderId], references: [id])
+  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  watchContextPerson   Person?        @relation("WatchContextPerson", fields: [watchContextPersonId], references: [id])
+}
+
 enum AnimeSource {
   ANILIST
   MANUAL
@@ -72,201 +267,4 @@ enum DiscoveryType {
   PLATFORM
   OTHER
   UNKNOWN
-}
-
-// ── Auth.js required models ──────────────────────────────────────────────────
-
-model User {
-  id            String      @id @default(cuid())
-  name          String?
-  email         String      @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  userEntries   UserEntry[]
-  links         Link[]
-  franchises    Franchise[]
-  people        Person[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-}
-
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@id([identifier, token])
-}
-
-// ── App models ───────────────────────────────────────────────────────────────
-
-model Person {
-  id                  Int         @id @default(autoincrement())
-  name                String
-  userId              String
-  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  entries             UserEntry[] @relation("Recommender")
-  watchContextEntries UserEntry[] @relation("WatchContextPerson")
-  createdAt           DateTime    @default(now())
-
-  @@unique([name, userId])
-}
-
-model Franchise {
-  id          Int              @id @default(autoincrement())
-  name        String
-  userId      String
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  description String?
-  entries     FranchiseEntry[]
-  createdAt   DateTime         @default(now())
-
-  @@unique([name, userId])
-}
-
-model FranchiseEntry {
-  id          Int                @id @default(autoincrement())
-  franchise   Franchise          @relation(fields: [franchiseId], references: [id], onDelete: Cascade)
-  franchiseId Int
-  anime       Anime              @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  animeId     Int
-  order       Int
-  entryType   FranchiseEntryType @default(MAIN)
-
-  @@unique([franchiseId, animeId])
-  @@unique([franchiseId, order])
-}
-
-model Studio {
-  id              Int           @id @default(autoincrement())
-  name            String        @unique
-  anilistStudioId Int?          @unique
-  animeStudios    AnimeStudio[]
-}
-
-model AnimeStudio {
-  anime        Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  animeId      Int
-  studio       Studio  @relation(fields: [studioId], references: [id])
-  studioId     Int
-  isMainStudio Boolean @default(false)
-
-  @@id([animeId, studioId])
-}
-
-model Anime {
-  id             Int            @id @default(autoincrement())
-  anilistId      Int?           @unique
-  source         AnimeSource    @default(ANILIST)
-  titleEnglish   String?
-  titleRomaji    String
-  titleNative    String?
-  coverImageUrl  String?
-  synopsis       String?
-  genres         String         @default("[]") // stored as JSON array string
-  totalEpisodes     Int?
-  totalSeasons      Int?
-  episodesPerSeason String? // JSON array e.g. [13,10,13,14,12]
-  durationMins   Int?
-  airingStatus   AiringStatus   @default(FINISHED)
-  displayFormat  DisplayFormat  @default(SERIES)
-  sourceMaterial SourceMaterial?
-  season         Season?
-  seasonYear     Int?
-  meanScore      Int?           // AniList community score 0-100
-  nextAiringEp   Int?           // next episode number (RELEASING shows)
-  nextAiringAt   DateTime?      // timestamp of next episode
-  lastSyncedAt       DateTime?
-  tmdbId             Int?
-  tmdbMediaType      String?     // "tv" or "movie"
-  externalUrl        String?     // custom link for manually-added anime (e.g. TMDB)
-  streamingCheckedAt DateTime?
-  createdAt          DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-
-  franchiseEntries FranchiseEntry[]
-  animeStudios     AnimeStudio[]
-  streamingLinks   StreamingLink[]
-  linkedIn         LinkedAnime[]
-}
-
-model Link {
-  id          Int           @id @default(autoincrement())
-  name        String?
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  linkedAnime LinkedAnime[]
-  userEntry   UserEntry?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-}
-
-model LinkedAnime {
-  id      Int   @id @default(autoincrement())
-  linkId  Int
-  link    Link  @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  animeId Int
-  anime   Anime @relation(fields: [animeId], references: [id])
-  order   Int   @default(0)
-
-  @@unique([linkId, animeId])
-}
-
-model StreamingLink {
-  id      Int              @id @default(autoincrement())
-  anime   Anime            @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  animeId Int
-  service StreamingService
-  url     String
-
-  @@unique([animeId, service])
-}
-
-model UserEntry {
-  id             Int          @id @default(autoincrement())
-  link           Link?        @relation(fields: [linkId], references: [id], onDelete: Cascade)
-  linkId         Int?         @unique
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  watchStatus    WatchStatus  @default(PLAN_TO_WATCH)
-  currentEpisode Int          @default(0)
-  score          Float?       // 1-10, user's personal rating
-  notes          String?
-  watchContextPerson   Person?      @relation("WatchContextPerson", fields: [watchContextPersonId], references: [id])
-  watchContextPersonId Int?
-  recommender          Person?      @relation("Recommender", fields: [recommenderId], references: [id])
-  recommenderId        Int?
-  discoveryType        DiscoveryType?
-  discoverySource      String?
-  startedAt      DateTime?
-  completedAt    DateTime?
-  verified       Boolean      @default(false) // TODO[TEMP]: remove after data review
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
 }

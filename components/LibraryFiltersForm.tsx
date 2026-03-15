@@ -146,6 +146,7 @@ function TagSelect({
 // ── Main component ─────────────────────────────────────────────────────────────
 
 const WATCH_STATUSES: { value: WatchStatus; label: string; muted?: boolean }[] = [
+  { value: "PLAN_TO_WATCH", label: "Plan to Watch" },
   { value: "WATCHING", label: "Watching" },
   { value: "COMPLETED", label: "Completed" },
   { value: "DROPPED", label: "Dropped" },

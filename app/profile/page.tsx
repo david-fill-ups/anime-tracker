@@ -28,6 +28,19 @@ export default async function ProfilePage() {
       </div>
 
       <ProfileActions />
+
+      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-slate-300 mb-1">API Reference</h3>
+        <p className="text-xs text-slate-500 mb-3">
+          Browse the full REST API — schemas stay in sync with the codebase automatically.
+        </p>
+        <a
+          href="/docs"
+          className="inline-block px-4 py-2 rounded-md text-sm font-medium bg-slate-800 hover:bg-slate-700 text-white transition-colors"
+        >
+          View API Docs
+        </a>
+      </div>
     </div>
   );
 }

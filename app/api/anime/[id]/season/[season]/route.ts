@@ -28,26 +28,29 @@ export async function GET(req: NextRequest, { params }: Params) {
       return NextResponse.json({ episodes: [] });
     }
 
-    let episodes = await fetchSeasonEpisodes(anime.tmdbId, seasonParsed.data, idParsed.data);
+    let episodes: Array<{ number: number; name: string }> = [];
 
-    // If direct fetch failed, try title search for a series-level TMDB entry
-    if (episodes.length === 0 && seasonParsed.data > 1) {
-      const title = anime.titleEnglish ?? anime.titleRomaji;
-      if (title) {
-        const match = await findTmdbEntry(title, "tv", null);
-        if (match && match.tmdbId !== anime.tmdbId) {
-          episodes = await fetchSeasonEpisodes(match.tmdbId, seasonParsed.data);
-          if (episodes.length === 0 && seasonParsed.data > 1) {
-            episodes = await fetchSeasonEpisodes(match.tmdbId, 1);
+    if (hasOffsetParams) {
+      // Multi-link mode: virtual season number ≠ TMDB season number, so skip the direct
+      // season-number fetch (it would return wrong episodes) and go straight to offset walk.
+      episodes = await fetchEpisodesAtOffset(anime.tmdbId, episodeOffset, episodeCount);
+    } else {
+      // Standalone / single-season mode: use the season number directly.
+      episodes = await fetchSeasonEpisodes(anime.tmdbId, seasonParsed.data, idParsed.data);
+
+      // If direct fetch failed, try title search for a series-level TMDB entry
+      if (episodes.length === 0 && seasonParsed.data > 1) {
+        const title = anime.titleEnglish ?? anime.titleRomaji;
+        if (title) {
+          const match = await findTmdbEntry(title, "tv", null);
+          if (match && match.tmdbId !== anime.tmdbId) {
+            episodes = await fetchSeasonEpisodes(match.tmdbId, seasonParsed.data);
+            if (episodes.length === 0 && seasonParsed.data > 1) {
+              episodes = await fetchSeasonEpisodes(match.tmdbId, 1);
+            }
           }
         }
       }
-    }
-
-    // If still empty and the caller provided offset/count, walk TMDB season structure
-    // to find the right season and slice (handles multi-link anime where virtual season ≠ TMDB season)
-    if (episodes.length === 0 && hasOffsetParams) {
-      episodes = await fetchEpisodesAtOffset(anime.tmdbId, episodeOffset, episodeCount);
     }
 
     return NextResponse.json({ episodes });

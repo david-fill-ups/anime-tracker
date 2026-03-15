@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import type { StreamingService } from "@/app/generated/prisma";
+import { fetchAniListStreamingLinks } from "@/lib/anilist";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -432,6 +433,21 @@ export async function refreshStreamingForAnime(animeId: number): Promise<void> {
       update: { url },
       create: { animeId, service, url },
     });
+  }
+
+  // Supplement with AniList streaming links (fills gaps TMDB misses, e.g. HiDive, Crunchyroll)
+  if (anime.anilistId) {
+    const anilistLinks = await fetchAniListStreamingLinks(anime.anilistId);
+    console.log(
+      `[anilist] Found ${anilistLinks.size} streaming link(s) for anime ${animeId}: ${[...anilistLinks.keys()].join(", ") || "none"}`
+    );
+    for (const [service, url] of anilistLinks) {
+      await db.streamingLink.upsert({
+        where: { animeId_service: { animeId, service } },
+        update: {}, // don't overwrite TMDB-provided links
+        create: { animeId, service, url },
+      });
+    }
   }
 
   // Always stamp the check timestamp

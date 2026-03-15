@@ -140,7 +140,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
   const [externalUrl, setExternalUrl] = useState(anime.externalUrl ?? "");
 
   const [form, setForm] = useState({
-    watchStatus: entry?.watchStatus ?? "RECOMMENDED",
+    watchStatus: entry?.watchStatus ?? "PLAN_TO_WATCH",
     currentEpisode: String(initFlat),
     currentSeason: String(initSE.season),
     currentEpisodeInSeason: String(initSE.episode),
@@ -317,21 +317,37 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
           <label className="block text-xs text-slate-400 mb-1">Watch Status</label>
           <select
             value={form.watchStatus}
-            onChange={(e) => { set("watchStatus", e.target.value); if (e.target.value !== "RECOMMENDED") save({ watchStatus: e.target.value as typeof form.watchStatus }); }}
+            onChange={(e) => {
+              const newStatus = e.target.value;
+              if (newStatus === "PLAN_TO_WATCH") {
+                const episodeFlat = useSeasonDropdowns
+                  ? seasonToFlat(Number(form.currentSeason), Number(form.currentEpisodeInSeason))
+                  : Number(form.currentEpisode);
+                if (episodeFlat > 0) {
+                  if (!confirm("Changing to Plan to Watch will clear your episode progress. Continue?")) return;
+                  const cleared = { watchStatus: "PLAN_TO_WATCH" as const, currentEpisode: "0", currentSeason: "1", currentEpisodeInSeason: "0" };
+                  setForm((f) => ({ ...f, ...cleared }));
+                  save(cleared);
+                  return;
+                }
+              }
+              set("watchStatus", newStatus);
+              save({ watchStatus: newStatus as typeof form.watchStatus });
+            }}
             className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
           >
-            {!entry && <option value="RECOMMENDED">Recommended</option>}
+            <option value="PLAN_TO_WATCH">Plan to Watch</option>
             <option value="WATCHING">Watching</option>
             <option value="COMPLETED" disabled={!canBeCompleted}>
               {canBeCompleted ? "Completed" : "Completed (series not finished)"}
             </option>
             <option value="DROPPED">Dropped</option>
-            <option value="PLAN_TO_WATCH">Plan to Watch</option>
+            <option value="NOT_INTERESTED">Not Interested</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-xs text-slate-400 mb-1">Episode Progress</label>
+          <label className="block text-xs text-slate-400 mb-1">Last Completed Episode</label>
           {isCompleted ? (
             <div className="w-full bg-slate-800/50 text-slate-500 border border-slate-700 rounded-md px-3 py-2 text-sm cursor-not-allowed">
               {totalEpisodesCount
@@ -360,10 +376,17 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
               </select>
               <select
                 value={form.currentEpisodeInSeason}
-                onChange={(e) => { set("currentEpisodeInSeason", e.target.value); save({ currentEpisodeInSeason: e.target.value }); }}
+                onChange={(e) => {
+                  const updates: Partial<typeof form> = { currentEpisodeInSeason: e.target.value };
+                  if (Number(e.target.value) > 0 && form.watchStatus === "PLAN_TO_WATCH") {
+                    updates.watchStatus = "WATCHING";
+                  }
+                  setForm((f) => ({ ...f, ...updates }));
+                  save(updates);
+                }}
                 className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
               >
-                <option value={0}>Not started</option>
+                <option value={0}>None</option>
                 {Array.from({ length: getEpsForSeason(Number(form.currentSeason)) }, (_, i) => i + 1).map((ep) => {
                   const title = episodeNames[Number(form.currentSeason)]?.find((e) => e.number === ep)?.name;
                   return (
@@ -381,7 +404,14 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
               max={anime.totalEpisodes ?? undefined}
               value={form.currentEpisode}
               onChange={(e) => set("currentEpisode", e.target.value)}
-              onBlur={() => save()}
+              onBlur={() => {
+                const updates: Partial<typeof form> = {};
+                if (Number(form.currentEpisode) > 0 && form.watchStatus === "PLAN_TO_WATCH") {
+                  updates.watchStatus = "WATCHING";
+                  setForm((f) => ({ ...f, ...updates }));
+                }
+                save(updates);
+              }}
               className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
             />
           )}
@@ -531,6 +561,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
               <button
                 onClick={() => removeFromFranchise(fe.id)}
                 className="text-slate-600 hover:text-red-400 text-sm"
+                suppressHydrationWarning
               >
                 ✕
               </button>
@@ -582,6 +613,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
           onClick={deleteAnime}
           disabled={deleting}
           className="ml-auto px-4 py-2 text-sm text-red-400 hover:text-red-300 border border-red-900 hover:border-red-700 rounded-md transition-colors disabled:opacity-50"
+          suppressHydrationWarning
         >
           Remove
         </button>

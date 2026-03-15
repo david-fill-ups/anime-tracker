@@ -38,9 +38,15 @@ export const LINKED_ANIME_SELECT = {
   totalSeasons: true,
   episodesPerSeason: true,
   tmdbId: true,
+  tmdbMediaType: true,
   airingStatus: true,
   meanScore: true,
   synopsis: true,
   displayFormat: true,
+  externalUrl: true,
+  genres: true,
+  startYear: true,
+  startMonth: true,
+  startDay: true,
 } as const;
 

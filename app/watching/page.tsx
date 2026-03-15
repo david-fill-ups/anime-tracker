@@ -149,7 +149,14 @@ export default async function WatchListPage() {
 
       {/* Catch Up section */}
       <section className="space-y-3">
-        <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Catch Up</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wide">Catch Up</h3>
+          {catchUpItems.reduce((sum, i) => sum + (i.behind ?? 0), 0) > 0 && (
+            <span className="text-xs font-medium text-amber-400 bg-amber-900/30 border border-amber-800/50 px-2 py-0.5 rounded-full">
+              {catchUpItems.reduce((sum, i) => sum + (i.behind ?? 0), 0)} episodes behind
+            </span>
+          )}
+        </div>
         {catchUpItems.length === 0 ? (
           <p className="text-slate-500 text-sm py-4 text-center">You&apos;re all caught up!</p>
         ) : (

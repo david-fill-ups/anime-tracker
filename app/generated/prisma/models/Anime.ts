@@ -35,6 +35,9 @@ export type AnimeAvgAggregateOutputType = {
   seasonYear: number | null
   meanScore: number | null
   nextAiringEp: number | null
+  startYear: number | null
+  startMonth: number | null
+  startDay: number | null
   tmdbId: number | null
 }
 
@@ -47,6 +50,9 @@ export type AnimeSumAggregateOutputType = {
   seasonYear: number | null
   meanScore: number | null
   nextAiringEp: number | null
+  startYear: number | null
+  startMonth: number | null
+  startDay: number | null
   tmdbId: number | null
 }
 
@@ -72,6 +78,9 @@ export type AnimeMinAggregateOutputType = {
   meanScore: number | null
   nextAiringEp: number | null
   nextAiringAt: Date | null
+  startYear: number | null
+  startMonth: number | null
+  startDay: number | null
   lastSyncedAt: Date | null
   tmdbId: number | null
   tmdbMediaType: string | null
@@ -103,6 +112,9 @@ export type AnimeMaxAggregateOutputType = {
   meanScore: number | null
   nextAiringEp: number | null
   nextAiringAt: Date | null
+  startYear: number | null
+  startMonth: number | null
+  startDay: number | null
   lastSyncedAt: Date | null
   tmdbId: number | null
   tmdbMediaType: string | null
@@ -134,6 +146,9 @@ export type AnimeCountAggregateOutputType = {
   meanScore: number
   nextAiringEp: number
   nextAiringAt: number
+  startYear: number
+  startMonth: number
+  startDay: number
   lastSyncedAt: number
   tmdbId: number
   tmdbMediaType: number
@@ -154,6 +169,9 @@ export type AnimeAvgAggregateInputType = {
   seasonYear?: true
   meanScore?: true
   nextAiringEp?: true
+  startYear?: true
+  startMonth?: true
+  startDay?: true
   tmdbId?: true
 }
 
@@ -166,6 +184,9 @@ export type AnimeSumAggregateInputType = {
   seasonYear?: true
   meanScore?: true
   nextAiringEp?: true
+  startYear?: true
+  startMonth?: true
+  startDay?: true
   tmdbId?: true
 }
 
@@ -191,6 +212,9 @@ export type AnimeMinAggregateInputType = {
   meanScore?: true
   nextAiringEp?: true
   nextAiringAt?: true
+  startYear?: true
+  startMonth?: true
+  startDay?: true
   lastSyncedAt?: true
   tmdbId?: true
   tmdbMediaType?: true
@@ -222,6 +246,9 @@ export type AnimeMaxAggregateInputType = {
   meanScore?: true
   nextAiringEp?: true
   nextAiringAt?: true
+  startYear?: true
+  startMonth?: true
+  startDay?: true
   lastSyncedAt?: true
   tmdbId?: true
   tmdbMediaType?: true
@@ -253,6 +280,9 @@ export type AnimeCountAggregateInputType = {
   meanScore?: true
   nextAiringEp?: true
   nextAiringAt?: true
+  startYear?: true
+  startMonth?: true
+  startDay?: true
   lastSyncedAt?: true
   tmdbId?: true
   tmdbMediaType?: true
@@ -371,6 +401,9 @@ export type AnimeGroupByOutputType = {
   meanScore: number | null
   nextAiringEp: number | null
   nextAiringAt: Date | null
+  startYear: number | null
+  startMonth: number | null
+  startDay: number | null
   lastSyncedAt: Date | null
   tmdbId: number | null
   tmdbMediaType: string | null
@@ -425,6 +458,9 @@ export type AnimeWhereInput = {
   meanScore?: Prisma.IntNullableFilter<"Anime"> | number | null
   nextAiringEp?: Prisma.IntNullableFilter<"Anime"> | number | null
   nextAiringAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
+  startYear?: Prisma.IntNullableFilter<"Anime"> | number | null
+  startMonth?: Prisma.IntNullableFilter<"Anime"> | number | null
+  startDay?: Prisma.IntNullableFilter<"Anime"> | number | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
   tmdbId?: Prisma.IntNullableFilter<"Anime"> | number | null
   tmdbMediaType?: Prisma.StringNullableFilter<"Anime"> | string | null
@@ -460,6 +496,9 @@ export type AnimeOrderByWithRelationInput = {
   meanScore?: Prisma.SortOrderInput | Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrderInput | Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  startYear?: Prisma.SortOrderInput | Prisma.SortOrder
+  startMonth?: Prisma.SortOrderInput | Prisma.SortOrder
+  startDay?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tmdbId?: Prisma.SortOrderInput | Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -498,6 +537,9 @@ export type AnimeWhereUniqueInput = Prisma.AtLeast<{
   meanScore?: Prisma.IntNullableFilter<"Anime"> | number | null
   nextAiringEp?: Prisma.IntNullableFilter<"Anime"> | number | null
   nextAiringAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
+  startYear?: Prisma.IntNullableFilter<"Anime"> | number | null
+  startMonth?: Prisma.IntNullableFilter<"Anime"> | number | null
+  startDay?: Prisma.IntNullableFilter<"Anime"> | number | null
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"Anime"> | Date | string | null
   tmdbId?: Prisma.IntNullableFilter<"Anime"> | number | null
   tmdbMediaType?: Prisma.StringNullableFilter<"Anime"> | string | null
@@ -533,6 +575,9 @@ export type AnimeOrderByWithAggregationInput = {
   meanScore?: Prisma.SortOrderInput | Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrderInput | Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  startYear?: Prisma.SortOrderInput | Prisma.SortOrder
+  startMonth?: Prisma.SortOrderInput | Prisma.SortOrder
+  startDay?: Prisma.SortOrderInput | Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tmdbId?: Prisma.SortOrderInput | Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -572,6 +617,9 @@ export type AnimeScalarWhereWithAggregatesInput = {
   meanScore?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
   nextAiringEp?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
   nextAiringAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Anime"> | Date | string | null
+  startYear?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
+  startMonth?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
+  startDay?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
   lastSyncedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Anime"> | Date | string | null
   tmdbId?: Prisma.IntNullableWithAggregatesFilter<"Anime"> | number | null
   tmdbMediaType?: Prisma.StringNullableWithAggregatesFilter<"Anime"> | string | null
@@ -602,6 +650,9 @@ export type AnimeCreateInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -637,6 +688,9 @@ export type AnimeUncheckedCreateInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -671,6 +725,9 @@ export type AnimeUpdateInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -706,6 +763,9 @@ export type AnimeUncheckedUpdateInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -741,6 +801,9 @@ export type AnimeCreateManyInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -771,6 +834,9 @@ export type AnimeUpdateManyMutationInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -802,6 +868,9 @@ export type AnimeUncheckedUpdateManyInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -838,6 +907,9 @@ export type AnimeCountOrderByAggregateInput = {
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrder
@@ -856,6 +928,9 @@ export type AnimeAvgOrderByAggregateInput = {
   seasonYear?: Prisma.SortOrder
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
 }
 
@@ -881,6 +956,9 @@ export type AnimeMaxOrderByAggregateInput = {
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrder
@@ -912,6 +990,9 @@ export type AnimeMinOrderByAggregateInput = {
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
   nextAiringAt?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
   tmdbMediaType?: Prisma.SortOrder
@@ -930,6 +1011,9 @@ export type AnimeSumOrderByAggregateInput = {
   seasonYear?: Prisma.SortOrder
   meanScore?: Prisma.SortOrder
   nextAiringEp?: Prisma.SortOrder
+  startYear?: Prisma.SortOrder
+  startMonth?: Prisma.SortOrder
+  startDay?: Prisma.SortOrder
   tmdbId?: Prisma.SortOrder
 }
 
@@ -1030,6 +1114,9 @@ export type AnimeCreateWithoutFranchiseEntriesInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1064,6 +1151,9 @@ export type AnimeUncheckedCreateWithoutFranchiseEntriesInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1113,6 +1203,9 @@ export type AnimeUpdateWithoutFranchiseEntriesInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1147,6 +1240,9 @@ export type AnimeUncheckedUpdateWithoutFranchiseEntriesInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1180,6 +1276,9 @@ export type AnimeCreateWithoutAnimeStudiosInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1214,6 +1313,9 @@ export type AnimeUncheckedCreateWithoutAnimeStudiosInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1263,6 +1365,9 @@ export type AnimeUpdateWithoutAnimeStudiosInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1297,6 +1402,9 @@ export type AnimeUncheckedUpdateWithoutAnimeStudiosInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1330,6 +1438,9 @@ export type AnimeCreateWithoutLinkedInInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1364,6 +1475,9 @@ export type AnimeUncheckedCreateWithoutLinkedInInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1413,6 +1527,9 @@ export type AnimeUpdateWithoutLinkedInInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1447,6 +1564,9 @@ export type AnimeUncheckedUpdateWithoutLinkedInInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1480,6 +1600,9 @@ export type AnimeCreateWithoutStreamingLinksInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1514,6 +1637,9 @@ export type AnimeUncheckedCreateWithoutStreamingLinksInput = {
   meanScore?: number | null
   nextAiringEp?: number | null
   nextAiringAt?: Date | string | null
+  startYear?: number | null
+  startMonth?: number | null
+  startDay?: number | null
   lastSyncedAt?: Date | string | null
   tmdbId?: number | null
   tmdbMediaType?: string | null
@@ -1563,6 +1689,9 @@ export type AnimeUpdateWithoutStreamingLinksInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1597,6 +1726,9 @@ export type AnimeUncheckedUpdateWithoutStreamingLinksInput = {
   meanScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringEp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   nextAiringAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startMonth?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startDay?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tmdbId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   tmdbMediaType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1689,6 +1821,9 @@ export type AnimeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   meanScore?: boolean
   nextAiringEp?: boolean
   nextAiringAt?: boolean
+  startYear?: boolean
+  startMonth?: boolean
+  startDay?: boolean
   lastSyncedAt?: boolean
   tmdbId?: boolean
   tmdbMediaType?: boolean
@@ -1725,6 +1860,9 @@ export type AnimeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   meanScore?: boolean
   nextAiringEp?: boolean
   nextAiringAt?: boolean
+  startYear?: boolean
+  startMonth?: boolean
+  startDay?: boolean
   lastSyncedAt?: boolean
   tmdbId?: boolean
   tmdbMediaType?: boolean
@@ -1756,6 +1894,9 @@ export type AnimeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   meanScore?: boolean
   nextAiringEp?: boolean
   nextAiringAt?: boolean
+  startYear?: boolean
+  startMonth?: boolean
+  startDay?: boolean
   lastSyncedAt?: boolean
   tmdbId?: boolean
   tmdbMediaType?: boolean
@@ -1787,6 +1928,9 @@ export type AnimeSelectScalar = {
   meanScore?: boolean
   nextAiringEp?: boolean
   nextAiringAt?: boolean
+  startYear?: boolean
+  startMonth?: boolean
+  startDay?: boolean
   lastSyncedAt?: boolean
   tmdbId?: boolean
   tmdbMediaType?: boolean
@@ -1796,7 +1940,7 @@ export type AnimeSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AnimeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "anilistId" | "source" | "titleEnglish" | "titleRomaji" | "titleNative" | "coverImageUrl" | "synopsis" | "genres" | "totalEpisodes" | "totalSeasons" | "episodesPerSeason" | "durationMins" | "airingStatus" | "displayFormat" | "sourceMaterial" | "season" | "seasonYear" | "meanScore" | "nextAiringEp" | "nextAiringAt" | "lastSyncedAt" | "tmdbId" | "tmdbMediaType" | "externalUrl" | "streamingCheckedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["anime"]>
+export type AnimeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "anilistId" | "source" | "titleEnglish" | "titleRomaji" | "titleNative" | "coverImageUrl" | "synopsis" | "genres" | "totalEpisodes" | "totalSeasons" | "episodesPerSeason" | "durationMins" | "airingStatus" | "displayFormat" | "sourceMaterial" | "season" | "seasonYear" | "meanScore" | "nextAiringEp" | "nextAiringAt" | "startYear" | "startMonth" | "startDay" | "lastSyncedAt" | "tmdbId" | "tmdbMediaType" | "externalUrl" | "streamingCheckedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["anime"]>
 export type AnimeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   franchiseEntries?: boolean | Prisma.Anime$franchiseEntriesArgs<ExtArgs>
   animeStudios?: boolean | Prisma.Anime$animeStudiosArgs<ExtArgs>
@@ -1837,6 +1981,9 @@ export type $AnimePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     meanScore: number | null
     nextAiringEp: number | null
     nextAiringAt: Date | null
+    startYear: number | null
+    startMonth: number | null
+    startDay: number | null
     lastSyncedAt: Date | null
     tmdbId: number | null
     tmdbMediaType: string | null
@@ -2292,6 +2439,9 @@ export interface AnimeFieldRefs {
   readonly meanScore: Prisma.FieldRef<"Anime", 'Int'>
   readonly nextAiringEp: Prisma.FieldRef<"Anime", 'Int'>
   readonly nextAiringAt: Prisma.FieldRef<"Anime", 'DateTime'>
+  readonly startYear: Prisma.FieldRef<"Anime", 'Int'>
+  readonly startMonth: Prisma.FieldRef<"Anime", 'Int'>
+  readonly startDay: Prisma.FieldRef<"Anime", 'Int'>
   readonly lastSyncedAt: Prisma.FieldRef<"Anime", 'DateTime'>
   readonly tmdbId: Prisma.FieldRef<"Anime", 'Int'>
   readonly tmdbMediaType: Prisma.FieldRef<"Anime", 'String'>

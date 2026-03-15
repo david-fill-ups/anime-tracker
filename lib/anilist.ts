@@ -1,5 +1,6 @@
 import { GraphQLClient, gql } from "graphql-request";
 import { db } from "./db";
+import type { StreamingService } from "@/app/generated/prisma";
 
 const client = new GraphQLClient("https://graphql.anilist.co");
 
@@ -31,6 +32,11 @@ export interface AniListAnime {
   season: "WINTER" | "SPRING" | "SUMMER" | "FALL" | null;
   seasonYear: number | null;
   meanScore: number | null;
+  startDate: {
+    year: number | null;
+    month: number | null;
+    day: number | null;
+  } | null;
   nextAiringEpisode: {
     episode: number;
     airingAt: number; // unix timestamp
@@ -77,6 +83,11 @@ const ANIME_FIELDS = gql`
     season
     seasonYear
     meanScore
+    startDate {
+      year
+      month
+      day
+    }
     nextAiringEpisode {
       episode
       airingAt
@@ -182,6 +193,9 @@ export function mapAniListToAnimeData(
     season: data.season ?? null,
     seasonYear: data.seasonYear ?? null,
     meanScore: data.meanScore ?? null,
+    startYear: data.startDate?.year ?? null,
+    startMonth: data.startDate?.month ?? null,
+    startDay: data.startDate?.day ?? null,
     nextAiringEp: data.nextAiringEpisode?.episode ?? null,
     nextAiringAt: data.nextAiringEpisode
       ? new Date(data.nextAiringEpisode.airingAt * 1000)
@@ -211,6 +225,54 @@ export async function upsertStudios(
     seen.add(c.studioId);
     return true;
   });
+}
+
+// ---------------------------------------------------------------------------
+// Streaming links from AniList externalLinks
+// ---------------------------------------------------------------------------
+
+const ANILIST_SITE_MAP: Record<string, StreamingService> = {
+  "Crunchyroll":          "CRUNCHYROLL",
+  "Netflix":              "NETFLIX",
+  "Hulu":                 "HULU",
+  "Disney Plus":          "DISNEY_PLUS",
+  "Amazon Prime Video":   "AMAZON_PRIME",
+  "HIDIVE":               "HIDIVE",
+  "HBO Max":              "HBO",
+  "Max":                  "HBO",
+};
+
+const STREAMING_LINKS_QUERY = gql`
+  query FetchStreamingLinks($id: Int!) {
+    Media(id: $id, type: ANIME) {
+      externalLinks {
+        url
+        site
+        type
+      }
+    }
+  }
+`;
+
+export async function fetchAniListStreamingLinks(
+  anilistId: number
+): Promise<Map<StreamingService, string>> {
+  const result = new Map<StreamingService, string>();
+  try {
+    const data = await client.request<{
+      Media: { externalLinks: { url: string; site: string; type: string }[] };
+    }>(STREAMING_LINKS_QUERY, { id: anilistId });
+
+    for (const link of data.Media.externalLinks) {
+      const service = ANILIST_SITE_MAP[link.site];
+      if (service && !result.has(service)) {
+        result.set(service, link.url);
+      }
+    }
+  } catch {
+    // AniList failures are non-fatal
+  }
+  return result;
 }
 
 // Map AniList source to our SourceMaterial

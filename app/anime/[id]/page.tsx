@@ -3,21 +3,13 @@ import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-function formatRelativeDate(date: Date | string | null | undefined): string {
-  if (!date) return "never";
-  const diffMs = Date.now() - new Date(date).getTime();
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (days === 0) return "today";
-  if (days === 1) return "yesterday";
-  if (days < 30) return `${days}d ago`;
-  return `${Math.floor(days / 30)}mo ago`;
-}
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import StatusBadge from "@/components/StatusBadge";
 import AnimeEditForm from "@/components/AnimeEditForm";
 import WhereToWatch from "@/components/WhereToWatch";
 import StreamingAutoRefresh from "@/components/StreamingAutoRefresh";
+import StreamingLastUpdated from "@/components/StreamingLastUpdated";
 import AnimeMetaEdit from "@/components/AnimeMetaEdit";
 import LinkManager from "@/components/LinkManager";
 import LinkDetailClient from "@/components/LinkDetailClient";
@@ -117,11 +109,13 @@ export default async function AnimeDetailPage({
           seasonYear: la.anime.seasonYear,
           displayFormat: la.anime.displayFormat,
           anilistId: la.anime.anilistId,
-          // Only the page's own anime has tmdb/external/genre data loaded
-          tmdbId: la.anime.id === rawAnime.id ? rawAnime.tmdbId : null,
-          tmdbMediaType: la.anime.id === rawAnime.id ? rawAnime.tmdbMediaType : null,
-          externalUrl: la.anime.id === rawAnime.id ? rawAnime.externalUrl : null,
-          genres: la.anime.id === rawAnime.id ? rawAnime.genres : "[]",
+          tmdbId: la.anime.tmdbId,
+          tmdbMediaType: la.anime.tmdbMediaType,
+          externalUrl: la.anime.externalUrl,
+          genres: la.anime.genres,
+          startYear: la.anime.startYear,
+          startMonth: la.anime.startMonth,
+          startDay: la.anime.startDay,
         },
       })),
       userEntry: link.userEntry,
@@ -138,19 +132,18 @@ export default async function AnimeDetailPage({
           streamingCheckedAt={rawAnime.streamingCheckedAt}
           source={rawAnime.source}
           lastSyncedAt={rawAnime.lastSyncedAt}
+          relatedAnimeSlot={rawAnime.anilistId && (
+            <Suspense key="related-anime" fallback={null}>
+              <RelatedAnime
+                anilistId={rawAnime.anilistId}
+                userId={userId}
+                linkId={link.id}
+                linkedAnilistIds={link.linkedAnime.map((la) => la.anime.anilistId)}
+              />
+            </Suspense>
+          )}
+          streamingLastUpdatedSlot={<StreamingLastUpdated key="streaming-last-updated" animeId={rawAnime.id} streamingCheckedAt={rawAnime.streamingCheckedAt} />}
         />
-
-        {rawAnime.anilistId && (
-          <Suspense fallback={null}>
-            <RelatedAnime
-              anilistId={rawAnime.anilistId}
-              userId={userId}
-              franchiseIds={rawAnime.franchiseEntries.map((fe) => fe.franchise.id)}
-              linkId={link.id}
-              linkedAnilistIds={link.linkedAnime.map((la) => la.anime.anilistId)}
-            />
-          </Suspense>
-        )}
       </div>
     );
   }
@@ -231,7 +224,7 @@ export default async function AnimeDetailPage({
         {rawAnime.synopsis && (
           <>
             <h3 className="text-sm font-semibold text-slate-300 mb-2">Synopsis</h3>
-            <p className="text-sm text-slate-400 leading-relaxed line-clamp-6">{rawAnime.synopsis}</p>
+            <p className="text-sm text-slate-400 leading-relaxed line-clamp-6 whitespace-pre-line">{rawAnime.synopsis.replace(/<br\s*\/?>/gi, '\n').trim()}</p>
           </>
         )}
         <AnimeMetaEdit anime={rawAnime} />
@@ -278,20 +271,19 @@ export default async function AnimeDetailPage({
         />
       )}
 
+      <StreamingAutoRefresh animeId={rawAnime.id} source={rawAnime.source} streamingCheckedAt={rawAnime.streamingCheckedAt} lastSyncedAt={rawAnime.lastSyncedAt} />
+      <WhereToWatch animeId={rawAnime.id} initialLinks={rawAnime.streamingLinks} />
+
       {rawAnime.anilistId && (
         <Suspense fallback={null}>
           <RelatedAnime
             anilistId={rawAnime.anilistId}
             userId={userId}
-            franchiseIds={rawAnime.franchiseEntries.map((fe) => fe.franchise.id)}
             linkId={link?.id ?? null}
             linkedAnilistIds={link?.linkedAnime.map((la) => la.anime.anilistId) ?? []}
           />
         </Suspense>
       )}
-
-      <StreamingAutoRefresh animeId={rawAnime.id} source={rawAnime.source} streamingCheckedAt={rawAnime.streamingCheckedAt} lastSyncedAt={rawAnime.lastSyncedAt} />
-      <WhereToWatch animeId={rawAnime.id} initialLinks={rawAnime.streamingLinks} />
 
       <div>
         <h3 className="text-sm font-semibold text-slate-300 mb-4">Your Review</h3>
@@ -304,11 +296,7 @@ export default async function AnimeDetailPage({
         />
       </div>
 
-      {rawAnime.streamingCheckedAt && (
-        <p className="text-xs text-slate-600" title={new Date(rawAnime.streamingCheckedAt).toLocaleString()}>
-          Last updated {formatRelativeDate(rawAnime.streamingCheckedAt)}
-        </p>
-      )}
+      <StreamingLastUpdated animeId={rawAnime.id} streamingCheckedAt={rawAnime.streamingCheckedAt} />
     </div>
   );
 }

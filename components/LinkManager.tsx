@@ -83,6 +83,9 @@ export default function LinkManager({
   const [removing, setRemoving] = useState<number | null>(null);
   const [reordering, setReordering] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualTitle, setManualTitle] = useState("");
+  const [manualEpisodes, setManualEpisodes] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Sync when prop changes (after router.refresh())
@@ -195,9 +198,37 @@ export default function LinkManager({
     }
   }
 
+  async function handleManualAdd() {
+    const title = manualTitle.trim();
+    if (!title) return;
+    const eps = manualEpisodes ? parseInt(manualEpisodes, 10) : undefined;
+    setAdding(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/links/${linkId}/anime`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ manual: { title, ...(eps && eps > 0 ? { totalEpisodes: eps } : {}) } }),
+      });
+      if (!res.ok) {
+        const { error: msg } = await res.json();
+        setError(msg ?? "Failed to add to link");
+      } else {
+        setQuery("");
+        setResults([]);
+        setShowManualForm(false);
+        setManualTitle("");
+        setManualEpisodes("");
+        router.refresh();
+      }
+    } finally {
+      setAdding(false);
+    }
+  }
+
   const libraryResults = results.filter((r): r is LibraryResult => r.source === "library");
   const anilistResults = results.filter((r): r is AniListResult => r.source === "anilist");
-  const showResults = query.trim().length >= 2 && (searching || results.length > 0);
+  const showDropdown = query.trim().length >= 2;
 
   return (
     <div className="space-y-3">
@@ -283,7 +314,7 @@ export default function LinkManager({
           />
           {query && (
             <button
-              onClick={() => { setQuery(""); setResults([]); }}
+              onClick={() => { setQuery(""); setResults([]); setShowManualForm(false); setManualTitle(""); setManualEpisodes(""); }}
               className="text-sm text-slate-500 hover:text-slate-300 px-2"
             >
               ✕
@@ -291,13 +322,10 @@ export default function LinkManager({
           )}
         </div>
 
-        {showResults && (
+        {showDropdown && results.length > 0 && (
           <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-            {searching && results.length === 0 && (
+            {searching && (
               <p className="text-xs text-slate-500 px-3 py-2">Searching…</p>
-            )}
-            {!searching && results.length === 0 && (
-              <p className="text-xs text-slate-500 px-3 py-2">No results found</p>
             )}
 
             {libraryResults.length > 0 && (
@@ -344,7 +372,79 @@ export default function LinkManager({
               </>
             )}
 
+            {anilistResults.length > 0 && (
+              <>
+                <p className="text-xs text-slate-500 px-3 pt-2 pb-1 font-medium uppercase tracking-wide">
+                  From AniList
+                </p>
+                {anilistResults.map((r) => (
+                  <button
+                    key={`al-${r.anilistId}`}
+                    onClick={() => handleSelect(r)}
+                    disabled={adding}
+                    className="w-full text-left flex items-center justify-between gap-3 px-3 py-2 hover:bg-slate-700 transition-colors disabled:opacity-50"
+                  >
+                    <span className="text-sm text-slate-200 truncate">
+                      {resultTitle(r)}
+                      <span className="text-slate-500 text-xs">{resultMeta(r)}</span>
+                    </span>
+                    <span className="text-xs text-indigo-400 flex-shrink-0">AniList</span>
+                  </button>
+                ))}
+              </>
+            )}
+
             {adding && <p className="text-xs text-slate-500 px-3 py-2">Adding…</p>}
+          </div>
+        )}
+
+        {showDropdown && !showManualForm && (
+          <div className="flex items-center justify-between bg-slate-800 border border-slate-700 rounded-lg px-3 py-2">
+            <span className="text-xs text-slate-500">
+              {searching && results.length === 0 ? "Searching…" : results.length === 0 ? "No results found." : "Not what you're looking for?"}
+            </span>
+            <button
+              onClick={() => { setManualTitle(query.trim()); setShowManualForm(true); }}
+              className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+            >
+              + Add manually
+            </button>
+          </div>
+        )}
+
+        {showDropdown && showManualForm && (
+          <div className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-3 space-y-2">
+            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Manual Entry</p>
+            <input
+              type="text"
+              value={manualTitle}
+              onChange={(e) => setManualTitle(e.target.value)}
+              placeholder="Title"
+              className="w-full text-sm bg-slate-700 border border-slate-600 text-white placeholder-slate-500 rounded px-2 py-1 focus:outline-none focus:border-indigo-500"
+            />
+            <input
+              type="number"
+              value={manualEpisodes}
+              onChange={(e) => setManualEpisodes(e.target.value)}
+              placeholder="Episodes (optional)"
+              min={1}
+              className="w-full text-sm bg-slate-700 border border-slate-600 text-white placeholder-slate-500 rounded px-2 py-1 focus:outline-none focus:border-indigo-500"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleManualAdd}
+                disabled={!manualTitle.trim() || adding}
+                className="text-sm bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded px-3 py-1 transition-colors"
+              >
+                {adding ? "Adding…" : "Add"}
+              </button>
+              <button
+                onClick={() => setShowManualForm(false)}
+                className="text-sm text-slate-500 hover:text-slate-300 px-2"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
       </div>

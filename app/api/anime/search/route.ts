@@ -11,15 +11,22 @@ export async function GET(req: NextRequest) {
 
   if (q.length < 2) return NextResponse.json([]);
 
+  // Two-step exclusion avoids a Prisma bug where `some` + `none` on the same
+  // relation in an AND array can produce incorrect results.
+  let excludeAnimeIds: number[] = [];
+  if (excludeLinkId) {
+    const linked = await db.linkedAnime.findMany({
+      where: { linkId: excludeLinkId },
+      select: { animeId: true },
+    });
+    excludeAnimeIds = linked.map((la) => la.animeId);
+  }
+
   const results = await db.anime.findMany({
     where: {
       ...(excludeId ? { id: { not: excludeId } } : {}),
-      AND: [
-        // Show anime that are in this user's library (in any of their Links)
-        { linkedIn: { some: { link: { userId } } } },
-        // Optionally exclude anime already in a specific link
-        ...(excludeLinkId ? [{ linkedIn: { none: { linkId: excludeLinkId } } }] : []),
-      ],
+      ...(excludeAnimeIds.length > 0 ? { id: { notIn: excludeAnimeIds } } : {}),
+      linkedIn: { some: { link: { userId } } },
       OR: [
         { titleEnglish: { contains: q, mode: "insensitive" } },
         { titleRomaji: { contains: q, mode: "insensitive" } },

@@ -17,36 +17,25 @@ const RELATION_ORDER = ["PREQUEL", "SEQUEL", "PARENT", "SIDE_STORY", "SPIN_OFF",
 export default async function RelatedAnime({
   anilistId,
   userId,
-  franchiseIds,
   linkId,
   linkedAnilistIds,
 }: {
   anilistId: number;
   userId: string;
-  franchiseIds?: number[];
   linkId?: number | null;
   linkedAnilistIds?: (number | null)[];
 }) {
-  const [anilistData, userAnimes, franchiseMembers] = await Promise.all([
+  const [anilistData, userAnimes] = await Promise.all([
     fetchAniListById(anilistId),
     db.anime.findMany({
       where: { linkedIn: { some: { link: { userId } } }, anilistId: { not: null } },
       select: { anilistId: true },
     }),
-    franchiseIds && franchiseIds.length > 0
-      ? db.franchiseEntry.findMany({
-          where: { franchiseId: { in: franchiseIds }, anime: { anilistId: { not: null } } },
-          select: { anime: { select: { anilistId: true } } },
-        })
-      : Promise.resolve([]),
   ]);
 
   if (!anilistData) return null;
 
   const seenIds = new Set(userAnimes.map((a) => a.anilistId));
-  for (const fm of franchiseMembers) {
-    if (fm.anime.anilistId) seenIds.add(fm.anime.anilistId);
-  }
   // Exclude already-linked anime so they don't appear as "related"
   for (const id of linkedAnilistIds ?? []) {
     if (id) seenIds.add(id);

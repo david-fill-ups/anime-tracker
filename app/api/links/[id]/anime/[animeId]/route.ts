@@ -23,7 +23,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     // Verify caller owns this link
     const link = await db.link.findFirst({
       where: { id: linkId, userId },
-      include: { linkedAnime: { select: { id: true, animeId: true } } },
+      include: { linkedAnime: { select: { id: true, animeId: true }, orderBy: { order: "asc" } } },
     });
     if (!link) return NextResponse.json({ error: "Not in your library" }, { status: 403 });
 

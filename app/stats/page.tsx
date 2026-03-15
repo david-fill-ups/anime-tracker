@@ -121,6 +121,28 @@ export default async function DashboardPage() {
     : null;
   const scoreDelta = avgUserNorm != null && avgCommunity != null ? avgUserNorm - avgCommunity : null;
 
+  // Genre divergence vs community (≥2 community-scored entries per genre)
+  const genreDivMap: Record<string, { userNormSum: number; communitySum: number; count: number }> = {};
+  for (const e of scoredWithCommunity) {
+    const genres: string[] = JSON.parse(e.anime.genres || "[]");
+    for (const g of genres) {
+      if (!genreDivMap[g]) genreDivMap[g] = { userNormSum: 0, communitySum: 0, count: 0 };
+      genreDivMap[g].userNormSum += (e.score! / 5) * 100;
+      genreDivMap[g].communitySum += e.anime.meanScore!;
+      genreDivMap[g].count += 1;
+    }
+  }
+  const genreDeltas = Object.entries(genreDivMap)
+    .filter(([, v]) => v.count >= 2)
+    .map(([genre, v]) => ({
+      genre,
+      delta: Math.round(v.userNormSum / v.count - v.communitySum / v.count),
+      count: v.count,
+    }))
+    .sort((a, b) => b.delta - a.delta);
+  const higherThanAvg = genreDeltas.slice(0, 3);
+  const lowerThanAvg = [...genreDeltas].reverse().slice(0, 3);
+
   // Score by release year — scatter data (nulls filtered out)
   const scatterData = rated
     .filter((e) => e.anime.seasonYear != null)
@@ -136,17 +158,19 @@ export default async function DashboardPage() {
   for (const a of engagedAnimes) formatCounts[a.displayFormat] = (formatCounts[a.displayFormat] ?? 0) + 1;
 
   const STATUS_LABELS: Record<string, string> = {
+    PLAN_TO_WATCH: "Plan to Watch",
     WATCHING: "Watching",
     COMPLETED: "Completed",
     DROPPED: "Dropped",
-    PLAN_TO_WATCH: "Plan to Watch",
+    NOT_INTERESTED: "Not Interested",
   };
 
   const STATUS_COLORS: Record<string, string> = {
+    PLAN_TO_WATCH: "bg-purple-500",
     WATCHING: "bg-blue-500",
     COMPLETED: "bg-green-500",
     DROPPED: "bg-red-500",
-    PLAN_TO_WATCH: "bg-purple-500",
+    NOT_INTERESTED: "bg-gray-500",
   };
 
   return (
@@ -263,30 +287,48 @@ export default async function DashboardPage() {
 
       {/* Your taste vs community */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-slate-300 mb-4">Your Taste vs Community</h3>
+        <h3 className="text-sm font-semibold text-slate-300 mb-1">Your Taste vs Community</h3>
         {avgUserNorm == null ? (
-          <p className="text-slate-500 text-sm">Rate more anime with AniList data to see this comparison.</p>
+          <p className="text-slate-500 text-sm mt-3">Rate more anime with AniList data to see this comparison.</p>
         ) : (
           <>
-            <div className="flex gap-6 mb-3">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-white">{avgUserNorm}</p>
-                <p className="text-xs text-slate-400 mt-1">You</p>
+            <p className="text-xs text-slate-500 mb-4">
+              You: <span className="text-slate-300 font-medium">{avgUserNorm}</span>
+              {" · "}Community: <span className="text-slate-300 font-medium">{avgCommunity}</span>
+              {scoreDelta != null && (
+                <span className={scoreDelta >= 0 ? " text-green-400" : " text-amber-400"}>
+                  {" "}({scoreDelta >= 0 ? "+" : ""}{scoreDelta} pts overall)
+                </span>
+              )}
+              {" · out of 100"}
+            </p>
+            {genreDeltas.length >= 4 ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-slate-500 mb-2">Genres you favor</p>
+                  <div className="space-y-1.5">
+                    {higherThanAvg.map((g) => (
+                      <div key={g.genre} className="flex items-center justify-between">
+                        <span className="text-sm text-slate-300 truncate">{g.genre}</span>
+                        <span className={`text-sm font-medium ml-2 shrink-0 ${g.delta > 0 ? "text-green-400" : g.delta < 0 ? "text-amber-400" : "text-slate-400"}`}>{g.delta > 0 ? "+" : ""}{g.delta}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 mb-2">Genres you're harder on</p>
+                  <div className="space-y-1.5">
+                    {lowerThanAvg.map((g) => (
+                      <div key={g.genre} className="flex items-center justify-between">
+                        <span className="text-sm text-slate-300 truncate">{g.genre}</span>
+                        <span className={`text-sm font-medium ml-2 shrink-0 ${g.delta > 0 ? "text-green-400" : g.delta < 0 ? "text-amber-400" : "text-slate-400"}`}>{g.delta > 0 ? "+" : ""}{g.delta}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-white">{avgCommunity}</p>
-                <p className="text-xs text-slate-400 mt-1">Community</p>
-              </div>
-            </div>
-            {scoreDelta != null && (
-              <p className="text-xs text-slate-400">
-                {scoreDelta === 0
-                  ? "Right in line with the community average"
-                  : scoreDelta > 0
-                  ? `You rate +${scoreDelta} pts above community average`
-                  : `You rate ${scoreDelta} pts below community average`}
-                {" "}· out of 100
-              </p>
+            ) : (
+              <p className="text-xs text-slate-500">Rate more genres (≥2 each) to see where your tastes diverge.</p>
             )}
           </>
         )}
