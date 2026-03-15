@@ -122,7 +122,9 @@ export default function FranchiseDetail({ franchise, allAnime }: Props) {
     router.push("/franchises");
   }
 
-  const trackedEntries = franchise.entries.filter((e) => e.anime.userEntry !== null);
+  const trackedEntries = franchise.entries.filter(
+    (e) => e.anime.userEntry !== null && e.anime.userEntry.watchStatus !== "NOT_INTERESTED"
+  );
   const untrackedEntries = franchise.entries.filter((e) => e.anime.userEntry === null);
 
   return (

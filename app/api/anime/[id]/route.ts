@@ -94,8 +94,26 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         entryData.startedAt = new Date();
       }
       if (link) {
+        if (link.userEntry) {
+          updates.push(
+            db.userEntry.update({ where: { linkId: link.id }, data: entryData })
+          );
+        } else {
+          // Link exists but UserEntry was deleted (anime previously removed from library)
+          updates.push(
+            db.userEntry.create({ data: { userId, linkId: link.id, ...entryData } })
+          );
+        }
+      } else {
+        // No link at all — create Link, LinkedAnime, and UserEntry together
         updates.push(
-          db.userEntry.update({ where: { linkId: link.id }, data: entryData })
+          db.link.create({
+            data: {
+              userId,
+              linkedAnime: { create: { animeId, order: 0 } },
+              userEntry: { create: { userId, ...entryData } },
+            },
+          })
         );
       }
     }

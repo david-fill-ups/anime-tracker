@@ -88,8 +88,10 @@ export async function POST(req: NextRequest, { params }: Params) {
       });
     }
 
+    if (!anime) return NextResponse.json({ error: "Anime not found" }, { status: 404 });
+
     // Check not adding the same anime to the same link
-    if (link.linkedAnime.some((la) => la.animeId === anime!.id)) {
+    if (link.linkedAnime.some((la) => la.animeId === anime.id)) {
       return NextResponse.json({ error: "Anime is already in this link" }, { status: 409 });
     }
 

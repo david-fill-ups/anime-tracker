@@ -140,7 +140,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
   const [externalUrl, setExternalUrl] = useState(anime.externalUrl ?? "");
 
   const [form, setForm] = useState({
-    watchStatus: entry?.watchStatus ?? "PLAN_TO_WATCH",
+    watchStatus: entry?.watchStatus ?? "",
     currentEpisode: String(initFlat),
     currentSeason: String(initSE.season),
     currentEpisodeInSeason: String(initSE.episode),
@@ -219,6 +219,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
 
   async function save(formOverrides: Partial<typeof form> = {}, euOverride?: string, verifiedOverride?: boolean) {
     const f = { ...form, ...formOverrides };
+    if (!f.watchStatus) return; // No status selected yet — don't create an entry
     const eu = euOverride ?? externalUrl;
     const v = verifiedOverride ?? verified;
     const isComp = f.watchStatus === "COMPLETED";
@@ -336,6 +337,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
             }}
             className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
           >
+            {!entry && <option value="" disabled>— Select status —</option>}
             <option value="PLAN_TO_WATCH">Plan to Watch</option>
             <option value="WATCHING">Watching</option>
             <option value="COMPLETED" disabled={!canBeCompleted}>
