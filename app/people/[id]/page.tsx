@@ -52,21 +52,38 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
     .filter((l) => l.userEntry && l.linkedAnime[0]?.anime)
     .map((l) => ({ ...l.userEntry!, anime: l.linkedAnime[0].anime }));
 
-  // Status breakdown
+  // Status breakdown (of recommendations)
   const statusCounts: Record<string, number> = {};
   for (const e of entries) {
     statusCounts[e.watchStatus] = (statusCounts[e.watchStatus] ?? 0) + 1;
   }
 
-  // Hours watched
-  const activeEntries = entries.filter(
-    (e) => e.watchStatus === "COMPLETED" || e.watchStatus === "WATCHING"
-  );
+  // Watch-together entries (watchContextPersonId) — for Watching, Completed Together, Hours Watched
+  const watchContextEntries = await db.userEntry.findMany({
+    where: { userId, watchContextPersonId: personId },
+    select: {
+      watchStatus: true,
+      currentEpisode: true,
+      link: {
+        select: {
+          linkedAnime: {
+            where: { order: 0 },
+            select: { anime: { select: { durationMins: true } } },
+            take: 1,
+          },
+        },
+      },
+    },
+  });
+
+  // Hours watched together
   const totalHours = Math.round(
-    activeEntries.reduce((sum, e) => {
-      const mins = e.anime.durationMins ?? 24;
-      return sum + mins * e.currentEpisode;
-    }, 0) / 60
+    watchContextEntries
+      .filter((e) => e.watchStatus === "COMPLETED" || e.watchStatus === "WATCHING")
+      .reduce((sum, e) => {
+        const mins = e.link?.linkedAnime[0]?.anime.durationMins ?? 24;
+        return sum + mins * e.currentEpisode;
+      }, 0) / 60
   );
 
   // Avg score — engaged only
@@ -108,7 +125,8 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
     formatCounts[e.anime.displayFormat] = (formatCounts[e.anime.displayFormat] ?? 0) + 1;
   }
 
-  const completedCount = statusCounts["COMPLETED"] ?? 0;
+  const completedCount = watchContextEntries.filter((e) => e.watchStatus === "COMPLETED").length;
+  const watchingCount = watchContextEntries.filter((e) => e.watchStatus === "WATCHING").length;
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -124,11 +142,12 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Top-line numbers */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <StatCard label="Total Recommended" value={String(entries.length)} href={`/backlog?recommender=${person.id}`} />
-        <StatCard label="Completed" value={String(completedCount)} href={`/library?recommender=${person.id}&status=COMPLETED`} />
+        <StatCard label="Completed Together" value={String(completedCount)} href={`/library?recommender=${person.id}&status=COMPLETED`} />
+        <StatCard label="Watching" value={String(watchingCount)} href={`/library?recommender=${person.id}&status=WATCHING`} />
         <StatCard label="Hours Watched" value={String(totalHours)} href={`/library?recommender=${person.id}`} />
-        <StatCard label="Avg Score" value={avgScore != null ? `${avgScore} / 5` : "—"} href={`/library?recommender=${person.id}&sort=score`} />
+        <StatCard label="Avg Score" subtitle="of their recommendations" value={avgScore != null ? `${avgScore} / 5` : "—"} href={`/library?recommender=${person.id}&sort=score`} />
       </div>
 
       {/* Status breakdown */}
@@ -222,7 +241,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
   );
 }
 
-function StatCard({ label, value, href }: { label: string; value: string; href: string }) {
+function StatCard({ label, subtitle, value, href }: { label: string; subtitle?: string; value: string; href: string }) {
   return (
     <Link
       href={href}
@@ -230,6 +249,7 @@ function StatCard({ label, value, href }: { label: string; value: string; href: 
     >
       <p className="text-2xl font-bold text-white">{value}</p>
       <p className="text-xs text-slate-400 mt-1">{label}</p>
+      {subtitle && <p className="text-xs text-slate-600 mt-0.5">{subtitle}</p>}
     </Link>
   );
 }

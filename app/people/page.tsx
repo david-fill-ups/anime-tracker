@@ -21,13 +21,17 @@ export default async function PeoplePage() {
           },
         },
       },
+      watchContextEntries: {
+        select: { watchStatus: true },
+      },
     },
     orderBy: { name: "asc" },
   });
 
   const peopleWithStats = people.map((person) => {
-    const completed = person.entries.filter((e) => e.watchStatus === "COMPLETED");
-    const rated = completed.filter((e) => e.score !== null);
+    const completed = person.watchContextEntries.filter((e) => e.watchStatus === "COMPLETED");
+    const watching = person.watchContextEntries.filter((e) => e.watchStatus === "WATCHING");
+    const rated = person.entries.filter((e) => e.score !== null);
     const avgScore = rated.length
       ? Math.round((rated.reduce((s, e) => s + (e.score ?? 0), 0) / rated.length) * 10) / 10
       : null;
@@ -36,6 +40,7 @@ export default async function PeoplePage() {
       name: person.name,
       totalRecommendations: person.entries.length,
       completedCount: completed.length,
+      watchingCount: watching.length,
       ratedCount: rated.length,
       avgScore,
       recentRecommendations: person.entries.slice(0, 3).map((e) => {

@@ -9,6 +9,7 @@ type PersonStats = {
   name: string;
   totalRecommendations: number;
   completedCount: number;
+  watchingCount: number;
   ratedCount: number;
   avgScore: number | null;
   recentRecommendations: { animeId: number | null; title: string; status: string; score: number | null }[];
@@ -78,20 +79,25 @@ export default function PeopleManager({ people }: { people: PersonStats[] }) {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-3">
+            <div className="grid grid-cols-4 gap-3 mb-3">
               <Link href={`/backlog?recommender=${person.id}`} className="text-center group">
                 <p className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">{person.totalRecommendations}</p>
-                <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">Recommended</p>
+                <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">Recommendations</p>
               </Link>
               <Link href={`/library?recommender=${person.id}&status=COMPLETED`} className="text-center group">
                 <p className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">{person.completedCount}</p>
-                <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">Completed</p>
+                <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">Completed Together</p>
+              </Link>
+              <Link href={`/library?recommender=${person.id}&status=WATCHING`} className="text-center group">
+                <p className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors">{person.watchingCount}</p>
+                <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">Watching Together</p>
               </Link>
               <div className="text-center">
                 <p className="text-lg font-bold text-yellow-400">
                   {person.avgScore != null ? person.avgScore : "—"}
                 </p>
                 <p className="text-xs text-slate-500">Avg Score</p>
+                <p className="text-xs text-slate-700">their recs</p>
               </div>
             </div>
 

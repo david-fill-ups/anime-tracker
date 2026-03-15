@@ -183,7 +183,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Total Watched" value={String(engagedAnimes.length)} href="/library" />
         <StatCard label="Completed" value={String(statusCounts["COMPLETED"] ?? 0)} href="/library?status=COMPLETED" />
-        <StatCard label="Hours Watched" value={formatWatchTime(totalMinutes)} title={`${totalHours.toLocaleString()} hours watched`} href="/library" />
+        <StatCard label="Time Watched" value={formatWatchTime(totalMinutes)} title={`${totalHours.toLocaleString()} hours watched`} href="/library" />
         <StatCard
           label="Avg Score"
           value={avgScore != null ? `${avgScore} / 5` : "—"}
@@ -239,50 +239,51 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* Studio scores */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-slate-300 mb-1">Studio Ratings</h3>
-        <p className="text-xs text-slate-500 mb-4">Hours-weighted avg · ≥2 rated entries</p>
-        {topStudios.length === 0 ? (
-          <p className="text-slate-500 text-sm">Rate more anime to see studio comparisons.</p>
-        ) : (
-          <div className="space-y-2">
-            {topStudios.map((s) => (
-              <Link
-                key={s.name}
-                href={`/library?studio=${encodeURIComponent(s.name)}`}
-                className="flex items-center gap-3 rounded-lg px-2 py-1 -mx-2 hover:bg-slate-800/60 transition-colors"
-              >
-                <span className="text-sm text-slate-300 flex-1">{s.name}</span>
-                <span className="text-xs text-slate-500">{s.count} anime</span>
-                <span className="text-sm font-medium text-yellow-400">★ {s.avg}</span>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Studio scores + Genre ratings side by side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-slate-300 mb-1">Studio Ratings</h3>
+          <p className="text-xs text-slate-500 mb-4">Hours-weighted avg · ≥2 rated entries</p>
+          {topStudios.length === 0 ? (
+            <p className="text-slate-500 text-sm">Rate more anime to see studio comparisons.</p>
+          ) : (
+            <div className="space-y-2">
+              {topStudios.map((s) => (
+                <Link
+                  key={s.name}
+                  href={`/library?studio=${encodeURIComponent(s.name)}`}
+                  className="flex items-center gap-3 rounded-lg px-2 py-1 -mx-2 hover:bg-slate-800/60 transition-colors"
+                >
+                  <span className="text-sm text-slate-300 flex-1">{s.name}</span>
+                  <span className="text-xs text-slate-500">{s.count} anime</span>
+                  <span className="text-sm font-medium text-yellow-400">★ {s.avg}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Genre ratings */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-slate-300 mb-1">Genre Ratings</h3>
-        <p className="text-xs text-slate-500 mb-4">Avg score · ≥2 rated entries</p>
-        {genreRatings.length === 0 ? (
-          <p className="text-slate-500 text-sm">Rate more anime to see genre comparisons.</p>
-        ) : (
-          <div className="space-y-2">
-            {genreRatings.map((g) => (
-              <Link
-                key={g.genre}
-                href={`/library?genre=${encodeURIComponent(g.genre)}`}
-                className="flex items-center gap-3 rounded-lg px-2 py-1 -mx-2 hover:bg-slate-800/60 transition-colors"
-              >
-                <span className="text-sm text-slate-300 flex-1">{g.genre}</span>
-                <span className="text-xs text-slate-500">{g.count} anime</span>
-                <span className="text-sm font-medium text-yellow-400">★ {g.avg}</span>
-              </Link>
-            ))}
-          </div>
-        )}
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-slate-300 mb-1">Genre Ratings</h3>
+          <p className="text-xs text-slate-500 mb-4">Avg score · ≥2 rated entries</p>
+          {genreRatings.length === 0 ? (
+            <p className="text-slate-500 text-sm">Rate more anime to see genre comparisons.</p>
+          ) : (
+            <div className="space-y-2">
+              {genreRatings.map((g) => (
+                <Link
+                  key={g.genre}
+                  href={`/library?genre=${encodeURIComponent(g.genre)}`}
+                  className="flex items-center gap-3 rounded-lg px-2 py-1 -mx-2 hover:bg-slate-800/60 transition-colors"
+                >
+                  <span className="text-sm text-slate-300 flex-1">{g.genre}</span>
+                  <span className="text-xs text-slate-500">{g.count} anime</span>
+                  <span className="text-sm font-medium text-yellow-400">★ {g.avg}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Your taste vs community */}

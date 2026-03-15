@@ -20,13 +20,13 @@ const QUEUE_STATUSES: WatchStatus[] = ["PLAN_TO_WATCH"];
 export default async function QueuePage({
   searchParams,
 }: {
-  searchParams: Promise<{ service?: string; airingStatus?: string; recommender?: string; quickBinge?: string }>;
+  searchParams: Promise<{ service?: string; airingStatus?: string; recommender?: string; quickBinge?: string; jfm?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   const userId = session.user.id;
 
-  const { service, airingStatus, recommender, quickBinge } = await searchParams;
+  const { service, airingStatus, recommender, quickBinge, jfm } = await searchParams;
 
   // Plan to Watch: explicitly queued by the user
   const rawLinks = await db.link.findMany({
@@ -188,14 +188,70 @@ export default async function QueuePage({
   }
   const availableRecommenders = Array.from(recommenderMap.entries()).map(([id, name]) => ({ id, name }));
 
+  // Compute preferred genres/studios (avg ≥ 3.5) for "Just for Me" filter
+  const isJustForMe = jfm === "1";
+  let preferredGenres = new Set<string>();
+  let preferredStudios = new Set<string>();
+
+  if (isJustForMe) {
+    const ratedLinks = await db.link.findMany({
+      where: {
+        userId,
+        userEntry: { is: { score: { not: null }, watchStatus: { in: ["WATCHING", "COMPLETED", "DROPPED"] } } },
+      },
+      include: {
+        userEntry: true,
+        linkedAnime: {
+          where: { order: 0 },
+          include: { anime: { include: { animeStudios: { include: { studio: true }, where: { isMainStudio: true } } } } },
+          take: 1,
+        },
+      },
+    });
+
+    const genreScores: Record<string, { sum: number; count: number }> = {};
+    const studioScores: Record<string, { sum: number; count: number }> = {};
+
+    for (const link of ratedLinks) {
+      const score = link.userEntry?.score;
+      const anime = link.linkedAnime[0]?.anime;
+      if (!score || !anime) continue;
+      for (const g of JSON.parse(anime.genres || "[]") as string[]) {
+        if (!genreScores[g]) genreScores[g] = { sum: 0, count: 0 };
+        genreScores[g].sum += score;
+        genreScores[g].count += 1;
+      }
+      const studio = anime.animeStudios[0]?.studio.name;
+      if (studio) {
+        if (!studioScores[studio]) studioScores[studio] = { sum: 0, count: 0 };
+        studioScores[studio].sum += score;
+        studioScores[studio].count += 1;
+      }
+    }
+
+    preferredGenres = new Set(
+      Object.entries(genreScores).filter(([, v]) => v.sum / v.count >= 3.5).map(([g]) => g)
+    );
+    preferredStudios = new Set(
+      Object.entries(studioScores).filter(([, v]) => v.sum / v.count >= 3.5).map(([s]) => s)
+    );
+  }
+
   // Apply filters
   const isQuickBinge = quickBinge === "1";
+
+  function matchesJustForMe(genres: string, studioName: string | undefined) {
+    if (!isJustForMe) return true;
+    const animeGenres: string[] = JSON.parse(genres || "[]");
+    return animeGenres.some((g) => preferredGenres.has(g)) || (!!studioName && preferredStudios.has(studioName));
+  }
 
   const planToWatch = allPlanToWatch.filter((a) => {
     if (service && !a.streamingLinks.some((l) => l.service === service)) return false;
     if (airingStatus && a.airingStatus !== airingStatus) return false;
     if (recommender && String(a.userEntry?.recommenderId ?? "") !== recommender) return false;
     if (isQuickBinge && (a.airingStatus !== "FINISHED" || (a.totalEpisodes ?? Infinity) > 15)) return false;
+    if (!matchesJustForMe(a.genres, a.animeStudios[0]?.studio.name)) return false;
     return true;
   });
 
@@ -204,6 +260,7 @@ export default async function QueuePage({
     if (service && !anime.streamingLinks?.some((l) => l.service === service)) return false;
     if (airingStatus && anime.airingStatus !== airingStatus) return false;
     if (isQuickBinge && (anime.airingStatus !== "FINISHED" || (anime.totalEpisodes ?? Infinity) > 15)) return false;
+    if (!matchesJustForMe(anime.genres, anime.animeStudios[0]?.studio.name)) return false;
     return true;
   });
 

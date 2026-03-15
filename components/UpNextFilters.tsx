@@ -53,8 +53,9 @@ export default function UpNextFilters({
   const activeAiringStatus = searchParams.get("airingStatus") || "";
   const activeRecommender = searchParams.get("recommender") || "";
   const activeQuickBinge = searchParams.get("quickBinge") === "1";
+  const activeJustForMe = searchParams.get("jfm") === "1";
 
-  const hasActiveFilters = !!(activeService || activeAiringStatus || activeRecommender || activeQuickBinge);
+  const hasActiveFilters = !!(activeService || activeAiringStatus || activeRecommender || activeQuickBinge || activeJustForMe);
 
   function clearAll() {
     const params = new URLSearchParams(searchParams.toString());
@@ -62,6 +63,7 @@ export default function UpNextFilters({
     params.delete("airingStatus");
     params.delete("recommender");
     params.delete("quickBinge");
+    params.delete("jfm");
     router.push(`${pathname}?${params.toString()}`);
   }
 
@@ -119,6 +121,18 @@ export default function UpNextFilters({
         }`}
       >
         ⚡ Quick Binge
+      </button>
+
+      {/* Just for Me */}
+      <button
+        onClick={() => set("jfm", activeJustForMe ? "" : "1")}
+        className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+          activeJustForMe
+            ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/40"
+            : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-700"
+        }`}
+      >
+        ★ Just for Me
       </button>
 
       {/* Clear */}
