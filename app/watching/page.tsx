@@ -101,8 +101,11 @@ export default async function WatchListPage() {
           const isPast = showNextAt ? showNextAt.getTime() < Date.now() : false;
           episodesAired = (episodesAired ?? 0) + (isPast ? show.nextAiringEp : show.nextAiringEp - 1);
           if (!nextAt && showNextAt && !isPast) nextAt = showNextAt;
-        } else if (show.totalEpisodes != null) {
-          episodesAired = (episodesAired ?? 0) + show.totalEpisodes;
+        } else {
+          // nextAiringEp is null: can't determine how many episodes have aired.
+          // Mark as unknown so the entry appears in Catch Up rather than Keep Up.
+          episodesAired = null;
+          break;
         }
       }
       // NOT_YET_RELEASED: 0 episodes aired, skip
