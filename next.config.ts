@@ -25,7 +25,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // unsafe-inline/eval required by Next.js dev/prod
+      "script-src 'self' 'unsafe-inline'", // unsafe-inline required by Next.js for hydration scripts
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https://lh3.googleusercontent.com https://s4.anilist.co https://image.tmdb.org",
       "font-src 'self'",

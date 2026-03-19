@@ -50,6 +50,13 @@ export default async function FranchisesPage() {
         <h2 className="text-2xl font-bold text-white">Franchises</h2>
       </div>
 
+      {franchises.length === 0 && (
+        <div className="text-center py-24 text-slate-500">
+          <p className="text-lg">No franchises yet</p>
+          <p className="text-sm mt-1">Franchises are auto-created when you add anime from AniList, or you can create one manually.</p>
+        </div>
+      )}
+
       <FranchiseManager franchises={franchises} />
     </div>
   );

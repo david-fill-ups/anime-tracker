@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
 import { CreatePersonSchema, parseBody, wrapHandler } from "@/lib/validation";
-
-const MAX_LIMIT = 200;
-const DEFAULT_LIMIT = 100;
+import { PAGINATION } from "@/lib/pagination";
 
 export async function GET(req: NextRequest) {
   return wrapHandler(async () => {
@@ -12,8 +10,8 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
     const limit = Math.min(
-      MAX_LIMIT,
-      Math.max(1, parseInt(searchParams.get("limit") ?? String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT)
+      PAGINATION.people.max,
+      Math.max(1, parseInt(searchParams.get("limit") ?? String(PAGINATION.people.default), 10) || PAGINATION.people.default)
     );
     const skip = (page - 1) * limit;
 

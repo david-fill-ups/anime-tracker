@@ -6,6 +6,7 @@ import { useState } from "react";
 import StatusBadge from "./StatusBadge";
 import { useSpotlight } from "./SpotlightContext";
 import type { Anime, UserEntry, WatchStatus } from "@/app/generated/prisma";
+import { toast } from "sonner";
 
 type AnimeWithEntry = Anime & {
   userEntry: UserEntry & { recommender: { name: string } | null; watchContextPerson: { name: string } | null } | null;
@@ -35,26 +36,39 @@ export default function AnimeCard({ anime, onUpdate }: {
 
   const mainStudio = anime.animeStudios.find((s) => s.isMainStudio)?.studio.name;
   const franchise = anime.franchiseEntries[0]?.franchise.name;
-  const genres: string[] = JSON.parse(anime.genres || "[]");
+  let genres: string[] = [];
+  try { genres = JSON.parse(anime.genres || "[]"); } catch { genres = []; }
 
   async function incrementEpisode() {
     if (!entry) return;
     setLoading(true);
-    await fetch(`/api/anime/${anime.id}/episode`, { method: "PATCH" });
-    setLoading(false);
-    onUpdate();
+    try {
+      const res = await fetch(`/api/anime/${anime.id}/episode`, { method: "PATCH" });
+      if (!res.ok) toast.error("Failed to update episode");
+      else onUpdate();
+    } catch {
+      toast.error("Failed to update episode");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function changeStatus(status: WatchStatus) {
     if (!entry) return;
     setLoading(true);
-    await fetch(`/api/anime/${anime.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ watchStatus: status }),
-    });
-    setLoading(false);
-    onUpdate();
+    try {
+      const res = await fetch(`/api/anime/${anime.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ watchStatus: status }),
+      });
+      if (!res.ok) toast.error("Failed to update status");
+      else onUpdate();
+    } catch {
+      toast.error("Failed to update status");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const episodeText = entry
@@ -155,6 +169,7 @@ export default function AnimeCard({ anime, onUpdate }: {
               <option value="COMPLETED">Completed</option>
               <option value="DROPPED">Dropped</option>
               <option value="PLAN_TO_WATCH">Plan to Watch</option>
+              <option value="NOT_INTERESTED">Not Interested</option>
             </select>
           </div>
         )}

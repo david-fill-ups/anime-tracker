@@ -90,6 +90,7 @@ model FranchiseEntry {
 
   @@unique([franchiseId, animeId])
   @@unique([franchiseId, order])
+  @@index([franchiseId, order])
 }
 
 model Studio {
@@ -104,7 +105,7 @@ model AnimeStudio {
   studioId     Int
   isMainStudio Boolean @default(false)
   anime        Anime   @relation(fields: [animeId], references: [id], onDelete: Cascade)
-  studio       Studio  @relation(fields: [studioId], references: [id])
+  studio       Studio  @relation(fields: [studioId], references: [id], onDelete: Cascade)
 
   @@id([animeId, studioId])
 }
@@ -118,9 +119,11 @@ model Anime {
   titleNative        String?
   coverImageUrl      String?
   synopsis           String?
+  // JSON array of strings e.g. ["Action", "Drama"]
   genres             String           @default("[]")
   totalEpisodes      Int?
   totalSeasons       Int?
+  // JSON array of ints e.g. [12, 13, 11] — one entry per season
   episodesPerSeason  String?
   durationMins       Int?
   airingStatus       AiringStatus     @default(FINISHED)
@@ -145,6 +148,8 @@ model Anime {
   franchiseEntries   FranchiseEntry[]
   linkedIn           LinkedAnime[]
   streamingLinks     StreamingLink[]
+
+  @@index([airingStatus])
 }
 
 model Link {
@@ -156,6 +161,8 @@ model Link {
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   linkedAnime LinkedAnime[]
   userEntry   UserEntry?
+
+  @@index([userId])
 }
 
 model LinkedAnime {
@@ -167,6 +174,7 @@ model LinkedAnime {
   link    Link  @relation(fields: [linkId], references: [id], onDelete: Cascade)
 
   @@unique([linkId, animeId])
+  @@index([linkId, order])
 }
 
 model StreamingLink {
@@ -199,6 +207,8 @@ model UserEntry {
   recommender          Person?        @relation("Recommender", fields: [recommenderId], references: [id])
   user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   watchContextPerson   Person?        @relation("WatchContextPerson", fields: [watchContextPersonId], references: [id])
+
+  @@index([linkId])
 }
 
 enum AnimeSource {

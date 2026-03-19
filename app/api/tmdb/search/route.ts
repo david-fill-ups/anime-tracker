@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { wrapHandler } from "@/lib/validation";
+import { requireUserId } from "@/lib/auth-helpers";
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w92";
@@ -19,6 +20,7 @@ interface TmdbSearchResponse {
 
 export async function GET(req: NextRequest) {
   return wrapHandler(async () => {
+    await requireUserId();
     const q = req.nextUrl.searchParams.get("q")?.trim() ?? "";
     const type = (req.nextUrl.searchParams.get("type") ?? "tv") as "tv" | "movie";
 

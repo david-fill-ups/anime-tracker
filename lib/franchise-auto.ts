@@ -204,32 +204,34 @@ export async function autoPopulateFranchise(
     targetFranchiseId = franchiseIds[0];
     const toMerge = franchiseIds.slice(1);
 
-    for (const srcId of toMerge) {
-      const srcEntries = await db.franchiseEntry.findMany({
-        where: { franchiseId: srcId },
-        include: { anime: { select: { seasonYear: true, season: true } } },
-      });
-
-      for (const entry of srcEntries) {
-        const alreadyInTarget = await db.franchiseEntry.findFirst({
-          where: { franchiseId: targetFranchiseId, animeId: entry.animeId },
+    await db.$transaction(async (tx) => {
+      for (const srcId of toMerge) {
+        const srcEntries = await tx.franchiseEntry.findMany({
+          where: { franchiseId: srcId },
+          include: { anime: { select: { seasonYear: true, season: true } } },
         });
-        if (!alreadyInTarget) {
-          const baseOrder = computeOrder(entry.anime.seasonYear, entry.anime.season);
-          const order = await findAvailableOrder(targetFranchiseId, baseOrder);
-          await db.franchiseEntry.create({
-            data: {
-              franchiseId: targetFranchiseId,
-              animeId: entry.animeId,
-              order,
-              entryType: entry.entryType,
-            },
-          });
-        }
-      }
 
-      await db.franchise.delete({ where: { id: srcId } });
-    }
+        for (const entry of srcEntries) {
+          const alreadyInTarget = await tx.franchiseEntry.findFirst({
+            where: { franchiseId: targetFranchiseId, animeId: entry.animeId },
+          });
+          if (!alreadyInTarget) {
+            const baseOrder = computeOrder(entry.anime.seasonYear, entry.anime.season);
+            const order = await findAvailableOrder(targetFranchiseId, baseOrder);
+            await tx.franchiseEntry.create({
+              data: {
+                franchiseId: targetFranchiseId,
+                animeId: entry.animeId,
+                order,
+                entryType: entry.entryType,
+              },
+            });
+          }
+        }
+
+        await tx.franchise.delete({ where: { id: srcId } });
+      }
+    });
   }
 
   // Add current anime to the target franchise if not already there

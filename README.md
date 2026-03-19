@@ -94,3 +94,25 @@ Key endpoints:
 | `GET` | `/api/export` | Export library as CSV |
 | `GET` | `/api/franchises` | List franchises (paginated) |
 | `GET` | `/api/people` | List people (paginated) |
+
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | ✅ Required | PostgreSQL connection string (e.g. [Neon](https://neon.tech)) |
+| `AUTH_SECRET` | ✅ Required | Random secret for NextAuth.js session signing |
+| `AUTH_GOOGLE_ID` | ✅ Required | Google OAuth client ID |
+| `AUTH_GOOGLE_SECRET` | ✅ Required | Google OAuth client secret |
+| `TMDB_API_TOKEN` | Optional | TMDB Bearer token — enables automatic streaming link detection |
+
+## Data Model
+
+**Links & LinkedAnime**: A "Link" groups one or more anime seasons into a single tracked entry with cumulative episode progress. For example, Attack on Titan seasons 1–4 can be linked together so your `currentEpisode` counts across all seasons in order. Each Link has one UserEntry (your watch status and progress) and one or more LinkedAnime records (the actual seasons, with an `order` field).
+
+This is the core feature that distinguishes this tracker: instead of tracking each season separately, you track the whole franchise as one unit — while still knowing exactly which season you're in.
+
+## Troubleshooting
+
+**Schema changes**: This project uses `npx prisma db push` to sync the schema directly (no migration history files). Run this after pulling changes that modify `prisma/schema.prisma`.
+
+**Build order**: `npm run build` runs `prisma generate`, creates the Prisma barrel file, runs tests, then builds Next.js. If a step fails, fix it before running the full build again.

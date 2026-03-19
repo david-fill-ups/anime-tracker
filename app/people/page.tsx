@@ -59,6 +59,12 @@ export default async function PeoplePage() {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-white">People</h2>
       <p className="text-sm text-slate-400">Track who recommends anime to you and how their taste aligns with yours.</p>
+      {peopleWithStats.length === 0 && (
+        <div className="text-center py-24 text-slate-500">
+          <p className="text-lg">No people yet</p>
+          <p className="text-sm mt-1">Add a recommender or watch partner from any anime detail page.</p>
+        </div>
+      )}
       <PeopleManager people={peopleWithStats} />
     </div>
   );

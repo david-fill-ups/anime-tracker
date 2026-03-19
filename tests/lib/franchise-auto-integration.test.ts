@@ -18,6 +18,8 @@ const mockDb = vi.hoisted(() => ({
     create: vi.fn(),
     upsert: vi.fn(),
   },
+  // $transaction calls the callback with mockDb as the transaction proxy
+  $transaction: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({ db: mockDb }));
@@ -68,6 +70,8 @@ beforeEach(() => {
   mockDb.franchiseEntry.findFirst.mockResolvedValue(null);
   mockDb.franchiseEntry.create.mockResolvedValue({ id: 99 });
   mockDb.franchiseEntry.upsert.mockResolvedValue({ id: 99 });
+  // Pass mockDb as the transaction proxy so tx.* calls use the same mocks
+  mockDb.$transaction.mockImplementation((fn: (tx: typeof mockDb) => Promise<unknown>) => fn(mockDb));
 });
 
 describe("autoPopulateFranchise", () => {

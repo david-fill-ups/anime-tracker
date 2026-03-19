@@ -5,6 +5,7 @@ import Nav from "@/components/Nav";
 import { SpotlightProvider } from "@/components/SpotlightContext";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { Toaster } from "sonner";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
@@ -64,6 +65,7 @@ export default async function RootLayout({
             <main className="flex-1 lg:ml-56 p-4 pt-14 lg:p-8">{children}</main>
           </div>
         </SpotlightProvider>
+        <Toaster theme="dark" position="bottom-right" />
       </body>
     </html>
   );

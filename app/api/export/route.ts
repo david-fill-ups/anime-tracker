@@ -81,7 +81,8 @@ export async function GET(req: NextRequest) {
     ...filtered.map((link) => {
       const e = link.userEntry!;
       const primary = link.linkedAnime[0]!.anime;
-      const genres: string[] = JSON.parse(primary.genres || "[]");
+      let genres: string[] = [];
+      try { genres = JSON.parse(primary.genres || "[]"); } catch { genres = []; }
       // All linked anime IDs (excluding the primary)
       const linkedIds = link.linkedAnime
         .slice(1)

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
+import { wrapHandler } from "@/lib/validation";
+import { checkRateLimit, recordRateLimit } from "@/lib/rate-limit";
 import { fetchAniListById, mapAniListToAnimeData, upsertStudios } from "@/lib/anilist";
 import { parseCSV, validateHeader, EXPECTED_HEADERS } from "@/lib/csv";
 import type { WatchStatus } from "@/app/generated/prisma";
@@ -34,225 +36,238 @@ async function fetchOrCreateAnime(anilistId: number, tmdbIdVal: number | null) {
 }
 
 export async function POST(req: NextRequest) {
-  const userId = await requireUserId();
+  return wrapHandler(async () => {
+    const userId = await requireUserId();
 
-  const formData = await req.formData();
-  const file = formData.get("file") as File | null;
-  const mode = (formData.get("mode") as string) ?? "import";
-  const conflictMode = (formData.get("conflictMode") as string) ?? "update";
+    const formData = await req.formData();
+    const file = formData.get("file") as File | null;
+    const mode = (formData.get("mode") as string) ?? "import";
+    const conflictMode = (formData.get("conflictMode") as string) ?? "update";
 
-  if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
-  if (!file.name.toLowerCase().endsWith(".csv")) {
-    return NextResponse.json(
-      { error: "Invalid file type — please upload a .csv file exported from this app" },
-      { status: 400 },
-    );
-  }
-
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-  if (file.size > MAX_FILE_SIZE) {
-    return NextResponse.json({ error: "File too large (max 10 MB)" }, { status: 413 });
-  }
-
-  const text = await file.text();
-  const rows = parseCSV(text);
-
-  if (rows.length < 2) {
-    return NextResponse.json(
-      { error: "The CSV file is empty or contains no data rows" },
-      { status: 400 },
-    );
-  }
-
-  const header = rows[0];
-  const headerError = validateHeader(header);
-  if (headerError) {
-    return NextResponse.json({ error: headerError }, { status: 400 });
-  }
-
-  // ── Preview mode: validate format and count conflicts without writing ────────
-  if (mode === "preview") {
-    const validAnilistIds: number[] = [];
-    let invalidCount = 0;
-
-    for (const row of rows.slice(1)) {
-      const anilistIdStr = row[0];
-      const status = row[2];
-      if (!anilistIdStr || !VALID_STATUSES.has(status)) {
-        invalidCount++;
-        continue;
-      }
-      const anilistId = Number(anilistIdStr);
-      if (!Number.isInteger(anilistId) || anilistId <= 0) {
-        invalidCount++;
-        continue;
-      }
-      validAnilistIds.push(anilistId);
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      return NextResponse.json(
+        { error: "Invalid file type — please upload a .csv file exported from this app" },
+        { status: 400 },
+      );
     }
 
-    const existingAnime = await db.anime.findMany({
-      where: { anilistId: { in: validAnilistIds } },
-      select: { id: true, anilistId: true },
-    });
-
-    // Check which anime are already in this user's library (via LinkedAnime)
-    const existingLinked =
-      existingAnime.length > 0
-        ? await db.linkedAnime.findMany({
-            where: { animeId: { in: existingAnime.map((a) => a.id) }, link: { userId } },
-            select: { animeId: true },
-          })
-        : [];
-
-    const linkedAnimeIdSet = new Set(existingLinked.map((la) => la.animeId));
-    const animeByAnilistId = new Map(existingAnime.map((a) => [a.anilistId!, a.id]));
-
-    let existingCount = 0;
-    let newCount = 0;
-    for (const anilistId of validAnilistIds) {
-      const animeId = animeByAnilistId.get(anilistId);
-      if (animeId !== undefined && linkedAnimeIdSet.has(animeId)) {
-        existingCount++;
-      } else {
-        newCount++;
-      }
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "File too large (max 10 MB)" }, { status: 413 });
     }
 
-    return NextResponse.json({ newCount, existingCount, invalidCount });
-  }
+    const text = await file.text();
+    const rows = parseCSV(text);
 
-  // ── Import mode ──────────────────────────────────────────────────────────────
-  let imported = 0;
-  let updated = 0;
-  let skipped = 0;
-  let errors = 0;
+    if (rows.length < 2) {
+      return NextResponse.json(
+        { error: "The CSV file is empty or contains no data rows" },
+        { status: 400 },
+      );
+    }
 
-  for (const row of rows.slice(1)) {
-    try {
-      const anilistIdStr = row[0];
-      const status = row[2];
-      const currentEpStr = row[3];
-      const scoreStr = row[5];
-      const recommenderName = row[13];
-      const startedStr = row[14];
-      const completedStr = row[15];
-      const notes = row[16];
-      const tmdbIdStr = row[17] ?? "";
-      const linkedIdsStr = row[18] ?? "";
+    const header = rows[0];
+    const headerError = validateHeader(header);
+    if (headerError) {
+      return NextResponse.json({ error: headerError }, { status: 400 });
+    }
 
-      if (!anilistIdStr || !VALID_STATUSES.has(status)) {
-        errors++;
-        continue;
+    // ── Preview mode: validate format and count conflicts without writing ────────
+    if (mode === "preview") {
+      const validAnilistIds: number[] = [];
+      let invalidCount = 0;
+
+      for (const row of rows.slice(1)) {
+        const anilistIdStr = row[0];
+        const status = row[2];
+        if (!anilistIdStr || !VALID_STATUSES.has(status)) {
+          invalidCount++;
+          continue;
+        }
+        const anilistId = Number(anilistIdStr);
+        if (!Number.isInteger(anilistId) || anilistId <= 0) {
+          invalidCount++;
+          continue;
+        }
+        validAnilistIds.push(anilistId);
       }
 
-      const anilistId = Number(anilistIdStr);
-      if (!Number.isInteger(anilistId) || anilistId <= 0) {
-        errors++;
-        continue;
-      }
-
-      const tmdbIdVal = tmdbIdStr ? Number(tmdbIdStr) : null;
-
-      const anime = await fetchOrCreateAnime(anilistId, tmdbIdVal);
-      if (!anime) {
-        errors++;
-        continue;
-      }
-
-      // Find or create the recommender person
-      let recommenderId: number | null = null;
-      if (recommenderName) {
-        const person = await db.person.upsert({
-          where: { name_userId: { name: recommenderName, userId } },
-          update: {},
-          create: { name: recommenderName, userId },
-        });
-        recommenderId = person.id;
-      }
-
-      const entryData = {
-        watchStatus: status as WatchStatus,
-        currentEpisode: Number(currentEpStr) || 0,
-        score: scoreStr ? Number(scoreStr) : null,
-        notes: notes || null,
-        recommenderId,
-        startedAt: startedStr ? new Date(startedStr) : null,
-        completedAt: completedStr ? new Date(completedStr) : null,
-      };
-
-      // Find existing Link for this anime
-      const existingLink = await db.link.findFirst({
-        where: { userId, linkedAnime: { some: { animeId: anime.id } } },
-        select: { id: true, userEntry: { select: { id: true } } },
+      const existingAnime = await db.anime.findMany({
+        where: { anilistId: { in: validAnilistIds } },
+        select: { id: true, anilistId: true },
       });
 
-      if (existingLink?.userEntry) {
-        if (conflictMode === "skip") {
-          skipped++;
+      // Check which anime are already in this user's library (via LinkedAnime)
+      const existingLinked =
+        existingAnime.length > 0
+          ? await db.linkedAnime.findMany({
+              where: { animeId: { in: existingAnime.map((a) => a.id) }, link: { userId } },
+              select: { animeId: true },
+            })
+          : [];
+
+      const linkedAnimeIdSet = new Set(existingLinked.map((la) => la.animeId));
+      const animeByAnilistId = new Map(existingAnime.map((a) => [a.anilistId!, a.id]));
+
+      let existingCount = 0;
+      let newCount = 0;
+      for (const anilistId of validAnilistIds) {
+        const animeId = animeByAnilistId.get(anilistId);
+        if (animeId !== undefined && linkedAnimeIdSet.has(animeId)) {
+          existingCount++;
         } else {
-          await db.userEntry.update({
-            where: { linkId: existingLink.id },
-            data: entryData,
-          });
-          updated++;
+          newCount++;
         }
-      } else if (existingLink) {
-        // Link exists but no UserEntry — create one
-        await db.userEntry.create({
-          data: { linkId: existingLink.id, userId, ...entryData },
-        });
-        imported++;
-      } else {
-        // No link — create Link + LinkedAnime + UserEntry
-        await db.link.create({
-          data: {
-            userId,
-            linkedAnime: { create: { animeId: anime.id, order: 0 } },
-            userEntry: { create: { userId, ...entryData } },
-          },
-        });
-        imported++;
       }
 
-      // Re-establish linked anime for any linked AniList IDs
-      if (linkedIdsStr) {
-        // Find or create the link for the primary anime
-        const link = await db.link.findFirst({
+      return NextResponse.json({ newCount, existingCount, invalidCount });
+    }
+
+    // ── Rate limit check (import only, not preview) ───────────────────────────
+    const rateLimitKey = `import:${userId}`;
+    const { limited, secsLeft } = checkRateLimit(rateLimitKey, 30_000);
+    if (limited) {
+      return NextResponse.json(
+        { error: `Please wait ${secsLeft}s before importing again` },
+        { status: 429 },
+      );
+    }
+    recordRateLimit(rateLimitKey);
+
+    // ── Import mode ──────────────────────────────────────────────────────────────
+    let imported = 0;
+    let updated = 0;
+    let skipped = 0;
+    let errors = 0;
+
+    for (const row of rows.slice(1)) {
+      try {
+        const anilistIdStr = row[0];
+        const status = row[2];
+        const currentEpStr = row[3];
+        const scoreStr = row[5];
+        const recommenderName = row[13];
+        const startedStr = row[14];
+        const completedStr = row[15];
+        const notes = row[16];
+        const tmdbIdStr = row[17] ?? "";
+        const linkedIdsStr = row[18] ?? "";
+
+        if (!anilistIdStr || !VALID_STATUSES.has(status)) {
+          errors++;
+          continue;
+        }
+
+        const anilistId = Number(anilistIdStr);
+        if (!Number.isInteger(anilistId) || anilistId <= 0) {
+          errors++;
+          continue;
+        }
+
+        const tmdbIdVal = tmdbIdStr ? Number(tmdbIdStr) : null;
+
+        const anime = await fetchOrCreateAnime(anilistId, tmdbIdVal);
+        if (!anime) {
+          errors++;
+          continue;
+        }
+
+        // Find or create the recommender person
+        let recommenderId: number | null = null;
+        if (recommenderName) {
+          const person = await db.person.upsert({
+            where: { name_userId: { name: recommenderName, userId } },
+            update: {},
+            create: { name: recommenderName, userId },
+          });
+          recommenderId = person.id;
+        }
+
+        const entryData = {
+          watchStatus: status as WatchStatus,
+          currentEpisode: Number(currentEpStr) || 0,
+          score: scoreStr ? Number(scoreStr) : null,
+          notes: notes || null,
+          recommenderId,
+          startedAt: startedStr ? new Date(startedStr) : null,
+          completedAt: completedStr ? new Date(completedStr) : null,
+        };
+
+        // Find existing Link for this anime
+        const existingLink = await db.link.findFirst({
           where: { userId, linkedAnime: { some: { animeId: anime.id } } },
-          include: { linkedAnime: { select: { animeId: true, order: true } } },
+          select: { id: true, userEntry: { select: { id: true } } },
         });
-        if (!link) continue;
 
-        const linkedIds = linkedIdsStr
-          .split(";")
-          .map((s) => Number(s.trim()))
-          .filter((n) => Number.isInteger(n) && n > 0);
-
-        for (const linkedId of linkedIds) {
-          try {
-            const linkedAnime = await fetchOrCreateAnime(linkedId, null);
-            if (!linkedAnime) continue;
-
-            // Skip if already in this link
-            if (link.linkedAnime.some((la) => la.animeId === linkedAnime.id)) continue;
-
-            const nextOrder = link.linkedAnime.length;
-            await db.linkedAnime.create({
-              data: { linkId: link.id, animeId: linkedAnime.id, order: nextOrder },
+        if (existingLink?.userEntry) {
+          if (conflictMode === "skip") {
+            skipped++;
+          } else {
+            await db.userEntry.update({
+              where: { linkId: existingLink.id },
+              data: entryData,
             });
-            // Update local array to track order
-            link.linkedAnime.push({ animeId: linkedAnime.id, order: nextOrder });
-          } catch {
-            // skip individual link failures — don't fail the whole row
+            updated++;
+          }
+        } else if (existingLink) {
+          // Link exists but no UserEntry — create one
+          await db.userEntry.create({
+            data: { linkId: existingLink.id, userId, ...entryData },
+          });
+          imported++;
+        } else {
+          // No link — create Link + LinkedAnime + UserEntry
+          await db.link.create({
+            data: {
+              userId,
+              linkedAnime: { create: { animeId: anime.id, order: 0 } },
+              userEntry: { create: { userId, ...entryData } },
+            },
+          });
+          imported++;
+        }
+
+        // Re-establish linked anime for any linked AniList IDs
+        if (linkedIdsStr) {
+          // Find or create the link for the primary anime
+          const link = await db.link.findFirst({
+            where: { userId, linkedAnime: { some: { animeId: anime.id } } },
+            include: { linkedAnime: { select: { animeId: true, order: true } } },
+          });
+          if (!link) continue;
+
+          const linkedIds = linkedIdsStr
+            .split(";")
+            .map((s) => Number(s.trim()))
+            .filter((n) => Number.isInteger(n) && n > 0);
+
+          for (const linkedId of linkedIds) {
+            try {
+              const linkedAnime = await fetchOrCreateAnime(linkedId, null);
+              if (!linkedAnime) continue;
+
+              // Skip if already in this link
+              if (link.linkedAnime.some((la) => la.animeId === linkedAnime.id)) continue;
+
+              const nextOrder = link.linkedAnime.length;
+              await db.linkedAnime.create({
+                data: { linkId: link.id, animeId: linkedAnime.id, order: nextOrder },
+              });
+              // Update local array to track order
+              link.linkedAnime.push({ animeId: linkedAnime.id, order: nextOrder });
+            } catch {
+              // skip individual link failures — don't fail the whole row
+            }
           }
         }
+      } catch (err) {
+        console.error("[import] Failed to process row:", err);
+        errors++;
       }
-    } catch (err) {
-      console.error("[import] Failed to process row:", err);
-      errors++;
     }
-  }
 
-  return NextResponse.json({ imported, updated, skipped, errors });
+    return NextResponse.json({ imported, updated, skipped, errors });
+  });
 }

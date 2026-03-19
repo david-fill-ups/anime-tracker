@@ -778,6 +778,30 @@ export function buildOpenApiSpec(): AnyObj {
         },
       },
 
+      "/api/tmdb/search": {
+        get: {
+          operationId: "searchTmdb",
+          summary: "Search TMDB for TV shows or movies",
+          tags: ["Search"],
+          parameters: [
+            queryParam("q", "Search query", true),
+            {
+              name: "type",
+              in: "query" as const,
+              required: false,
+              description: "Media type to search: tv or movie (default tv)",
+              schema: { type: "string", enum: ["tv", "movie"], default: "tv" },
+            },
+          ],
+          responses: {
+            "200": resp(
+              "Array of { id, name, year, mediaType, posterUrl }",
+            ),
+            "401": resp("Unauthorized"),
+          },
+        },
+      },
+
       // ─── Sync ─────────────────────────────────────────────────────────────────
 
       "/api/sync-all": {

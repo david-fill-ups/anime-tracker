@@ -1,21 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { wrapHandler, URLIdSchema } from "@/lib/validation";
+import { requireUserId } from "@/lib/auth-helpers";
+import { db } from "@/lib/db";
 import { refreshStreamingForAnime } from "@/lib/tmdb";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(_req: NextRequest, { params }: Params) {
-  const { id } = await params;
-  const animeId = Number(id);
+  return wrapHandler(async () => {
+    const userId = await requireUserId();
+    const { id } = await params;
+    const animeId = URLIdSchema.parse(id);
 
-  if (isNaN(animeId)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
+    const owned = await db.linkedAnime.findFirst({ where: { animeId, link: { userId } } });
+    if (!owned) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
 
-  try {
     await refreshStreamingForAnime(animeId);
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("[streaming/refresh] Unexpected error:", err);
-    return NextResponse.json({ ok: false, error: "Failed to refresh streaming data" }, { status: 500 });
-  }
+  });
 }

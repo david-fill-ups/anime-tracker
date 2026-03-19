@@ -54,7 +54,8 @@ export default async function AnimeDetailPage({
   const entry = link?.userEntry ?? null;
   const isMultiLink = (link?.linkedAnime.length ?? 0) > 1;
 
-  const genres: string[] = JSON.parse(rawAnime.genres || "[]");
+  let genres: string[] = [];
+  try { genres = JSON.parse(rawAnime.genres || "[]"); } catch { genres = []; }
   const mainStudios = rawAnime.animeStudios.filter((s) => s.isMainStudio);
 
   // Effective totals across all linked anime
