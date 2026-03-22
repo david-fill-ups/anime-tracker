@@ -50,7 +50,9 @@ function categorizeBehind(
   behind: number | null,
   isReleasing: boolean
 ): "catchUp" | "keepUp" | "neither" {
-  if (behind == null || behind > 0) return "catchUp";
+  // behind=null + isReleasing: unknown aired count (e.g. mid-cour break) → catch up
+  // behind=null + !isReleasing: all NOT_YET_RELEASED, nothing has aired → neither
+  if ((behind == null && isReleasing) || (behind != null && behind > 0)) return "catchUp";
   if (behind === 0 && isReleasing) return "keepUp";
   return "neither";
 }
@@ -126,7 +128,7 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
     expect(behind).toBe(null);
   });
 
-  it("NOT_YET_RELEASED show: contributes 0 episodes aired (loop continues)", () => {
+  it("NOT_YET_RELEASED show: episodesAired=null, behind=null, but categorizes as neither (not catch-up)", () => {
     const shows: ShowForCalc[] = [
       { airingStatus: "NOT_YET_RELEASED", totalEpisodes: 12, nextAiringEp: null, nextAiringAt: null },
     ];
@@ -134,6 +136,9 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
     const { episodesAired, behind } = calcBehind(shows, 0);
     expect(episodesAired).toBe(null);
     expect(behind).toBe(null);
+    // isReleasing=false → behind=null means nothing has aired yet, not unknown → neither
+    const isReleasing = shows.some((s) => s.airingStatus === "RELEASING");
+    expect(categorizeBehind(behind, isReleasing)).toBe("neither");
   });
 
   it("multi-season chain (FINISHED + FINISHED + RELEASING future): sums all seasons", () => {
@@ -196,11 +201,15 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
 });
 
 describe("categorization — behind=null goes to Catch Up, behind=0 + releasing goes to Keep Up", () => {
-  it("behind=null → Catch Up (not Keep Up)", () => {
-    // This is the key invariant: unknown progress must never be treated as
+  it("behind=null + isReleasing=true → Catch Up (unknown aired count, e.g. mid-cour break)", () => {
+    // Unknown progress on an actively releasing show must never be treated as
     // "caught up". Violating this was the Oshi no Ko S3 bug.
     expect(categorizeBehind(null, true)).toBe("catchUp");
-    expect(categorizeBehind(null, false)).toBe("catchUp");
+  });
+
+  it("behind=null + isReleasing=false → neither (all NOT_YET_RELEASED, nothing has aired)", () => {
+    // e.g. JoJo Steel Ball Run: announced but not yet airing — user is not behind
+    expect(categorizeBehind(null, false)).toBe("neither");
   });
 
   it("behind=0 and isReleasing=true → Keep Up", () => {

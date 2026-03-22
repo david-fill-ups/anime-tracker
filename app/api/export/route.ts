@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
             include: {
               franchiseEntries: { include: { franchise: true }, orderBy: { order: "asc" } },
               animeStudios: { include: { studio: true }, where: { isMainStudio: true } },
+              streamingLinks: { orderBy: { service: "asc" } },
             },
           },
         },
@@ -77,6 +78,7 @@ export async function GET(req: NextRequest) {
       "Notes",
       "TMDB ID",
       "Linked AniList IDs",
+      "Streaming Links",
     ],
     ...filtered.map((link) => {
       const e = link.userEntry!;
@@ -90,6 +92,14 @@ export async function GET(req: NextRequest) {
         .filter(Boolean)
         .join("; ");
 
+      const franchiseStr = primary.franchiseEntries
+        .map((fe) => `${fe.franchise.name}|${fe.order}|${fe.entryType}`)
+        .join("; ");
+
+      const streamingStr = primary.streamingLinks
+        .map((sl) => `${sl.service}:${sl.url}`)
+        .join("; ");
+
       return [
         primary.anilistId != null ? String(primary.anilistId) : "",
         primary.titleEnglish || primary.titleRomaji,
@@ -101,7 +111,7 @@ export async function GET(req: NextRequest) {
         e.score != null ? String(e.score) : "",
         primary.meanScore != null ? String(primary.meanScore) : "",
         primary.displayFormat,
-        primary.franchiseEntries[0]?.franchise.name ?? "",
+        franchiseStr,
         primary.animeStudios[0]?.studio.name ?? "",
         genres.join("; "),
         primary.airingStatus,
@@ -112,6 +122,7 @@ export async function GET(req: NextRequest) {
         (e.notes ?? "").replace(/[\n\r]/g, " "),
         primary.tmdbId != null ? String(primary.tmdbId) : "",
         linkedIds,
+        streamingStr,
       ];
     }),
   ];

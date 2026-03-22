@@ -5,7 +5,7 @@ import { wrapHandler } from "@/lib/validation";
 import { checkRateLimit, recordRateLimit } from "@/lib/rate-limit";
 import { fetchAniListById, mapAniListToAnimeData, upsertStudios } from "@/lib/anilist";
 import { parseCSV, validateHeader, EXPECTED_HEADERS } from "@/lib/csv";
-import type { WatchStatus } from "@/app/generated/prisma";
+import type { WatchStatus, StreamingService, FranchiseEntryType } from "@/app/generated/prisma";
 
 const VALID_STATUSES = new Set<string>([
   "WATCHING",
@@ -14,6 +14,18 @@ const VALID_STATUSES = new Set<string>([
   "PLAN_TO_WATCH",
   "NOT_INTERESTED",
 ]);
+
+const VALID_STREAMING_SERVICES = new Set<string>([
+  "NETFLIX",
+  "HULU",
+  "DISNEY_PLUS",
+  "HBO",
+  "CRUNCHYROLL",
+  "AMAZON_PRIME",
+  "HIDIVE",
+]);
+
+const VALID_ENTRY_TYPES = new Set<string>(["MAIN", "SIDE_STORY", "MOVIE", "OVA"]);
 
 
 // Fetch or create an anime by AniList ID (without linking)
@@ -148,12 +160,14 @@ export async function POST(req: NextRequest) {
         const status = row[2];
         const currentEpStr = row[3];
         const scoreStr = row[5];
+        const franchiseStr = row[8] ?? "";
         const recommenderName = row[13];
         const startedStr = row[14];
         const completedStr = row[15];
         const notes = row[16];
         const tmdbIdStr = row[17] ?? "";
         const linkedIdsStr = row[18] ?? "";
+        const streamingStr = row[19] ?? "";
 
         if (!anilistIdStr || !VALID_STATUSES.has(status)) {
           errors++;
@@ -259,6 +273,57 @@ export async function POST(req: NextRequest) {
               link.linkedAnime.push({ animeId: linkedAnime.id, order: nextOrder });
             } catch {
               // skip individual link failures — don't fail the whole row
+            }
+          }
+        }
+        // ── Restore franchise associations ────────────────────────────────
+        if (franchiseStr) {
+          const franchiseEntries = franchiseStr.split(";").map((s) => s.trim()).filter(Boolean);
+          for (const entry of franchiseEntries) {
+            try {
+              const parts = entry.split("|");
+              if (parts.length !== 3) continue; // old format or malformed — skip
+              const [franchiseName, orderStr, entryTypeStr] = parts;
+              const order = Number(orderStr);
+              if (!franchiseName?.trim() || !Number.isInteger(order) || order < 0) continue;
+              const entryType = entryTypeStr?.trim();
+              if (!VALID_ENTRY_TYPES.has(entryType)) continue;
+
+              const franchise = await db.franchise.upsert({
+                where: { name_userId: { name: franchiseName.trim(), userId } },
+                update: {},
+                create: { name: franchiseName.trim(), userId },
+              });
+
+              await db.franchiseEntry.upsert({
+                where: { franchiseId_animeId: { franchiseId: franchise.id, animeId: anime.id } },
+                update: { order, entryType: entryType as FranchiseEntryType },
+                create: { franchiseId: franchise.id, animeId: anime.id, order, entryType: entryType as FranchiseEntryType },
+              });
+            } catch {
+              // skip individual franchise entry failures (e.g. order conflicts)
+            }
+          }
+        }
+
+        // ── Restore streaming links ───────────────────────────────────────
+        if (streamingStr) {
+          const streamingEntries = streamingStr.split(";").map((s) => s.trim()).filter(Boolean);
+          for (const entry of streamingEntries) {
+            try {
+              const colonIdx = entry.indexOf(":");
+              if (colonIdx < 0) continue;
+              const service = entry.slice(0, colonIdx).trim();
+              const url = entry.slice(colonIdx + 1).trim();
+              if (!VALID_STREAMING_SERVICES.has(service) || !url) continue;
+
+              await db.streamingLink.upsert({
+                where: { animeId_service: { animeId: anime.id, service: service as StreamingService } },
+                update: { url },
+                create: { animeId: anime.id, service: service as StreamingService, url },
+              });
+            } catch {
+              // skip individual streaming link failures
             }
           }
         }

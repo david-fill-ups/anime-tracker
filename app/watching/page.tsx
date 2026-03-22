@@ -118,8 +118,10 @@ export default async function WatchListPage() {
   });
 
   // Catch Up: behind on episodes, sorted most behind first
+  // behind=null only counts if isReleasing — that means we can't determine aired count (e.g. mid-cour break).
+  // If behind=null and NOT isReleasing, all shows are NOT_YET_RELEASED — nothing has aired, so not behind.
   const catchUpItems = items
-    .filter((i) => i.behind == null || i.behind > 0)
+    .filter((i) => (i.behind == null && i.isReleasing) || (i.behind != null && i.behind > 0))
     .sort((a, b) => {
       if (a.behind == null && b.behind == null) return 0;
       if (a.behind == null) return 1;

@@ -18,6 +18,7 @@ export const EXPECTED_HEADERS = [
   "Notes",
   "TMDB ID",
   "Linked AniList IDs",
+  "Streaming Links",
 ];
 
 // Minimal RFC 4180-compatible CSV parser

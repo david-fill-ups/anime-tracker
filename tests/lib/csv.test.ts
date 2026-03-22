@@ -47,7 +47,7 @@ describe("validateHeader", () => {
 
   it("returns error when column count is too low", () => {
     const result = validateHeader(validHeader.slice(0, 5));
-    expect(result).toMatch(/expected 19 columns but found 5/);
+    expect(result).toMatch(/expected 20 columns but found 5/);
   });
 
   it("returns error when a key column has the wrong name", () => {

@@ -656,7 +656,7 @@ export function buildOpenApiSpec(): AnyObj {
           operationId: "exportLibrary",
           summary: "Export library as CSV",
           description:
-            "Downloads the user's full library as a CSV file. Supports optional filters.",
+            "Downloads the user's full library as a CSV file. Includes watch data, franchise associations (name|order|entryType per entry, semicolon-separated), and streaming links (SERVICE:url per link, semicolon-separated). Supports optional filters.",
           tags: ["Import/Export"],
           parameters: [
             queryParam(
@@ -684,7 +684,7 @@ export function buildOpenApiSpec(): AnyObj {
           operationId: "importLibrary",
           summary: "Import library from CSV",
           description:
-            "Imports anime from a CSV file previously exported by this app. Pass `mode=preview` for a dry run that returns counts only. For real imports, provide `conflictMode` to control how existing entries are handled.",
+            "Imports anime from a CSV file previously exported by this app. Restores watch data, franchise associations, and streaming links. Pass `mode=preview` for a dry run that returns counts only. For real imports, provide `conflictMode` to control how existing entries are handled.",
           tags: ["Import/Export"],
           requestBody: {
             required: true,
