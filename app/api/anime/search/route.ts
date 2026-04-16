@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
 import { wrapHandler } from "@/lib/validation";
+import { searchAnimeIdsByTitle } from "@/lib/anime-utils";
 
 export async function GET(req: NextRequest) {
   return wrapHandler(async () => {
@@ -24,15 +25,16 @@ export async function GET(req: NextRequest) {
       excludeAnimeIds = linked.map((la) => la.animeId);
     }
 
+    const allMatchingIds = await searchAnimeIdsByTitle(q);
+    const matchingIds = allMatchingIds.filter(
+      (id) => id !== excludeId && !excludeAnimeIds.includes(id)
+    );
+    if (matchingIds.length === 0) return NextResponse.json([]);
+
     const results = await db.anime.findMany({
       where: {
-        ...(excludeId ? { id: { not: excludeId } } : {}),
-        ...(excludeAnimeIds.length > 0 ? { id: { notIn: excludeAnimeIds } } : {}),
+        id: { in: matchingIds },
         linkedIn: { some: { link: { userId } } },
-        OR: [
-          { titleEnglish: { contains: q, mode: "insensitive" } },
-          { titleRomaji: { contains: q, mode: "insensitive" } },
-        ],
       },
       select: {
         id: true,

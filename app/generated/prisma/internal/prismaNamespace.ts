@@ -1612,6 +1612,7 @@ export const AnimeScalarFieldEnum = {
   meanScore: 'meanScore',
   nextAiringEp: 'nextAiringEp',
   nextAiringAt: 'nextAiringAt',
+  lastKnownAiredEp: 'lastKnownAiredEp',
   lastSyncedAt: 'lastSyncedAt',
   tmdbId: 'tmdbId',
   tmdbMediaType: 'tmdbMediaType',

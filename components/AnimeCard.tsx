@@ -45,7 +45,14 @@ export default function AnimeCard({ anime, onUpdate }: {
     try {
       const res = await fetch(`/api/anime/${anime.id}/episode`, { method: "PATCH" });
       if (!res.ok) toast.error("Failed to update episode");
-      else onUpdate();
+      else {
+        const nextEp = entry.currentEpisode + 1;
+        const seriesDone = anime.airingStatus === "FINISHED" || anime.airingStatus === "CANCELLED";
+        if (anime.totalEpisodes && nextEp >= anime.totalEpisodes && seriesDone && !entry.score) {
+          toast.success("Series complete! Don't forget to rate it.", { duration: 5000 });
+        }
+        onUpdate();
+      }
     } catch {
       toast.error("Failed to update episode");
     } finally {

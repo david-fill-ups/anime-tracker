@@ -10,6 +10,7 @@ type ShowForCalc = {
   totalEpisodes: number | null;
   nextAiringEp: number | null;
   nextAiringAt: Date | null;
+  lastKnownAiredEp: number | null;
 };
 
 function calcBehind(
@@ -28,8 +29,10 @@ function calcBehind(
         const isPast = showNextAt ? showNextAt.getTime() < Date.now() : false;
         episodesAired = (episodesAired ?? 0) + (isPast ? show.nextAiringEp : show.nextAiringEp - 1);
         if (!nextAt && showNextAt && !isPast) nextAt = showNextAt;
+      } else if (show.lastKnownAiredEp != null) {
+        episodesAired = (episodesAired ?? 0) + show.lastKnownAiredEp;
       } else {
-        // nextAiringEp is null: can't determine how many episodes have aired.
+        // nextAiringEp is null and no prior data: can't determine aired count.
         // Mark as unknown so the entry appears in Catch Up rather than Keep Up.
         episodesAired = null;
         break;
@@ -66,7 +69,7 @@ afterEach(() => {
 describe("calcBehind — episode-behind calculation (mirrors app/watching/page.tsx)", () => {
   it("FINISHED show: episodesAired equals totalEpisodes", () => {
     const shows: ShowForCalc[] = [
-      { airingStatus: "FINISHED", totalEpisodes: 12, nextAiringEp: null, nextAiringAt: null },
+      { airingStatus: "FINISHED", totalEpisodes: 12, nextAiringEp: null, nextAiringAt: null, lastKnownAiredEp: null },
     ];
     const { episodesAired, behind } = calcBehind(shows, 8);
     expect(episodesAired).toBe(12);
@@ -84,6 +87,7 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
         totalEpisodes: null,
         nextAiringEp: 5,
         nextAiringAt: futureDate,
+        lastKnownAiredEp: null,
       },
     ];
     const { episodesAired, behind } = calcBehind(shows, 3);
@@ -102,6 +106,7 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
         totalEpisodes: null,
         nextAiringEp: 5,
         nextAiringAt: pastDate,
+        lastKnownAiredEp: null,
       },
     ];
     const { episodesAired, behind } = calcBehind(shows, 3);
@@ -111,16 +116,17 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
 
   // Regression test: Oshi no Ko Season 3 (and similar shows) were incorrectly
   // appearing in "Keep Up" instead of "Catch Up" because nextAiringEp was null
-  // during mid-cour break / between seasons. When nextAiringEp is null we cannot
+  // during mid-cour break / between seasons. Without lastKnownAiredEp we cannot
   // determine how many episodes have aired, so episodesAired must be null and the
   // show must be treated as unknown (→ Catch Up), not as "caught up" (→ Keep Up).
-  it("RELEASING show with null nextAiringEp: episodesAired=null, behind=null (Oshi no Ko S3 regression)", () => {
+  it("RELEASING show with null nextAiringEp and no lastKnownAiredEp: episodesAired=null, behind=null (Oshi no Ko S3 regression)", () => {
     const shows: ShowForCalc[] = [
       {
         airingStatus: "RELEASING",
         totalEpisodes: null,
         nextAiringEp: null, // AniList hasn't populated next episode data yet
         nextAiringAt: null,
+        lastKnownAiredEp: null, // never synced while nextAiringEp was set
       },
     ];
     const { episodesAired, behind } = calcBehind(shows, 0);
@@ -128,9 +134,81 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
     expect(behind).toBe(null);
   });
 
+  // Fix for JoJo-style case: RELEASING show where nextAiringEp is temporarily null
+  // (between episodes / AniList scheduling gap) but we have a prior known aired count.
+  // User caught up → should resolve to behind=0 → Keep Up, not Catch Up.
+  it("RELEASING show with null nextAiringEp but lastKnownAiredEp set: uses floor (JoJo fix)", () => {
+    const shows: ShowForCalc[] = [
+      {
+        airingStatus: "RELEASING",
+        totalEpisodes: null,
+        nextAiringEp: null,
+        nextAiringAt: null,
+        lastKnownAiredEp: 151, // last sync had nextAiringEp=152, so 151 were aired
+      },
+    ];
+    // User is at ep 151 — caught up
+    const { episodesAired, behind } = calcBehind(shows, 151);
+    expect(episodesAired).toBe(151);
+    expect(behind).toBe(0);
+    const isReleasing = shows.some((s) => s.airingStatus === "RELEASING");
+    expect(categorizeBehind(behind, isReleasing)).toBe("keepUp");
+  });
+
+  it("RELEASING show with null nextAiringEp but lastKnownAiredEp set: user behind → Catch Up", () => {
+    const shows: ShowForCalc[] = [
+      {
+        airingStatus: "RELEASING",
+        totalEpisodes: null,
+        nextAiringEp: null,
+        nextAiringAt: null,
+        lastKnownAiredEp: 151,
+      },
+    ];
+    // User only at ep 148 — 3 behind
+    const { episodesAired, behind } = calcBehind(shows, 148);
+    expect(episodesAired).toBe(151);
+    expect(behind).toBe(3);
+    const isReleasing = shows.some((s) => s.airingStatus === "RELEASING");
+    expect(categorizeBehind(behind, isReleasing)).toBe("catchUp");
+  });
+
+  it("multi-season chain: FINISHED + RELEASING null nextAiringEp with lastKnownAiredEp uses floor", () => {
+    const shows: ShowForCalc[] = [
+      { airingStatus: "FINISHED", totalEpisodes: 11, nextAiringEp: null, nextAiringAt: null, lastKnownAiredEp: null },
+      {
+        airingStatus: "RELEASING",
+        totalEpisodes: null,
+        nextAiringEp: null,
+        nextAiringAt: null,
+        lastKnownAiredEp: 5, // last known: 5 eps aired for this season
+      },
+    ];
+    // Total aired: 11 + 5 = 16; user at ep 16 → caught up
+    const { episodesAired, behind } = calcBehind(shows, 16);
+    expect(episodesAired).toBe(16);
+    expect(behind).toBe(0);
+  });
+
+  it("multi-season with null nextAiringEp and no lastKnownAiredEp mid-chain: breaks loop → episodesAired=null", () => {
+    const shows: ShowForCalc[] = [
+      { airingStatus: "FINISHED", totalEpisodes: 11, nextAiringEp: null, nextAiringAt: null, lastKnownAiredEp: null },
+      {
+        airingStatus: "RELEASING",
+        totalEpisodes: null,
+        nextAiringEp: null, // unknown — breaks the chain
+        nextAiringAt: null,
+        lastKnownAiredEp: null,
+      },
+    ];
+    const { episodesAired, behind } = calcBehind(shows, 5);
+    expect(episodesAired).toBe(null);
+    expect(behind).toBe(null);
+  });
+
   it("NOT_YET_RELEASED show: episodesAired=null, behind=null, but categorizes as neither (not catch-up)", () => {
     const shows: ShowForCalc[] = [
-      { airingStatus: "NOT_YET_RELEASED", totalEpisodes: 12, nextAiringEp: null, nextAiringAt: null },
+      { airingStatus: "NOT_YET_RELEASED", totalEpisodes: 12, nextAiringEp: null, nextAiringAt: null, lastKnownAiredEp: null },
     ];
     // episodesAired starts as null and is never incremented because the status is skipped
     const { episodesAired, behind } = calcBehind(shows, 0);
@@ -148,15 +226,16 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
     const futureDate = new Date("2025-10-08T00:00:00Z");
     const shows: ShowForCalc[] = [
       // S1 — complete
-      { airingStatus: "FINISHED", totalEpisodes: 11, nextAiringEp: null, nextAiringAt: null },
+      { airingStatus: "FINISHED", totalEpisodes: 11, nextAiringEp: null, nextAiringAt: null, lastKnownAiredEp: null },
       // S2 — complete
-      { airingStatus: "FINISHED", totalEpisodes: 13, nextAiringEp: null, nextAiringAt: null },
+      { airingStatus: "FINISHED", totalEpisodes: 13, nextAiringEp: null, nextAiringAt: null, lastKnownAiredEp: null },
       // S3 — currently releasing, ep 3 airs next week
       {
         airingStatus: "RELEASING",
         totalEpisodes: null,
         nextAiringEp: 3,
         nextAiringAt: futureDate,
+        lastKnownAiredEp: null,
       },
     ];
     // S1(11) + S2(13) + S3(3-1=2) = 26 aired
@@ -165,24 +244,9 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
     expect(behind).toBe(2);
   });
 
-  it("multi-season with null nextAiringEp mid-chain: breaks loop → episodesAired=null", () => {
-    const shows: ShowForCalc[] = [
-      { airingStatus: "FINISHED", totalEpisodes: 11, nextAiringEp: null, nextAiringAt: null },
-      {
-        airingStatus: "RELEASING",
-        totalEpisodes: null,
-        nextAiringEp: null, // unknown — breaks the chain
-        nextAiringAt: null,
-      },
-    ];
-    const { episodesAired, behind } = calcBehind(shows, 5);
-    expect(episodesAired).toBe(null);
-    expect(behind).toBe(null);
-  });
-
   it("behind never goes negative: when user is ahead of aired count, behind=0", () => {
     const shows: ShowForCalc[] = [
-      { airingStatus: "FINISHED", totalEpisodes: 5, nextAiringEp: null, nextAiringAt: null },
+      { airingStatus: "FINISHED", totalEpisodes: 5, nextAiringEp: null, nextAiringAt: null, lastKnownAiredEp: null },
     ];
     // User is on ep 10 but only 5 have aired (e.g. data not yet updated)
     const { episodesAired, behind } = calcBehind(shows, 10);
@@ -192,7 +256,7 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
 
   it("CANCELLED show is treated the same as FINISHED: totalEpisodes counted", () => {
     const shows: ShowForCalc[] = [
-      { airingStatus: "CANCELLED", totalEpisodes: 6, nextAiringEp: null, nextAiringAt: null },
+      { airingStatus: "CANCELLED", totalEpisodes: 6, nextAiringEp: null, nextAiringAt: null, lastKnownAiredEp: null },
     ];
     const { episodesAired, behind } = calcBehind(shows, 3);
     expect(episodesAired).toBe(6);
@@ -201,7 +265,7 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
 });
 
 describe("categorization — behind=null goes to Catch Up, behind=0 + releasing goes to Keep Up", () => {
-  it("behind=null + isReleasing=true → Catch Up (unknown aired count, e.g. mid-cour break)", () => {
+  it("behind=null + isReleasing=true → Catch Up (unknown aired count, e.g. mid-cour break with no prior data)", () => {
     // Unknown progress on an actively releasing show must never be treated as
     // "caught up". Violating this was the Oshi no Ko S3 bug.
     expect(categorizeBehind(null, true)).toBe("catchUp");

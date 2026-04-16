@@ -143,7 +143,7 @@ export default async function AnimeDetailPage({
               />
             </Suspense>
           )}
-          streamingLastUpdatedSlot={<StreamingLastUpdated key="streaming-last-updated" animeId={rawAnime.id} streamingCheckedAt={rawAnime.streamingCheckedAt} />}
+          streamingLastUpdatedSlot={<StreamingLastUpdated key="streaming-last-updated" animeId={rawAnime.id} source={rawAnime.source} streamingCheckedAt={rawAnime.streamingCheckedAt} />}
         />
       </div>
     );
@@ -297,7 +297,7 @@ export default async function AnimeDetailPage({
         />
       </div>
 
-      <StreamingLastUpdated animeId={rawAnime.id} streamingCheckedAt={rawAnime.streamingCheckedAt} />
+      <StreamingLastUpdated animeId={rawAnime.id} source={rawAnime.source} streamingCheckedAt={rawAnime.streamingCheckedAt} />
     </div>
   );
 }

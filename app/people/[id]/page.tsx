@@ -142,12 +142,17 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Top-line numbers */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <StatCard label="Total Recommended" value={String(entries.length)} href={`/backlog?recommender=${person.id}`} />
-        <StatCard label="Completed Together" value={String(completedCount)} href={`/library?recommender=${person.id}&status=COMPLETED`} />
-        <StatCard label="Watching" value={String(watchingCount)} href={`/library?recommender=${person.id}&status=WATCHING`} />
-        <StatCard label="Hours Watched" value={String(totalHours)} href={`/library?recommender=${person.id}`} />
-        <StatCard label="Avg Score" subtitle="of their recommendations" value={avgScore != null ? `${avgScore} / 5` : "—"} href={`/library?recommender=${person.id}&sort=score`} />
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-4">
+          <StatCard label="Completed Together" value={String(completedCount)} href={`/library?context=${person.id}&status=COMPLETED`} />
+          <StatCard label="Watching Together" value={String(watchingCount)} href={`/library?context=${person.id}&status=WATCHING`} />
+          <StatCard label="Hours Watched" value={String(totalHours)} href={`/library?context=${person.id}`} />
+        </div>
+        <div className="border-t border-slate-800" />
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard label="Recommendations" value={String(entries.length)} href={`/backlog?recommender=${person.id}`} />
+          <StatCard label="Avg Score" value={avgScore != null ? `${avgScore} / 5` : "—"} href={`/library?recommender=${person.id}&sort=score`} />
+        </div>
       </div>
 
       {/* Status breakdown */}
@@ -241,7 +246,7 @@ export default async function PersonPage({ params }: { params: Promise<{ id: str
   );
 }
 
-function StatCard({ label, subtitle, value, href }: { label: string; subtitle?: string; value: string; href: string }) {
+function StatCard({ label, value, href }: { label: string; value: string; href: string }) {
   return (
     <Link
       href={href}
@@ -249,7 +254,6 @@ function StatCard({ label, subtitle, value, href }: { label: string; subtitle?: 
     >
       <p className="text-2xl font-bold text-white">{value}</p>
       <p className="text-xs text-slate-400 mt-1">{label}</p>
-      {subtitle && <p className="text-xs text-slate-600 mt-0.5">{subtitle}</p>}
     </Link>
   );
 }

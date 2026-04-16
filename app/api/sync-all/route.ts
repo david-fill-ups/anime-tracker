@@ -45,7 +45,7 @@ export async function POST() {
     // Find all anime in user's library (primary + linked) via Link records
     const linkedAnimeRecords = await db.linkedAnime.findMany({
       where: { link: { userId } },
-      select: { anime: { select: { id: true, anilistId: true, source: true, titleRomaji: true, titleEnglish: true } } },
+      select: { anime: { select: { id: true, anilistId: true, source: true, titleRomaji: true, titleEnglish: true, lastKnownAiredEp: true } } },
     });
 
     // Deduplicate in case same anime appears in multiple links
@@ -74,7 +74,13 @@ export async function POST() {
             }
 
             const { anilistId: _a, source: _s, ...syncFields } = mapAniListToAnimeData(data);
-            await db.anime.update({ where: { id: anime.id }, data: syncFields });
+            let lastKnownAiredEp: number | undefined;
+            if (syncFields.nextAiringEp != null) {
+              const isPast = syncFields.nextAiringAt ? syncFields.nextAiringAt.getTime() < Date.now() : false;
+              const airedNow = isPast ? syncFields.nextAiringEp : syncFields.nextAiringEp - 1;
+              lastKnownAiredEp = Math.max(anime.lastKnownAiredEp ?? 0, airedNow);
+            }
+            await db.anime.update({ where: { id: anime.id }, data: { ...syncFields, ...(lastKnownAiredEp !== undefined ? { lastKnownAiredEp } : {}) } });
           }
 
           // Streaming / where-to-watch refresh for all anime

@@ -88,6 +88,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
 
 
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [showCompletionPrompt, setShowCompletionPrompt] = useState(false);
 
   // Season/episode helpers — derived from prop (updates after router.refresh())
   // If there are multiple linked anime, each is treated as one virtual "season".
@@ -200,6 +201,20 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
     };
     setForm((f) => ({ ...f, ...updates }));
     return updates;
+  }
+
+  function checkCompletionPrompt(overrides: Partial<typeof form> = {}) {
+    const f = { ...form, ...overrides };
+    if (!canBeCompleted || f.watchStatus === "COMPLETED" || !f.watchStatus) return;
+    let atLastEpisode: boolean;
+    if (useSeasonDropdowns) {
+      const season = Number(f.currentSeason);
+      const ep = Number(f.currentEpisodeInSeason);
+      atLastEpisode = season === virtualTotalSeasons && ep === getEpsForSeason(virtualTotalSeasons);
+    } else {
+      atLastEpisode = totalEpisodesCount !== null && Number(f.currentEpisode) >= totalEpisodesCount;
+    }
+    if (atLastEpisode) setShowCompletionPrompt(true);
   }
 
   function seasonToFlat(season: number, episode: number) {
@@ -352,6 +367,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
                   const updates = { currentSeason: e.target.value, currentEpisodeInSeason: String(clampedEp) };
                   setForm((f) => ({ ...f, ...updates }));
                   save(updates);
+                  checkCompletionPrompt(updates);
                 }}
                 className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
               >
@@ -368,6 +384,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
                   }
                   setForm((f) => ({ ...f, ...updates }));
                   save(updates);
+                  checkCompletionPrompt(updates);
                 }}
                 className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
               >
@@ -396,6 +413,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
                   setForm((f) => ({ ...f, ...updates }));
                 }
                 save(updates);
+                checkCompletionPrompt(updates);
               }}
               className="w-full bg-slate-800 text-slate-100 border border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-indigo-500"
             />
@@ -603,6 +621,43 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
           Remove
         </button>
       </div>
+
+      {showCompletionPrompt && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 max-w-sm w-full mx-4 space-y-4 shadow-xl">
+            <h3 className="text-white font-semibold text-lg">All caught up?</h3>
+            <p className="text-slate-300 text-sm">
+              You&apos;ve reached the last episode
+              {canBeCompleted ? " and this series has finished airing" : ""}.
+              {" "}Would you like to mark it as <span className="text-green-400 font-medium">Completed</span>?
+            </p>
+            {!form.score && (
+              <p className="text-yellow-400 text-sm font-medium">
+                ★ Don&apos;t forget to give it a rating!
+              </p>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowCompletionPrompt(false);
+                  const updates = { watchStatus: "COMPLETED" as const };
+                  setForm((f) => ({ ...f, ...updates }));
+                  save(updates);
+                }}
+                className="flex-1 bg-green-700 hover:bg-green-600 text-white text-sm py-2 rounded-md transition-colors font-medium"
+              >
+                Mark as Completed
+              </button>
+              <button
+                onClick={() => setShowCompletionPrompt(false)}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm py-2 rounded-md border border-slate-600 transition-colors"
+              >
+                Not yet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -7,7 +7,7 @@ import LibraryFilters from "@/components/LibraryFilters";
 import AnimeGrid from "@/components/AnimeGrid";
 import LibraryUrlSaver from "@/components/LibraryUrlSaver";
 import type { WatchStatus, DisplayFormat, AiringStatus } from "@/app/generated/prisma";
-import { effectiveTotalEpisodesFromLink, effectiveAiringStatusFromLink } from "@/lib/anime-utils";
+import { effectiveTotalEpisodesFromLink, effectiveAiringStatusFromLink, searchAnimeIdsByTitle } from "@/lib/anime-utils";
 import LibraryRefreshFooter from "@/components/LibraryRefreshFooter";
 
 // Statuses that belong to the Library (watched / watching)
@@ -73,12 +73,8 @@ export default async function LibraryPage({
   const andConditions: Record<string, unknown>[] = [];
 
   if (search) {
-    andConditions.push({
-      OR: [
-        { titleEnglish: { contains: search, mode: "insensitive" } },
-        { titleRomaji: { contains: search, mode: "insensitive" } },
-      ],
-    });
+    const matchingIds = await searchAnimeIdsByTitle(search);
+    andConditions.push({ id: { in: matchingIds } });
   }
 
   if (franchise) {

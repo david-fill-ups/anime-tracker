@@ -304,7 +304,11 @@ export async function fetchSeasonEpisodes(
     }
 
     const data = (await res.json()) as TmdbSeasonDetails;
-    const episodes = data.episodes.map((ep) => ({ number: ep.episode_number, name: ep.name }));
+    const episodes = data.episodes.map((ep) => ({
+      number: ep.episode_number,
+      // Strip TMDB placeholder names like "Episode 69" (no real title yet)
+      name: /^Episode \d+$/.test(ep.name) ? "" : ep.name,
+    }));
     // Normalize to 1-based numbering — some long-running shows (e.g. One Piece) use global
     // episode numbers across seasons, so Season 2 episodes have numbers like 62, 63… instead of 1, 2…
     const minNum = episodes.length > 0 ? Math.min(...episodes.map((e) => e.number)) : 1;

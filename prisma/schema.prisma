@@ -134,6 +134,7 @@ model Anime {
   meanScore          Int?
   nextAiringEp       Int?
   nextAiringAt       DateTime?
+  lastKnownAiredEp   Int?
   lastSyncedAt       DateTime?
   tmdbId             Int?
   tmdbMediaType      String?

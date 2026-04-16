@@ -53,6 +53,7 @@ export default async function WatchListPage() {
               totalEpisodes: true,
               nextAiringEp: true,
               nextAiringAt: true,
+              lastKnownAiredEp: true,
               airingStatus: true,
               titleEnglish: true,
               titleRomaji: true,
@@ -101,8 +102,13 @@ export default async function WatchListPage() {
           const isPast = showNextAt ? showNextAt.getTime() < Date.now() : false;
           episodesAired = (episodesAired ?? 0) + (isPast ? show.nextAiringEp : show.nextAiringEp - 1);
           if (!nextAt && showNextAt && !isPast) nextAt = showNextAt;
+        } else if (show.lastKnownAiredEp != null) {
+          // nextAiringEp is null but we have a prior known aired count (e.g. between
+          // episodes where AniList hasn't scheduled the next one yet). Use it as a
+          // floor so the user doesn't incorrectly appear in Catch Up when caught up.
+          episodesAired = (episodesAired ?? 0) + show.lastKnownAiredEp;
         } else {
-          // nextAiringEp is null: can't determine how many episodes have aired.
+          // nextAiringEp is null and no prior data: can't determine aired count.
           // Mark as unknown so the entry appears in Catch Up rather than Keep Up.
           episodesAired = null;
           break;
@@ -187,13 +193,15 @@ export default async function WatchListPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">{title}</p>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      {episodesAired != null
+                      {episodesAired != null && episodesAired >= entry.currentEpisode
                         ? `Ep ${entry.currentEpisode} / ${episodesAired} aired`
                         : `Ep ${entry.currentEpisode}`}
                     </p>
-                    <p className="text-xs text-slate-600 mt-0.5">
-                      Next ep: {formatCountdown(nextAt)}
-                    </p>
+                    {nextAt && (
+                      <p className="text-xs text-slate-600 mt-0.5">
+                        Next ep {formatCountdown(nextAt)}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col items-end justify-center flex-shrink-0">
                     {behind != null && behind > 0 && (
@@ -239,7 +247,7 @@ export default async function WatchListPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">{title}</p>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      {episodesAired != null
+                      {episodesAired != null && episodesAired >= entry.currentEpisode
                         ? `Ep ${entry.currentEpisode} / ${episodesAired} aired`
                         : `Ep ${entry.currentEpisode}`}
                     </p>
@@ -248,7 +256,7 @@ export default async function WatchListPage() {
                     <span className="text-xs font-medium text-green-400 bg-green-900/30 border border-green-800/50 px-2 py-0.5 rounded-full">
                       Caught up
                     </span>
-                    <p className="text-xs text-slate-500 text-right">{formatCountdown(nextAt)}</p>
+                    {nextAt && <p className="text-xs text-slate-500 text-right">Next ep {formatCountdown(nextAt)}</p>}
                   </div>
                 </Link>
               );

@@ -31,9 +31,18 @@ export async function POST(req: NextRequest, { params }: Params) {
     // Strip identity fields — they don't change on sync
     const { anilistId: _a, source: _s, ...syncFields } = mapAniListToAnimeData(data);
 
+    // Preserve the highest known aired-episode count so that when nextAiringEp goes
+    // null (e.g. between-episode gaps) we can still tell whether the user is caught up.
+    let lastKnownAiredEp: number | undefined;
+    if (syncFields.nextAiringEp != null) {
+      const isPast = syncFields.nextAiringAt ? syncFields.nextAiringAt.getTime() < Date.now() : false;
+      const airedNow = isPast ? syncFields.nextAiringEp : syncFields.nextAiringEp - 1;
+      lastKnownAiredEp = Math.max(anime.lastKnownAiredEp ?? 0, airedNow);
+    }
+
     const updated = await db.anime.update({
       where: { id: animeId },
-      data: syncFields,
+      data: { ...syncFields, ...(lastKnownAiredEp !== undefined ? { lastKnownAiredEp } : {}) },
     });
 
     await autoPopulateFranchise(animeId, data, userId);

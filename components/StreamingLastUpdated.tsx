@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 type Props = {
   animeId: number;
+  source?: string | null;
   streamingCheckedAt: Date | string | null | undefined;
 };
 
@@ -18,7 +19,7 @@ function formatCheckedAt(date: Date | string | null | undefined): string {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-export default function StreamingLastUpdated({ animeId, streamingCheckedAt }: Props) {
+export default function StreamingLastUpdated({ animeId, source, streamingCheckedAt }: Props) {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
   const [checkedAt, setCheckedAt] = useState(streamingCheckedAt);
@@ -28,7 +29,13 @@ export default function StreamingLastUpdated({ animeId, streamingCheckedAt }: Pr
   async function handleRefresh() {
     setRefreshing(true);
     try {
-      await fetch(`/api/anime/${animeId}/streaming/refresh`, { method: "POST" });
+      const requests = [
+        fetch(`/api/anime/${animeId}/streaming/refresh`, { method: "POST" }),
+        fetch(`/api/anime/${animeId}/refresh-seasons`, { method: "POST" }),
+      ];
+      if (source === "ANILIST")
+        requests.push(fetch(`/api/anime/${animeId}/sync`, { method: "POST" }));
+      await Promise.all(requests);
       setCheckedAt(new Date());
       router.refresh();
     } finally {

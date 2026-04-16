@@ -7,6 +7,7 @@ export const authConfig = {
   providers: [Google],
   pages: { signIn: "/login" },
   session: { strategy: "jwt" as const },
+  trustHost: true,
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       if (auth?.user) return true;
