@@ -35,6 +35,9 @@ type LinkedAnimeDetail = {
     startYear: number | null;
     startMonth: number | null;
     startDay: number | null;
+    nextAiringEp: number | null;
+    nextAiringAt: Date | string | null;
+    lastKnownAiredEp: number | null;
   };
 };
 
@@ -98,6 +101,10 @@ export default function LinkDetailClient({ link, primaryAnime, people, franchise
       totalSeasons: la.anime.totalSeasons,
       episodesPerSeason: la.anime.episodesPerSeason,
       tmdbId: la.anime.tmdbId,
+      airingStatus: la.anime.airingStatus,
+      nextAiringEp: la.anime.nextAiringEp,
+      nextAiringAt: la.anime.nextAiringAt,
+      lastKnownAiredEp: la.anime.lastKnownAiredEp,
     },
   }));
 

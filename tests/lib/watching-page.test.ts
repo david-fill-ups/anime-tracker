@@ -27,7 +27,7 @@ function calcBehind(
       if (show.nextAiringEp != null) {
         const showNextAt = show.nextAiringAt ? new Date(show.nextAiringAt) : null;
         const isPast = showNextAt ? showNextAt.getTime() < Date.now() : false;
-        episodesAired = (episodesAired ?? 0) + (isPast ? show.nextAiringEp : show.nextAiringEp - 1);
+        episodesAired = (episodesAired ?? 0) + (show.nextAiringEp - 1);
         if (!nextAt && showNextAt && !isPast) nextAt = showNextAt;
       } else if (show.lastKnownAiredEp != null) {
         episodesAired = (episodesAired ?? 0) + show.lastKnownAiredEp;
@@ -95,7 +95,7 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
     expect(behind).toBe(1);
   });
 
-  it("RELEASING show with past nextAiringAt: counts nextAiringEp itself as aired", () => {
+  it("RELEASING show with past nextAiringAt: still uses nextAiringEp - 1 (conservative, avoids false positives from stale schedules)", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-06-15T00:00:00Z"));
 
@@ -110,8 +110,35 @@ describe("calcBehind — episode-behind calculation (mirrors app/watching/page.t
       },
     ];
     const { episodesAired, behind } = calcBehind(shows, 3);
-    expect(episodesAired).toBe(5); // ep 5 has already aired → counts as 5
-    expect(behind).toBe(2);
+    // We no longer count nextAiringEp as aired based on schedule alone — a fresh sync
+    // will advance nextAiringEp once the episode actually airs on AniList.
+    expect(episodesAired).toBe(4); // nextAiringEp - 1 = 4
+    expect(behind).toBe(1);
+  });
+
+  // Regression: shows as "1 behind" on /watching but "caught up" on /anime/[id].
+  // Cause: sync used isPast to inflate lastKnownAiredEp = nextAiringEp (e.g. 8),
+  // while totalEpisodes / the detail page still showed 7. Fix: always use nextAiringEp - 1.
+  it("RELEASING with past nextAiringAt and inflated lastKnownAiredEp: user caught up shows 0 behind (Ascendance of a Bookworm regression)", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-06-15T00:00:00Z"));
+
+    const pastDate = new Date("2025-06-08T00:00:00Z");
+    const shows: ShowForCalc[] = [
+      {
+        airingStatus: "RELEASING",
+        totalEpisodes: 7,
+        nextAiringEp: 8,
+        nextAiringAt: pastDate,
+        lastKnownAiredEp: 8, // inflated by old sync's isPast logic
+      },
+    ];
+    // User has watched 7 episodes — same as totalEpisodes / detail page shows "caught up"
+    const { episodesAired, behind } = calcBehind(shows, 7);
+    expect(episodesAired).toBe(7); // nextAiringEp - 1 = 7
+    expect(behind).toBe(0);
+    const isReleasing = shows.some((s) => s.airingStatus === "RELEASING");
+    expect(categorizeBehind(behind, isReleasing)).toBe("keepUp");
   });
 
   // Regression test: Oshi no Ko Season 3 (and similar shows) were incorrectly

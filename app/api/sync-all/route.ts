@@ -76,9 +76,12 @@ export async function POST() {
             const { anilistId: _a, source: _s, ...syncFields } = mapAniListToAnimeData(data);
             let lastKnownAiredEp: number | undefined;
             if (syncFields.nextAiringEp != null) {
-              const isPast = syncFields.nextAiringAt ? syncFields.nextAiringAt.getTime() < Date.now() : false;
-              const airedNow = isPast ? syncFields.nextAiringEp : syncFields.nextAiringEp - 1;
-              lastKnownAiredEp = Math.max(anime.lastKnownAiredEp ?? 0, airedNow);
+              // nextAiringEp is the UPCOMING episode; confirmed aired = nextAiringEp - 1.
+              // Never use isPast here — the schedule can be stale/wrong, and inflating
+              // lastKnownAiredEp causes false "1 behind" on the watching page.
+              // Always reflect the current AniList data directly — don't clamp to old value,
+              // which would lock in any previously-inflated count and prevent recovery.
+              lastKnownAiredEp = syncFields.nextAiringEp - 1;
             }
             await db.anime.update({ where: { id: anime.id }, data: { ...syncFields, ...(lastKnownAiredEp !== undefined ? { lastKnownAiredEp } : {}) } });
           }

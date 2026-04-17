@@ -125,7 +125,7 @@ export default async function LibraryPage({
         link: {
           include: {
             linkedAnime: {
-              include: { anime: { select: { totalEpisodes: true, airingStatus: true } } },
+              include: { anime: { select: { totalEpisodes: true, airingStatus: true, nextAiringEp: true, lastKnownAiredEp: true } } },
               orderBy: { order: "asc" as const },
             },
             userEntry: { include: { recommender: true, watchContextPerson: true } },

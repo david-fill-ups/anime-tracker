@@ -6,6 +6,7 @@ import { SpotlightProvider } from "@/components/SpotlightContext";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { Toaster } from "sonner";
+import SuppressExtensionHydration from "@/components/SuppressExtensionHydration";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
@@ -24,6 +25,7 @@ export default async function RootLayout({
     return (
       <html lang="en" className="dark">
         <body className={`${geist.variable} font-sans bg-slate-950 text-slate-100 antialiased`}>
+          <SuppressExtensionHydration />
           {children}
         </body>
       </html>
@@ -59,6 +61,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${geist.variable} font-sans bg-slate-950 text-slate-100 antialiased`}>
+        <SuppressExtensionHydration />
         <SpotlightProvider initial={recentAnime}>
           <div className="flex min-h-screen">
             <Nav user={session.user} />

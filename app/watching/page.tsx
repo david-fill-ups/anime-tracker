@@ -100,13 +100,11 @@ export default async function WatchListPage() {
         if (show.nextAiringEp != null) {
           const showNextAt = show.nextAiringAt ? new Date(show.nextAiringAt) : null;
           const isPast = showNextAt ? showNextAt.getTime() < Date.now() : false;
-          // When lastKnownAiredEp is available, use it as confirmed ground truth to avoid
-          // counting unconfirmed episodes (e.g. delayed or schedule mismatch after a stale sync).
-          // Only fall back to the isPast heuristic when we have no confirmed data.
-          const counted = show.lastKnownAiredEp != null
-            ? Math.max(show.lastKnownAiredEp, show.nextAiringEp - 1)
-            : isPast ? show.nextAiringEp : show.nextAiringEp - 1;
-          episodesAired = (episodesAired ?? 0) + counted;
+          // nextAiringEp is always the UPCOMING episode, so confirmed aired = nextAiringEp - 1.
+          // We do NOT count it as aired when isPast because the schedule can be wrong (delays),
+          // and the sync may have inflated lastKnownAiredEp with the same faulty heuristic.
+          // A fresh sync will advance nextAiringEp once the episode actually airs.
+          episodesAired = (episodesAired ?? 0) + (show.nextAiringEp - 1);
           if (!nextAt && showNextAt && !isPast) nextAt = showNextAt;
         } else if (show.lastKnownAiredEp != null) {
           // nextAiringEp is null but we have a prior known aired count (e.g. between

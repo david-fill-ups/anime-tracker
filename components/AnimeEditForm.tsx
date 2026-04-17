@@ -65,6 +65,10 @@ type LinkedAnimeSeason = {
     totalSeasons: number | null;
     episodesPerSeason: string | null;
     tmdbId: number | null;
+    airingStatus: string;
+    nextAiringEp: number | null;
+    nextAiringAt: Date | string | null;
+    lastKnownAiredEp: number | null;
   };
 };
 
@@ -100,8 +104,17 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
   let seasonLabels: string[];
 
   if (isMultiLink) {
-    // Each linked anime = one virtual season
-    virtualEpsPerSeason = linkedSorted.map((la) => la.anime.totalEpisodes ?? 1);
+    // Each linked anime = one virtual season.
+    // For RELEASING seasons with no confirmed total, derive the count from airing data
+    // so the form shows the correct number of available episodes (not just 1).
+    virtualEpsPerSeason = linkedSorted.map((la) => {
+      if (la.anime.totalEpisodes != null) return la.anime.totalEpisodes;
+      if (la.anime.airingStatus === "RELEASING") {
+        if (la.anime.nextAiringEp != null) return Math.max(1, la.anime.nextAiringEp - 1);
+        if (la.anime.lastKnownAiredEp != null) return Math.max(1, la.anime.lastKnownAiredEp);
+      }
+      return 1;
+    });
     seasonLabels = linkedSorted.map((la, i) =>
       la.anime.titleEnglish ?? la.anime.titleRomaji ?? `Season ${i + 1}`
     );
@@ -133,6 +146,36 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
       remaining -= sEps;
     }
     return { season: 1, episode: flat };
+  };
+
+  // Max selectable episode for the dropdown — caps releasing seasons at the last aired episode
+  // so unaired placeholder entries are hidden. Uses full totalEpisodes for completed seasons.
+  const getDropdownEpsForSeason = (season: number): number => {
+    const total = getEpsForSeason(season);
+
+    if (isMultiLink) {
+      const la = linkedSorted[season - 1];
+      if (!la || la.anime.airingStatus !== "RELEASING") return total;
+      if (la.anime.nextAiringEp != null) {
+        return Math.min(total, Math.max(0, la.anime.nextAiringEp - 1));
+      }
+      if (la.anime.lastKnownAiredEp != null) return Math.min(total, la.anime.lastKnownAiredEp);
+      return total;
+    } else {
+      // Single anime: only cap the last (currently-releasing) season
+      if (season !== virtualTotalSeasons || anime.airingStatus !== "RELEASING") return total;
+      let airedFlat: number | null = null;
+      if (anime.nextAiringEp != null) {
+        airedFlat = Math.max(0, anime.nextAiringEp - 1);
+      } else if (anime.lastKnownAiredEp != null) {
+        airedFlat = anime.lastKnownAiredEp;
+      }
+      if (airedFlat == null) return total;
+      const { season: airedSeason, episode: airedEp } = flatToSE(airedFlat);
+      if (airedSeason < season) return 0;
+      if (airedSeason === season) return Math.min(total, airedEp);
+      return total;
+    }
   };
 
   const initFlat = entry?.currentEpisode ?? 0;
@@ -225,7 +268,16 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
   }
 
   const isCompleted = form.watchStatus === "COMPLETED";
-  const canBeCompleted = anime.airingStatus === "FINISHED" || anime.airingStatus === "CANCELLED" || anime.airingStatus === "HIATUS";
+  // For multi-link, the series is only completable if ALL linked seasons have a terminal status.
+  // Using anime.airingStatus alone checks only the primary/first season (which can be FINISHED
+  // even when a later season is still RELEASING).
+  const effectiveAiringStatus = isMultiLink && linkedSorted.length > 0
+    ? linkedSorted.some((la) => la.anime.airingStatus === "RELEASING") ? "RELEASING"
+      : linkedSorted.some((la) => la.anime.airingStatus === "NOT_YET_RELEASED") ? "NOT_YET_RELEASED"
+      : linkedSorted.some((la) => la.anime.airingStatus === "HIATUS") ? "HIATUS"
+      : "FINISHED"
+    : anime.airingStatus;
+  const canBeCompleted = effectiveAiringStatus === "FINISHED" || effectiveAiringStatus === "CANCELLED" || effectiveAiringStatus === "HIATUS";
   const totalEpisodesCount = virtualEpsPerSeason.length > 0
     ? virtualEpsPerSeason.reduce((a, b) => a + b, 0)
     : null;
@@ -389,7 +441,7 @@ export default function AnimeEditForm({ anime, entry, people, franchises, linked
                 className="w-full bg-slate-800 text-slate-300 border border-slate-700 rounded-md px-2 py-2 text-sm focus:outline-none focus:border-indigo-500"
               >
                 <option value={0}>None</option>
-                {Array.from({ length: getEpsForSeason(Number(form.currentSeason)) }, (_, i) => i + 1).map((ep) => {
+                {Array.from({ length: getDropdownEpsForSeason(Number(form.currentSeason)) }, (_, i) => i + 1).map((ep) => {
                   const title = episodeNames[Number(form.currentSeason)]?.find((e) => e.number === ep)?.name;
                   return (
                     <option key={ep} value={ep}>

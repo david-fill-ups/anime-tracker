@@ -4,13 +4,33 @@ import { db } from "@/lib/db";
 // ── Link-based utilities (new model) ─────────────────────────────────────────
 
 type LinkedAnimeForCalc = {
-  anime: { totalEpisodes: number | null; airingStatus: AiringStatus };
+  anime: {
+    totalEpisodes: number | null;
+    airingStatus: AiringStatus;
+    nextAiringEp?: number | null;
+    lastKnownAiredEp?: number | null;
+  };
 };
 
 export function effectiveTotalEpisodesFromLink(
   linkedAnime: LinkedAnimeForCalc[]
 ): number | null {
-  const total = linkedAnime.reduce((s, la) => s + (la.anime.totalEpisodes ?? 0), 0);
+  let total = 0;
+  for (const la of linkedAnime) {
+    const { totalEpisodes, airingStatus, nextAiringEp, lastKnownAiredEp } = la.anime;
+    if (totalEpisodes != null) {
+      total += totalEpisodes;
+    } else if (airingStatus === "RELEASING") {
+      // Mirror AnimeEditForm virtualEpsPerSeason: use scheduling data when totalEpisodes is null
+      if (nextAiringEp != null) {
+        total += Math.max(0, nextAiringEp - 1);
+      } else if (lastKnownAiredEp != null) {
+        total += Math.max(0, lastKnownAiredEp);
+      }
+      // else: 0 known for this season — leave as 0
+    }
+    // NOT_YET_RELEASED / HIATUS / CANCELLED with null totalEpisodes: contribute 0
+  }
   return total > 0 ? total : null;
 }
 
@@ -54,6 +74,9 @@ export const LINKED_ANIME_SELECT = {
   tmdbId: true,
   tmdbMediaType: true,
   airingStatus: true,
+  nextAiringEp: true,
+  nextAiringAt: true,
+  lastKnownAiredEp: true,
   meanScore: true,
   synopsis: true,
   displayFormat: true,

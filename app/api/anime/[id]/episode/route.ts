@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireUserId } from "@/lib/auth-helpers";
-import { effectiveTotalEpisodesFromLink } from "@/lib/anime-utils";
+import { effectiveTotalEpisodesFromLink, effectiveAiringStatusFromLink } from "@/lib/anime-utils";
 import { URLIdSchema, wrapHandler } from "@/lib/validation";
 
 type Params = { params: Promise<{ id: string }> };
@@ -19,7 +19,7 @@ export async function PATCH(_req: NextRequest, { params }: Params) {
       where: { userId, linkedAnime: { some: { animeId } } },
       include: {
         userEntry: true,
-        linkedAnime: { include: { anime: { select: { totalEpisodes: true, airingStatus: true } } } },
+        linkedAnime: { include: { anime: { select: { totalEpisodes: true, airingStatus: true, nextAiringEp: true, lastKnownAiredEp: true } } } },
       },
     });
     if (!link?.userEntry) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -28,9 +28,12 @@ export async function PATCH(_req: NextRequest, { params }: Params) {
     const newEpisode = entry.currentEpisode + 1;
     const data: Record<string, unknown> = { currentEpisode: newEpisode };
 
-    // Auto-complete when last episode reached (uses total across all linked anime)
+    // Auto-complete when last episode reached (uses total across all linked anime).
+    // Only auto-complete for fully finished series — never for RELEASING/HIATUS.
     const totalEps = effectiveTotalEpisodesFromLink(link.linkedAnime);
-    if (totalEps && newEpisode >= totalEps) {
+    const effectiveStatus = effectiveAiringStatusFromLink(link.linkedAnime);
+    const seriesDone = effectiveStatus === "FINISHED" || effectiveStatus === "CANCELLED";
+    if (totalEps && newEpisode >= totalEps && seriesDone) {
       data.watchStatus = "COMPLETED";
       data.completedAt = new Date();
     }
