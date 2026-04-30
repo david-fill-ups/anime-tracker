@@ -17,6 +17,7 @@ import { effectiveTotalEpisodesFromLink, effectiveAiringStatusFromLink, LINKED_A
 import type { AiringStatus } from "@/app/generated/prisma";
 import { Suspense } from "react";
 import RelatedAnime from "@/components/RelatedAnime";
+import SpotlightUpdater from "@/components/SpotlightUpdater";
 
 export default async function AnimeDetailPage({
   params,
@@ -131,6 +132,11 @@ export default async function AnimeDetailPage({
 
     return (
       <div className="max-w-3xl space-y-8">
+        {rawAnime.coverImageUrl && (
+          <SpotlightUpdater
+            anime={{ coverImageUrl: rawAnime.coverImageUrl, title, score: link.userEntry?.score ?? null }}
+          />
+        )}
         <LinkDetailClient
           link={linkData}
           primaryAnime={rawAnime}
@@ -167,6 +173,11 @@ export default async function AnimeDetailPage({
 
   return (
     <div className="max-w-3xl space-y-8">
+      {rawAnime.coverImageUrl && (
+        <SpotlightUpdater
+          anime={{ coverImageUrl: rawAnime.coverImageUrl, title, score: entry?.score ?? null }}
+        />
+      )}
       {/* Header */}
       <div className="flex gap-6">
         <div className="relative w-32 h-48 flex-shrink-0 rounded-lg overflow-hidden bg-slate-800">
