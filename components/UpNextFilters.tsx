@@ -54,8 +54,9 @@ export default function UpNextFilters({
   const activeRecommender = searchParams.get("recommender") || "";
   const activeQuickBinge = searchParams.get("quickBinge") === "1";
   const activeJustForMe = searchParams.get("jfm") === "1";
+  const activeHighRanking = searchParams.get("highRanking") === "1";
 
-  const hasActiveFilters = !!(activeService || activeAiringStatus || activeRecommender || activeQuickBinge || activeJustForMe);
+  const hasActiveFilters = !!(activeService || activeAiringStatus || activeRecommender || activeQuickBinge || activeJustForMe || activeHighRanking);
 
   function clearAll() {
     const params = new URLSearchParams(searchParams.toString());
@@ -64,6 +65,7 @@ export default function UpNextFilters({
     params.delete("recommender");
     params.delete("quickBinge");
     params.delete("jfm");
+    params.delete("highRanking");
     router.push(`${pathname}?${params.toString()}`);
   }
 
@@ -133,6 +135,18 @@ export default function UpNextFilters({
         }`}
       >
         ★ Just for Me
+      </button>
+
+      {/* High Community Ranking */}
+      <button
+        onClick={() => set("highRanking", activeHighRanking ? "" : "1")}
+        className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
+          activeHighRanking
+            ? "bg-emerald-600/20 text-emerald-300 border border-emerald-500/40"
+            : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 border border-slate-700"
+        }`}
+      >
+        ▲ High Ranking
       </button>
 
       {/* Clear */}

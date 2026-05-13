@@ -20,13 +20,13 @@ const QUEUE_STATUSES: WatchStatus[] = ["PLAN_TO_WATCH"];
 export default async function QueuePage({
   searchParams,
 }: {
-  searchParams: Promise<{ service?: string; airingStatus?: string; recommender?: string; quickBinge?: string; jfm?: string }>;
+  searchParams: Promise<{ service?: string; airingStatus?: string; recommender?: string; quickBinge?: string; jfm?: string; highRanking?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   const userId = session.user.id;
 
-  const { service, airingStatus, recommender, quickBinge, jfm } = await searchParams;
+  const { service, airingStatus, recommender, quickBinge, jfm, highRanking } = await searchParams;
 
   // Plan to Watch: explicitly queued by the user
   const rawLinks = await db.link.findMany({
@@ -239,6 +239,7 @@ export default async function QueuePage({
 
   // Apply filters
   const isQuickBinge = quickBinge === "1";
+  const isHighRanking = highRanking === "1";
 
   function matchesJustForMe(genres: string, studioName: string | undefined) {
     if (!isJustForMe) return true;
@@ -251,6 +252,7 @@ export default async function QueuePage({
     if (airingStatus && a.airingStatus !== airingStatus) return false;
     if (recommender && String(a.userEntry?.recommenderId ?? "") !== recommender) return false;
     if (isQuickBinge && (a.airingStatus !== "FINISHED" || (a.totalEpisodes ?? Infinity) > 15)) return false;
+    if (isHighRanking && (a.meanScore == null || a.meanScore < 80)) return false;
     if (!matchesJustForMe(a.genres, a.animeStudios[0]?.studio.name)) return false;
     return true;
   });
@@ -260,6 +262,7 @@ export default async function QueuePage({
     if (service && !anime.streamingLinks?.some((l) => l.service === service)) return false;
     if (airingStatus && anime.airingStatus !== airingStatus) return false;
     if (isQuickBinge && (anime.airingStatus !== "FINISHED" || (anime.totalEpisodes ?? Infinity) > 15)) return false;
+    if (isHighRanking && (anime.meanScore == null || anime.meanScore < 80)) return false;
     if (!matchesJustForMe(anime.genres, anime.animeStudios[0]?.studio.name)) return false;
     return true;
   });
